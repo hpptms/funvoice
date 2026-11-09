@@ -1,11 +1,13 @@
 // /tags  タグ一覧
-import { apiGet, escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type Env } from '../edge/lib'
+import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type Env } from '../edge/lib'
+import { apiGet } from '../edge/cache'
 import { TAGS_PAGE_DESCRIPTION, TAGS_PAGE_TITLE } from '../edge/seo'
 
 const KIND_LABEL = { season: '放送時期', source: '原作・掲載誌', genre: 'ジャンル', other: 'その他' } as const
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  const { data } = await apiGet<{ tags: ApiTag[] }>(env, request, '/api/tags')
+export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const { request, env } = ctx
+  const { data } = await apiGet<{ tags: ApiTag[] }>(ctx, '/api/tags')
   const tags = (data?.tags ?? []).filter((t) => (t.workCount ?? 0) > 0)
   const sections = (Object.keys(KIND_LABEL) as (keyof typeof KIND_LABEL)[])
     .map((k) => {

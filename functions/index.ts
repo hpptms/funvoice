@@ -1,8 +1,10 @@
 // /  トップ（作品一覧）。?tag=N 1つだけの場合は「タグ別一覧ページ」として検索に出す
-import { apiGet, escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
+import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
+import { apiGet } from '../edge/cache'
 import { DEFAULT_DESCRIPTION, SITE_NAME, TOP_HEADING, TOP_LEAD, tagPageDescription, tagPageTitle } from '../edge/seo'
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const { request, env } = ctx
   const url = new URL(request.url)
   const origin = siteOrigin(env, request)
   const tags = url.searchParams.getAll('tag')
@@ -13,9 +15,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const noindex = tags.length > 1 || extra || (tags.length === 1 && !singleTag)
 
   let tag: ApiTag | undefined
-  if (singleTag) tag = (await apiGet<ApiTag>(env, request, `/api/tags/${tags[0]}`)).data
+  if (singleTag) tag = (await apiGet<ApiTag>(ctx, `/api/tags/${tags[0]}`)).data
 
-  const list = await apiGet<ApiWorkList>(env, request, `/api/works${tag ? `?tag=${tag.id}` : ''}`)
+  const list = await apiGet<ApiWorkList>(ctx, `/api/works${tag ? `?tag=${tag.id}` : ''}`)
   const works = list.data?.works ?? []
 
   const title = tag ? tagPageTitle(tag.name) : undefined

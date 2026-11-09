@@ -66,6 +66,9 @@ export default function ThreadPage() {
     enabled: id > 0,
     placeholderData: keepPreviousData,
     initialData: sort === 'asc' && page === 1 ? initial?.posts : undefined,
+    // 掲示板は他の人の新しいコメントを見たいので、30秒以上たっていればタブに戻ったときに取り直す
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   })
   const myKey = ['my-reactions', id]
   const mineQuery = useQuery({ queryKey: myKey, queryFn: () => api.myReactions(id), enabled: id > 0 })

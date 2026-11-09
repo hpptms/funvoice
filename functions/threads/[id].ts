@@ -1,6 +1,5 @@
 // /threads/:id  掲示板のトピック。タイトル・説明文・構造化データ(DiscussionForumPosting)・コメント本文を埋め込む
 import {
-  apiGet,
   escapeHtml,
   renderPage,
   shellHtml,
@@ -9,9 +8,11 @@ import {
   type ApiThread,
   type Env,
 } from '../../edge/lib'
+import { apiGet } from '../../edge/cache'
 import { threadPageDescription, threadPageTitle } from '../../edge/seo'
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env, params }) => {
+export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const { request, env, params } = ctx
   const id = String(params.id)
   const url = new URL(request.url)
   const origin = siteOrigin(env, request)
@@ -25,8 +26,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
   }
 
   const [threadRes, postsRes] = await Promise.all([
-    apiGet<ApiThread>(env, request, `/api/threads/${id}`),
-    apiGet<ApiPostPage>(env, request, `/api/threads/${id}/posts${page > 1 ? `?page=${page}` : ''}`),
+    apiGet<ApiThread>(ctx, `/api/threads/${id}`),
+    apiGet<ApiPostPage>(ctx, `/api/threads/${id}/posts${page > 1 ? `?page=${page}` : ''}`),
   ])
   if (threadRes.status === 404) {
     return renderPage(env, request, { title: 'トピックが見つかりません', canonical: base, noindex: true, status: 404 })

@@ -1,8 +1,10 @@
 // /works/:id  作品ページ。タイトル・説明文・OGP・構造化データ・本文をHTMLに埋め込む
-import { apiGet, escapeHtml, renderPage, safeUrl, shellHtml, siteOrigin, type ApiWork, type Env } from '../../edge/lib'
+import { escapeHtml, renderPage, safeUrl, shellHtml, siteOrigin, type ApiWork, type Env } from '../../edge/lib'
+import { apiGet } from '../../edge/cache'
 import { workPageDescription, workPageTitle } from '../../edge/seo'
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env, params }) => {
+export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const { request, env, params } = ctx
   const id = String(params.id)
   const origin = siteOrigin(env, request)
   const canonical = `${origin}/works/${id}`
@@ -16,8 +18,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
   }
 
   const [{ status, data: work }, threadsRes] = await Promise.all([
-    apiGet<ApiWork>(env, request, `/api/works/${id}`),
-    apiGet<{ threads: { id: number; title: string; postCount: number }[] }>(env, request, `/api/works/${id}/threads`),
+    apiGet<ApiWork>(ctx, `/api/works/${id}`),
+    apiGet<{ threads: { id: number; title: string; postCount: number }[] }>(ctx, `/api/works/${id}/threads`),
   ])
   if (status === 404) {
     return renderPage(env, request, { title: '作品が見つかりません', canonical, noindex: true, status: 404 })

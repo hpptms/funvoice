@@ -51,24 +51,6 @@ export function backendHeaders(env: Env, request: Request, base?: Headers): Head
   return headers
 }
 
-/**
- * 公開APIをGETする（SEO用のHTML生成で使う）。
- * cacheEverything により、バックエンドの Cache-Control(s-maxage) に従って Cloudflare にキャッシュされ、
- * Macへのリクエストは数十秒〜数分に1回になる。
- */
-export async function apiGet<T>(env: Env, request: Request, path: string): Promise<{ status: number; data?: T }> {
-  try {
-    const res = await fetch(new URL(path, env.API_ORIGIN), {
-      headers: backendHeaders(env, request),
-      cf: { cacheEverything: true },
-    })
-    if (!res.ok) return { status: res.status }
-    return { status: res.status, data: (await res.json()) as T }
-  } catch {
-    return { status: 503 }
-  }
-}
-
 // ---- エスケープ ----
 
 export function escapeHtml(s: string): string {
