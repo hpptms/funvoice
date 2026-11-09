@@ -18,5 +18,5 @@ const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
 /** 最初に開かれたページが遅延読み込みのページなら、描画前に読み込んでおく */
 export function preloadRoute(pathname: string): Promise<unknown> {
   const hit = LAZY_ROUTES.find(([re]) => re.test(pathname))
-  return hit ? hit[1]().catch(() => undefined) : Promise.resolve()
+  return hit ? hit[1]().catch(() => null) : Promise.resolve(null)
 }

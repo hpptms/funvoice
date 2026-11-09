@@ -20,6 +20,9 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       output: {
+        // ランタイムは中身がほぼ変わらずハッシュも固定のため、名前を変えて誤ってキャッシュされたURLを避ける
+        // （デプロイ完了前のアクセスで HTML がキャッシュされた事故の回避。再発防止は functions/_middleware.ts の assetGuard）
+        chunkFileNames: (chunk) => (chunk.name === 'rolldown-runtime' ? 'assets/runtime-[hash].js' : 'assets/[name]-[hash].js'),
         // ライブラリをアプリのコードと別ファイルにする。サイトを更新してもライブラリのファイル名（ハッシュ）は変わらず、
         // 再訪問者はブラウザ・Cloudflareのキャッシュをそのまま使える（/assets/* は1年キャッシュ）
         codeSplitting: {
