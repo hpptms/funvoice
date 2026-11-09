@@ -116,7 +116,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   privacy: {
     title: 'プライバシーポリシー',
     description: 'FanVoiceが取得する情報（IPアドレス、Cookieなど）と、その利用目的・保存期間・第三者提供についての方針です。',
-    updated: UPDATED,
+    updated: '2026年11月10日',
     sections: [
       {
         heading: '1. 取得する情報',
@@ -124,6 +124,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
           'IPアドレス：二重投票の防止、匿名IDの表示、荒らし対策のため、元に戻せない形（秘密鍵を使ったハッシュ）に変換して保存します。',
           'コメント投稿時のIPアドレス：法令に基づく発信者情報の開示請求に対応するため、暗号化して保存し、180日が過ぎたら自動で削除します。',
           'Cookie：投票・評価が同じ人によるものかを判定するため、ランダムな識別子をCookie（fv_vid）に保存します。',
+          'アクセス解析：サイトの利用状況を把握し改善するため、Google アナリティクス（Google タグマネージャー経由）を利用しています。Google アナリティクスは Cookie を使って、閲覧したページ・滞在時間・おおよその地域・使用端末などの情報を収集します。個人を特定する情報は含まれません。収集されたデータは Google のプライバシーポリシーに基づいて管理されます。Google アナリティクスによる収集は、Google が提供する「Google アナリティクス オプトアウト アドオン」で無効にできます。',
           'ブラウザへの保存：表示スタイル（レトロ/シンプル）と、掲示板の名前欄の入力内容を、お使いのブラウザにだけ保存します。運営には送信されません。',
           '投稿内容：掲示板に投稿された文章・名前、作品の情報（紹介画像・動画のURLを含む）、投票・評価の内容。',
           'コメントや作品ページに貼られた画像・動画：URL先のサイトから直接表示します。表示した際、閲覧者のIPアドレスなどがそのサイトに送られます（動画は再生ボタンを押したときのみ）。',
@@ -134,6 +135,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
         heading: '2. 利用目的',
         list: [
           '本サービスの提供・運営（投票の集計、掲示板の表示など）',
+          'アクセス解析によるサービスの改善',
           '二重投票・荒らし・不正アクセスの防止',
           'お問い合わせ・削除依頼への対応',
           '法令に基づく対応（発信者情報開示請求など）',
@@ -150,6 +152,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
         list: [
           'Cloudflare：サイトの配信とセキュリティのため。アクセスはCloudflareを経由します。',
           'Cloudinary：以前に投稿された画像の配信のため（画像のアップロードは終了しています）。',
+          'Google アナリティクス / Google タグマネージャー：アクセス解析のため（https://policies.google.com/privacy）。',
           'Annict：作品情報の取得のため（利用者の情報は送信しません）。',
         ],
       },
