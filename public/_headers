@@ -1,0 +1,19 @@
+# Cloudflare Pages: 静的ファイルのレスポンスヘッダ（Functionsのレスポンスには適用されないので edge/lib.ts でも同じものを付けている）
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.cloudinary.com; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://embed.nicovideo.jp; media-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# ビルド成果物はファイル名にハッシュが付くので長期キャッシュ
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# アイコン類（ファイル名が固定なので1日だけキャッシュ）
+/favicon.ico
+  Cache-Control: public, max-age=86400
+/*.png
+  Cache-Control: public, max-age=86400
+/site.webmanifest
+  Cache-Control: public, max-age=86400

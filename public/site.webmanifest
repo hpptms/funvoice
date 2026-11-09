@@ -1,0 +1,13 @@
+{
+  "name": "FanVoice - アニメを語りたい人の掲示板",
+  "description": "好きなアニメを語りたい人のためのアニメ掲示板。続編を応援する1票と、みんなの評価が集まります。",
+  "short_name": "FanVoice",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#141414",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
