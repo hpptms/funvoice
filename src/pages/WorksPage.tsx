@@ -25,6 +25,7 @@ import { usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 
 const SORT_LABEL: Record<WorkSort, string> = {
+  recommended: 'おすすめ順',
   new: '新しい順',
   popular: '人気順',
   votes: '投票数順',
@@ -35,7 +36,7 @@ export default function WorksPage() {
   const [sp, setSp] = useSearchParams()
   const q = sp.get('q') ?? ''
   const tagIds = sp.getAll('tag').map(Number).filter(Boolean)
-  const sort = (sp.get('sort') as WorkSort) || 'new'
+  const sort = (sp.get('sort') as WorkSort) || 'recommended'
   const page = Number(sp.get('page') ?? 1)
   const retro = useRetro()
 

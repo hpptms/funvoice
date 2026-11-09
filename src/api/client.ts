@@ -111,7 +111,7 @@ export interface WorkList {
   perPage: number
 }
 
-export type WorkSort = 'new' | 'popular' | 'votes' | 'sequel'
+export type WorkSort = 'recommended' | 'new' | 'popular' | 'votes' | 'sequel'
 
 // ---- 掲示板 ----
 
