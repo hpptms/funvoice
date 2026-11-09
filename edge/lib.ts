@@ -13,8 +13,14 @@ export interface Env {
   API_ORIGIN: string
   /** バックエンドと共有するシークレット。これが無いリクエストはバックエンドが拒否する */
   PROXY_SECRET: string
-  /** 正規URL（canonical）に使うサイトのURL。未設定ならリクエストのオリジン */
+  /** 正規URL（canonical）に使うサイトのURL。未設定ならリクエストのオリジン。これ以外のホストからのアクセスは _middleware で拒否する */
   SITE_URL?: string
+  /**
+   * Cloudflare Access のサービストークン（任意）。API_ORIGIN を Access で保護すると、
+   * このトークンを持たないリクエストは Cloudflare の入口で止まり、Macまで届かない
+   */
+  CF_ACCESS_CLIENT_ID?: string
+  CF_ACCESS_CLIENT_SECRET?: string
 }
 
 // ---- API ----
@@ -26,9 +32,22 @@ export function clientIP(request: Request): string {
 /** バックエンドへのリクエスト用ヘッダ。閲覧者が送ってきた同名ヘッダは必ず上書きする（偽装対策） */
 export function backendHeaders(env: Env, request: Request, base?: Headers): Headers {
   const headers = new Headers(base)
-  for (const h of ['host', 'x-fv-client-ip', 'x-fv-proxy-secret', 'x-forwarded-for', 'x-real-ip']) headers.delete(h)
+  for (const h of [
+    'host',
+    'x-fv-client-ip',
+    'x-fv-proxy-secret',
+    'x-forwarded-for',
+    'x-real-ip',
+    'cf-access-client-id',
+    'cf-access-client-secret',
+  ])
+    headers.delete(h)
   headers.set('X-FV-Client-IP', clientIP(request))
   headers.set('X-FV-Proxy-Secret', env.PROXY_SECRET)
+  if (env.CF_ACCESS_CLIENT_ID && env.CF_ACCESS_CLIENT_SECRET) {
+    headers.set('CF-Access-Client-Id', env.CF_ACCESS_CLIENT_ID)
+    headers.set('CF-Access-Client-Secret', env.CF_ACCESS_CLIENT_SECRET)
+  }
   return headers
 }
 

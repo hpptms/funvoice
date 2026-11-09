@@ -7,7 +7,7 @@ compatibility_date = "2026-09-01"
 # Macのバックエンド（make backend-prod, :8092）を Cloudflare Tunnel で公開したホスト名
 API_ORIGIN = "https://api-funvoice.item-search.net"
 # サイトの正規URL（canonical / sitemap のURLになる）。独自ドメインにしたら書き換える
-SITE_URL = "https://funvoice.pages.dev"
+SITE_URL = "https://funvoice.jp"
 
 # PROXY_SECRET はシークレットとして登録する（このファイルには書かない）:
 #   npx wrangler pages secret put PROXY_SECRET
