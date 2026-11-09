@@ -1,4 +1,5 @@
 import { AppBar, Box, Button, Container, Link, Toolbar, Typography } from '@mui/material'
+import { Suspense } from 'react'
 import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
@@ -92,7 +93,10 @@ export default function Layout() {
       <Container maxWidth="lg" sx={{ py: 3, pt: isTop ? 3 : 1.5, flex: 1 }}>
         {/* トップ以外のページには、左上に控えめな「戻る」ボタンを出す */}
         {!isTop && <BackButton />}
-        <Outlet />
+        {/* 遅延読み込みのページへ移動したとき、読み込み中もヘッダー・フッターは表示したままにする */}
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
       </Container>
 
       <Box component="footer" sx={{ borderTop: retro ? 2 : 1, borderColor: 'divider', bgcolor: 'background.paper', py: 2 }}>
