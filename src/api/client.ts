@@ -145,6 +145,16 @@ export interface Post {
   createdAt: string
   /** 表示用URLは必ず変換済み（EXIFなし） */
   image?: { id: string; url: string; fullUrl: string; width: number; height: number }
+  /** ログイン中に書かれたコメントなら、そのユーザーのアイコン（外部の画像URL） */
+  iconUrl?: string
+}
+
+/** 登録ユーザー */
+export interface User {
+  id: number
+  name: string
+  /** アイコン（外部の画像URL）。未設定なら空 */
+  iconUrl: string
 }
 
 
@@ -307,6 +317,16 @@ export const api = {
     request<void>(`/posts/${postId}/report`, { method: 'POST', body: JSON.stringify({ reason }) }),
   sendContact: (input: { category: ContactCategory; name: string; email: string; targetUrl: string; body: string }) =>
     request<void>('/contact', { method: 'POST', body: JSON.stringify(input) }),
+
+  auth: {
+    me: () => request<{ user: User | null }>('/me'),
+    register: (input: { username: string; password: string; passwordConfirm: string }) =>
+      request<{ user: User }>('/auth/register', { method: 'POST', body: JSON.stringify(input) }),
+    login: (username: string, password: string) =>
+      request<{ user: User }>('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    logout: () => request<void>('/auth/logout', { method: 'POST' }),
+    setIcon: (iconUrl: string) => request<{ user: User }>('/me/icon', { method: 'PUT', body: JSON.stringify({ iconUrl }) }),
+  },
 
   admin: {
     login: (username: string, password: string) =>

@@ -6,6 +6,7 @@ import { isPopular } from '../../lib/bbs'
 import { formatDateTime } from '../../lib/format'
 import { useRetro } from '../../lib/styleMode'
 import { PIXEL_FONT } from '../../theme'
+import UserIcon from '../account/UserIcon'
 import PostBody from './PostBody'
 import PostEmbeds from './PostEmbeds'
 import PostImage from './PostImage'
@@ -47,7 +48,9 @@ export function PostHeader({ post }: { post: Post }) {
       </Box>
       {!post.deleted && (
         <>
-          <Box component="span">
+          <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+            {/* ログイン中に書かれたコメントだけ、「名前：匿名」の左にアイコンを出す */}
+            <UserIcon url={post.iconUrl} />
             {retro && '名前：'}
             <Box component="span" sx={{ color: retro ? 'success.main' : 'text.primary', fontWeight: retro ? 400 : 700 }}>
               {post.name}

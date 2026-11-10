@@ -1,8 +1,11 @@
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import { AppBar, Box, Button, Container, Link, Toolbar, Typography } from '@mui/material'
 import { Suspense } from 'react'
 import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
+import { useMe } from '../lib/auth'
+import UserIcon from './account/UserIcon'
 import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
 
@@ -17,6 +20,7 @@ const FOOTER_LINKS = [
 export default function Layout() {
   const retro = useRetro()
   const isTop = useLocation().pathname === '/'
+  const me = useMe()
 
   const navSx = {
     color: 'inherit',
@@ -86,6 +90,31 @@ export default function Layout() {
             <NavLabel retro={retro}>タグ</NavLabel>
           </Button>
           <Box sx={{ flex: 1 }} />
+          {/* 読み込み中（undefined）は何も出さず、ログイン状態が分かってから表示する（ちらつき防止） */}
+          {me ? (
+            <Button component={NavLink} to="/mypage" sx={{ ...navSx, gap: 0.75, maxWidth: { xs: 44, sm: 200 } }} aria-label="マイページ">
+              {me.iconUrl ? (
+                <UserIcon url={me.iconUrl} size={26} />
+              ) : (
+                <Box component="span" sx={{ display: { sm: 'none' } }}>
+                  <NavLabel retro={retro}>マイ</NavLabel>
+                </Box>
+              )}
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {me.name}
+              </Box>
+            </Button>
+          ) : (
+            me === null && (
+              <Button component={NavLink} to="/login" sx={{ ...navSx, minWidth: { xs: 40, sm: 0 } }} aria-label="ログイン">
+                {/* スマホ幅は横幅が足りないのでアイコンだけ */}
+                <AccountCircleOutlinedIcon sx={{ display: { sm: 'none' } }} />
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  <NavLabel retro={retro}>ログイン</NavLabel>
+                </Box>
+              </Button>
+            )
+          )}
           <StyleSwitch />
         </Toolbar>
       </AppBar>

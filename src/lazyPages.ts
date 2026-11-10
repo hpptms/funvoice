@@ -3,6 +3,8 @@ import { lazyPage } from './lib/lazyPage'
 // よく開かれるページ（トップ・作品・スレッド）は最初のJSに含め、それ以外は開いたときに読み込む
 export const AddWorkPage = lazyPage(() => import('./pages/AddWorkPage'))
 export const AdminPage = lazyPage(() => import('./pages/AdminPage'))
+export const AuthPage = lazyPage(() => import('./pages/AuthPage'))
+export const MyPage = lazyPage(() => import('./pages/MyPage'))
 export const ContactPage = lazyPage(() => import('./pages/ContactPage'))
 export const StaticPage = lazyPage(() => import('./pages/StaticPage'))
 export const TagsPage = lazyPage(() => import('./pages/TagsPage'))
@@ -10,6 +12,8 @@ export const TagsPage = lazyPage(() => import('./pages/TagsPage'))
 const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/works\/new\/?$/, AddWorkPage.preload],
   [/^\/admin\/?$/, AdminPage.preload],
+  [/^\/(register|login)\/?$/, AuthPage.preload],
+  [/^\/mypage\/?$/, MyPage.preload],
   [/^\/contact\/?$/, ContactPage.preload],
   [/^\/(about|terms|privacy|copyright)\/?$/, StaticPage.preload],
   [/^\/tags\/?$/, TagsPage.preload],
