@@ -149,7 +149,6 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
                 key={kind}
                 to={rankingPath(kind, isSeasonName(season) ? season : undefined)}
                 color={kind === 'sequel' ? 'primary' : 'secondary'}
-                badge={kind === 'sequel' ? '★HOT★' : '★必見★'}
               >
                 {rankingTitle(kind, isSeasonName(season) ? season : undefined)}
               </RankingBanner>

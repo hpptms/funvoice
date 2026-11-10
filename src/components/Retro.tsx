@@ -126,18 +126,16 @@ export function Window({
 
 /**
  * ランキングへの目立つバナー風リンク。
- * レトロ: 昔の個人サイトのバナーのような、ベタ塗り＋太枠＋黒いハード影＋点滅バッジ
+ * レトロ: 昔の個人サイトのバナーのような、ベタ塗り＋太枠＋黒いハード影＋点滅する▶▶
  * シンプル: 色付きの角丸ボタン
  */
 export function RankingBanner({
   to,
   color,
-  badge,
   children,
 }: {
   to: string
   color: 'primary' | 'secondary'
-  badge: string
   children: ReactNode
 }) {
   const retro = useRetro()
@@ -180,24 +178,6 @@ export function RankingBanner({
         '&:focus-visible': { outline: '3px solid #ffe600', outlineOffset: 2 },
       })}
     >
-      <Box
-        component="span"
-        aria-hidden
-        sx={{
-          flexShrink: 0,
-          px: 0.75,
-          py: 0.25,
-          fontSize: 12,
-          color: '#141414',
-          bgcolor: '#ffe600',
-          textShadow: 'none',
-          ...(retro
-            ? { border: '2px solid #141414', animation: 'fv-blink 0.8s steps(1) infinite', [reduced]: { animation: 'none' } }
-            : { borderRadius: 999 }),
-        }}
-      >
-        {badge}
-      </Box>
       <Box component="span" sx={{ minWidth: 0 }}>
         {children}
       </Box>
