@@ -6,6 +6,10 @@ import App from './App'
 import { initAnalytics } from './lib/analytics'
 import StyleModeProvider from './components/StyleModeProvider'
 import { preloadRoute } from './lazyPages'
+import { installTranslateGuard } from './lib/translateGuard'
+
+// ブラウザの自動翻訳で画面が落ちないようにする（Reactの描画より前に入れておく）
+installTranslateGuard()
 
 // 通信を減らすため、取得したデータは1分間そのまま使い、タブに戻っただけでは取り直さない。
 // 自分の書き込み（投票・コメント等）は書き込みのレスポンスで画面のデータを直接更新しているので、待たずに反映される。

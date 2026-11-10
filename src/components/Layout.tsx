@@ -83,7 +83,8 @@ export default function Layout() {
               }}
             />
             {/* ごく狭い画面（〜359px）ではロゴ画像だけにして、ヘッダーのボタンを1行に収める */}
-            <Box component="span" sx={{ '@media (max-width: 359.95px)': { display: 'none' } }}>
+            {/* サイト名はブラウザの自動翻訳で訳させない */}
+            <Box component="span" translate="no" sx={{ '@media (max-width: 359.95px)': { display: 'none' } }}>
               FanVoice
             </Box>
             {retro && (
