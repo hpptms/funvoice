@@ -76,9 +76,12 @@ export default function Layout() {
                 ...(retro ? { outline: 2, outlineColor: 'primary.main' } : {}),
               }}
             />
-            FanVoice
+            {/* ごく狭い画面（〜359px）ではロゴ画像だけにして、ヘッダーのボタンを1行に収める */}
+            <Box component="span" sx={{ '@media (max-width: 359.95px)': { display: 'none' } }}>
+              FanVoice
+            </Box>
             {retro && (
-              <Box component="span" sx={{ fontSize: 11, ml: 0.75, opacity: 0.7, display: { xs: 'none', sm: 'inline' } }}>
+              <Box component="span" sx={{ fontSize: 11, ml: 0.75, opacity: 0.7, display: { xs: 'none', md: 'inline' } }}>
                 v0.1-alpha
               </Box>
             )}
@@ -106,13 +109,36 @@ export default function Layout() {
             </Button>
           ) : (
             me === null && (
-              <Button component={NavLink} to="/login" sx={{ ...navSx, minWidth: { xs: 40, sm: 0 } }} aria-label="ログイン">
-                {/* スマホ幅は横幅が足りないのでアイコンだけ */}
-                <AccountCircleOutlinedIcon sx={{ display: { sm: 'none' } }} />
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-                  <NavLabel retro={retro}>ログイン</NavLabel>
-                </Box>
-              </Button>
+              <>
+                <Button component={NavLink} to="/login" sx={{ ...navSx, minWidth: { xs: 36, sm: 0 } }} aria-label="ログイン">
+                  {/* スマホ幅は横幅が足りないのでアイコンだけ */}
+                  <AccountCircleOutlinedIcon sx={{ display: { sm: 'none' } }} />
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    <NavLabel retro={retro}>ログイン</NavLabel>
+                  </Box>
+                </Button>
+                {/* ユーザー登録は目立たせる（スマホ幅は「登録」だけ） */}
+                <Button
+                  component={NavLink}
+                  to="/register"
+                  variant="outlined"
+                  color={retro ? 'success' : 'primary'}
+                  aria-label="ユーザー登録"
+                  sx={{
+                    ...navSx,
+                    color: retro ? 'success.main' : 'primary.main',
+                    height: { xs: 32, sm: 34 },
+                    px: { xs: 0.75, sm: 1.25 },
+                    mr: { xs: 0.5, sm: 1 },
+                    fontSize: { xs: 13, sm: 14 },
+                  }}
+                >
+                  <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                    ユーザー
+                  </Box>
+                  登録
+                </Button>
+              </>
             )
           )}
           <StyleSwitch />

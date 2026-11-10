@@ -28,8 +28,8 @@ export default function StyleSwitch() {
           fontSize: { xs: 12, sm: 13 },
           whiteSpace: 'nowrap',
           lineHeight: 1,
-          // スマホ幅ではヘッダーに収まるようアイコンを隠して文字だけにする
-          '& .MuiSvgIcon-root': { display: { xs: 'none', sm: 'inline-block' } },
+          // スマホ・タブレット幅ではヘッダーに収まるよう（ログイン・登録ボタンと並べるため）文字を隠してアイコンだけにする
+          '& .fv-style-label': { display: { xs: 'none', md: 'inline' } },
           ...(retro
             ? {
                 // 黒いヘッダーの上に置くので、ヘッダーの文字色をそのまま使う
@@ -46,13 +46,13 @@ export default function StyleSwitch() {
         },
       }}
     >
-      <ToggleButton value="retro" aria-label="レトロモード">
+      <ToggleButton value="retro" aria-label="レトロモード" title="レトロ">
         <TerminalIcon sx={{ fontSize: 18 }} />
-        レトロ
+        <span className="fv-style-label">レトロ</span>
       </ToggleButton>
-      <ToggleButton value="simple" aria-label="シンプルモード">
+      <ToggleButton value="simple" aria-label="シンプルモード" title="シンプル">
         <AutoAwesomeOutlinedIcon sx={{ fontSize: 18 }} />
-        シンプル
+        <span className="fv-style-label">シンプル</span>
       </ToggleButton>
     </ToggleButtonGroup>
   )
