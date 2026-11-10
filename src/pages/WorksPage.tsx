@@ -8,6 +8,7 @@ import {
   Chip,
   CircularProgress,
   InputAdornment,
+  Link,
   MenuItem,
   Pagination,
   Stack,
@@ -15,12 +16,23 @@ import {
   Typography,
 } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Fragment, useState } from 'react'
-import { Link as RouterLink, useSearchParams } from 'react-router-dom'
+import { Fragment, useEffect, useState } from 'react'
+import { Link as RouterLink, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../api/client'
 import { Cursor, Prompt } from '../components/Retro'
 import WorkCard from '../components/WorkCard'
-import { TOP_HEADING, TOP_LEAD, tagPageDescription, tagPageTitle } from '../../edge/seo'
+import {
+  TOP_HEADING,
+  TOP_LEAD,
+  isSeasonName,
+  rankingPath,
+  rankingTitle,
+  seasonLabelFromSlug,
+  tagPageDescription,
+  tagPageTitle,
+  tagPath,
+} from '../../edge/seo'
+import NotFoundPage from './NotFoundPage'
 import { takeInitialData, usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 
@@ -32,10 +44,16 @@ const SORT_LABEL: Record<WorkSort, string> = {
   sequel: '続編希望順',
 }
 
-export default function WorksPage() {
-  const [sp, setSp] = useSearchParams()
+/**
+ * 作品一覧。トップ（/）と、タグ別のページ（/season/2026-autumn・/tags/123。baseTagId にそのタグ）で使う。
+ * タグ1つだけの一覧はタグ別のページのURLにし、検索語や2つ目以降のタグがあるときはトップに ?q=&tag= を付ける。
+ */
+export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
+  const [sp] = useSearchParams()
+  const navigate = useNavigate()
   const q = sp.get('q') ?? ''
-  const tagIds = sp.getAll('tag').map(Number).filter(Boolean)
+  const queryTagIds = sp.getAll('tag').map(Number).filter(Boolean)
+  const tagIds = baseTagId ? [baseTagId, ...queryTagIds.filter((id) => id !== baseTagId)] : queryTagIds
   const sort = (sp.get('sort') as WorkSort) || 'recommended'
   const page = Number(sp.get('page') ?? 1)
   const retro = useRetro()
@@ -62,20 +80,30 @@ export default function WorksPage() {
   })
 
   const update = (patch: { q?: string; tags?: number[]; sort?: WorkSort; page?: number }) => {
-    const next = new URLSearchParams(sp)
-    if (patch.q) next.set('q', patch.q)
-    else if (patch.q !== undefined) next.delete('q')
-    if (patch.tags !== undefined) {
-      next.delete('tag')
-      patch.tags.forEach((t) => next.append('tag', String(t)))
-    }
-    if (patch.sort !== undefined) next.set('sort', patch.sort)
+    const nextQ = patch.q ?? q
+    const nextTags = patch.tags ?? tagIds
+    const nextSort = patch.sort ?? sort
+    const next = new URLSearchParams()
+    if (nextQ) next.set('q', nextQ)
+    // タグ1つだけ（検索語なし）ならタグ別のページへ。タグの一覧がまだ読めていなければトップの ?tag= のまま
+    const single = !nextQ && nextTags.length === 1 ? allTags.find((t) => t.id === nextTags[0]) : undefined
+    if (!single) nextTags.forEach((t) => next.append('tag', String(t)))
+    if (nextSort !== 'recommended') next.set('sort', nextSort)
     // 条件が変わったら1ページ目に戻す
     if (patch.page !== undefined && patch.page > 1) next.set('page', String(patch.page))
-    else next.delete('page')
-    setSp(next)
+    const qs = next.toString()
+    navigate(`${single ? tagPath(single) : '/'}${qs ? `?${qs}` : ''}`)
   }
 
+  // 以前のURL（/?tag=123）や、アプリ内の古いリンクから来たら、タグ別のページへ置き換える
+  const legacySingle = !baseTagId && !q && queryTagIds.length === 1 ? allTags.find((t) => t.id === queryTagIds[0]) : undefined
+  useEffect(() => {
+    if (!legacySingle) return
+    const next = new URLSearchParams(sp)
+    next.delete('tag')
+    const qs = next.toString()
+    navigate(`${tagPath(legacySingle)}${qs ? `?${qs}` : ''}`, { replace: true })
+  }, [legacySingle, sp, navigate])
   const data = worksQuery.data
   // タグ1つだけの一覧は「タグ別のアニメ一覧ページ」として検索に出す（functions/index.ts と同じ文言）
   const singleTag = !q && selectedTags.length === 1 ? selectedTags[0] : undefined
@@ -90,15 +118,18 @@ export default function WorksPage() {
     description: singleTag ? tagPageDescription(singleTag.name, data?.total) : undefined,
   })
   const pageCount = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1
+  // 放送時期のページ（/season/2026-autumn）なら、その時期のランキングへのリンクを出す
+  const pageTag = baseTagId ? allTags.find((t) => t.id === baseTagId) : undefined
+  const season = pageTag ? tagPath(pageTag).replace(/^\/season\//, '') : ''
 
   return (
     <Stack spacing={3}>
       <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ gap: 2, alignItems: { sm: 'flex-end' } }}>
       <Box sx={{ flex: 1 }}>
-        <Prompt>./vote --sequel-or-complete</Prompt>
+        <Prompt>{pageTag ? `ls ./tags/${pageTag.name}` : './vote --sequel-or-complete'}</Prompt>
         <Typography variant="h5" component="h1" sx={{ fontSize: { xs: 22, md: 28 }, lineHeight: 1.5 }}>
           {/* スマホで「それと／も」のように語の途中で折り返さないよう、句ごとにまとめる */}
-          {TOP_HEADING.split(' ').map((phrase, i) => (
+          {(pageTag ? tagPageTitle(pageTag.name).split('｜')[0] : TOP_HEADING).split(' ').map((phrase, i) => (
             <Fragment key={i}>
               {i > 0 && ' '}
               <Box component="span" sx={{ display: 'inline-block' }}>
@@ -110,8 +141,18 @@ export default function WorksPage() {
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 13 }}>
           {retro && '// '}
-          {TOP_LEAD}
+          {pageTag ? tagPageDescription(pageTag.name, data?.total) : TOP_LEAD}
         </Typography>
+        {(isSeasonName(season) || !baseTagId) && (
+          <Stack direction="row" spacing={2} useFlexGap sx={{ mt: 1, flexWrap: 'wrap', fontSize: 14 }}>
+            {(['sequel', 'complete'] as const).map((kind) => (
+              <Link key={kind} component={RouterLink} to={rankingPath(kind, isSeasonName(season) ? season : undefined)} color={kind === 'sequel' ? 'primary' : 'secondary'}>
+                {retro ? '> ' : ''}
+                {rankingTitle(kind, isSeasonName(season) ? season : undefined)}
+              </Link>
+            ))}
+          </Stack>
+        )}
       </Box>
       <Button component={RouterLink} to="/works/new" variant="outlined" startIcon={<AddIcon />} sx={{ height: 44, flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'auto' } }}>
         作品を追加
@@ -271,4 +312,46 @@ function SearchBox({ initial, onSearch }: { initial: string; onSearch: (q: strin
       />
     </Box>
   )
+}
+
+/** /season/2026-autumn：URLの放送時期からタグを探して一覧を出す */
+export function SeasonWorksPage() {
+  const slug = useParams().slug ?? ''
+  const label = seasonLabelFromSlug(slug)
+  const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: api.listTags })
+  // タグの一覧を待たずに出せるよう、Pages Functions が埋め込んだ初期データのタグIDを先に使う
+  const [initialTagId] = useState(peekInitialWorksTag)
+  const tag = tagsQuery.data?.tags.find((t) => t.kind === 'season' && t.name === label)
+  const id = tag?.id ?? (tagsQuery.data ? undefined : initialTagId)
+  if (!label || (tagsQuery.data && !tag)) return <NotFoundPage />
+  if (!id) return <Loading />
+  return <WorksPage key={id} baseTagId={id} />
+}
+
+/** /tags/123：タグ別の一覧。放送時期タグなら /season/… に置き換える */
+export function TagWorksPage() {
+  const id = Number(useParams().id)
+  const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: api.listTags })
+  const tag = tagsQuery.data?.tags.find((t) => t.id === id)
+  if (!(id > 0) || (tagsQuery.data && !tag)) return <NotFoundPage />
+  if (tag && tagPath(tag) !== `/tags/${id}`) return <Navigate to={tagPath(tag)} replace />
+  return <WorksPage key={id} baseTagId={id} />
+}
+
+function Loading() {
+  return (
+    <Box sx={{ display: 'grid', placeItems: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
+  )
+}
+
+/** 埋め込まれた初期データ（fv-initial-works）のタグIDを、消さずに読む（一覧の本体は WorksPage が読む） */
+function peekInitialWorksTag(): number | undefined {
+  try {
+    const data = JSON.parse(document.getElementById('fv-initial-works')?.textContent ?? 'null') as { tag: number | null } | null
+    return data?.tag ?? undefined
+  } catch {
+    return undefined
+  }
 }

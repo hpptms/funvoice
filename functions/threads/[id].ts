@@ -102,6 +102,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     // 並び替え表示は同じ内容の重複になるので索引させない
     noindex: !!sort && sort !== 'asc',
     ogType: 'article',
+    // SNS で共有したときは、作品のカード画像（作品名と票の割合）
+    ogImage: `${origin}/api/og/works/${thread.workId}.png`,
     jsonLd,
     bodyHtml: body,
     initialData: page === 1 && !sort && postsRes.data ? { id: 'fv-initial-thread', data: { thread, posts: postsRes.data } } : undefined,

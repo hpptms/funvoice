@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link as RouterLink } from 'react-router-dom'
 import { Prompt } from '../components/Retro'
 import { TAG_KIND_LABEL, api, type TagKind } from '../api/client'
-import { TAGS_PAGE_DESCRIPTION, TAGS_PAGE_TITLE } from '../../edge/seo'
+import { TAGS_PAGE_DESCRIPTION, TAGS_PAGE_TITLE, tagPath } from '../../edge/seo'
 import { usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 
@@ -44,7 +44,7 @@ export default function TagsPage() {
                 <Chip
                   key={t.id}
                   component={RouterLink}
-                  to={`/?tag=${t.id}`}
+                  to={tagPath(t)}
                   clickable
                   label={`#${t.name} (${t.workCount ?? 0})`}
                   variant={t.workCount ? 'filled' : 'outlined'}

@@ -15,7 +15,7 @@ import {
   type Theme,
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   CHOICE_LABEL,
   MEDIA_LABEL,
@@ -28,11 +28,22 @@ import {
 import ThreadSection from '../components/bbs/ThreadSection'
 import AdminMediaEditor from '../components/works/AdminMediaEditor'
 import EditHistory from '../components/works/EditHistory'
+import RelatedWorks from '../components/works/RelatedWorks'
+import ShareButtons from '../components/works/ShareButtons'
 import TagEditor from '../components/works/TagEditor'
 import WorkMedia from '../components/works/WorkMedia'
 import { Prompt, Window } from '../components/Retro'
 import VoteTally from '../components/VoteTally'
-import { workPageDescription, workPageTitle } from '../../edge/seo'
+import {
+  rankingPath,
+  rankingTitle,
+  sequelPhrase,
+  sequelQuestion,
+  tagPath,
+  workPageDescription,
+  workPageTitle,
+  yearsSinceSeason,
+} from '../../edge/seo'
 import { takeInitialWork, usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 import { safeHttpUrl } from '../lib/text'
@@ -67,8 +78,9 @@ export default function WorkDetailPage() {
 
   const w = workQuery.data
   usePageMeta({
-    title: w ? workPageTitle(w.title) : undefined,
+    title: w ? workPageTitle(w) : undefined,
     description: w ? workPageDescription(w) : undefined,
+    noindex: w ? !w.approved || w.indexable === false : undefined,
   })
 
   if (workQuery.isLoading)
@@ -84,6 +96,14 @@ export default function WorkDetailPage() {
   // 外部から取り込んだURLは http(s) だけをリンクにする（javascript: などによるXSS対策）
   const officialUrl = safeHttpUrl(work.officialSiteUrl)
   const wikipediaUrl = safeHttpUrl(work.wikipediaUrl)
+  const seasonTag = work.tags.find((t) => t.kind === 'season')
+  const years = yearsSinceSeason(work.seasonName)
+  const phrase = sequelPhrase(work.title, work.media)
+  const { sequel, complete } = work.tally.total
+  const shareText = myVote
+    ? `「${work.title}」の${phrase}、私は「${CHOICE_LABEL[myVote.choice]}」に投票しました！ いまの結果は 続編希望${sequel}票・キレイに終わった${complete}票`
+    : `「${work.title}」の${phrase}、見たい？ それとも、キレイに終わった？ いまの結果は 続編希望${sequel}票・キレイに終わった${complete}票`
+  const isSeason = /^\d{4}-(winter|spring|summer|autumn)$/.test(work.seasonName)
 
   const voteButton = (choice: Choice, color: 'primary' | 'secondary') => {
     const selected = myVote?.choice === choice
@@ -111,10 +131,21 @@ export default function WorkDetailPage() {
         <Typography variant="h4" component="h1" sx={{ fontSize: { xs: 24, md: 32 }, lineHeight: 1.4 }}>
           {work.title}
         </Typography>
+        <Typography component="p" sx={{ mt: 0.5, color: 'text.secondary', fontSize: { xs: 14, md: 15 } }}>
+          {retro && '// '}
+          {sequelQuestion(work.title, work.media)}
+        </Typography>
         {work.source === 'user' && (
           <Chip size="small" variant="outlined" label="ユーザーが追加した作品" sx={{ mt: 0.5 }} />
         )}
         <Stack direction="row" spacing={2} useFlexGap sx={{ mt: 1, flexWrap: 'wrap', color: 'text.secondary', fontSize: 13 }}>
+          {seasonTag && (
+            <Link component={RouterLink} to={tagPath(seasonTag)} color="inherit">
+              {retro && 'season: '}
+              {seasonTag.name}
+              {years !== null && `（放送から約${years}年）`}
+            </Link>
+          )}
           {work.media && <span>{retro && 'media: '}{MEDIA_LABEL[work.media] ?? work.media}</span>}
           {work.episodesCount > 0 && <span>{retro ? `eps: ${work.episodesCount}` : `全${work.episodesCount}話`}</span>}
           {officialUrl && (
@@ -160,10 +191,59 @@ export default function WorkDetailPage() {
           )}
         </Window>
 
-        <Window file="stats.log" title="みんなの評価">
+        <Window file="stats.log" title={`「${work.title}」${phrase}希望の声`}>
           <VoteTally tally={work.tally} />
+          {work.seasonRank && isSeason && (
+            <Typography sx={{ mt: 1.5, fontSize: 13 }}>
+              {retro && '> '}
+              <Link component={RouterLink} to={rankingPath('sequel', work.seasonName)} color="primary">
+                {rankingTitle('sequel', work.seasonName)}
+              </Link>
+              ：{work.seasonRank.rank}位（{work.seasonRank.total}作品中）
+            </Typography>
+          )}
         </Window>
       </Box>
+
+      <Box>
+        <Typography variant="caption" color="text.secondary" component="p" sx={{ mb: 1 }}>
+          {retro ? '> ' : ''}みんなにも聞いてみる（票の割合のカード画像付きで共有されます）
+        </Typography>
+        <ShareButtons url={`${window.location.origin}/works/${work.id}`} text={shareText} />
+      </Box>
+
+      {((work.staff?.length ?? 0) > 0 || (work.series?.length ?? 0) > 0) && (
+        <Window file="data.txt" title="作品データ">
+          {(work.staff?.length ?? 0) > 0 && (
+            <Box component="dl" sx={{ m: 0, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '160px minmax(0, 1fr)' }, columnGap: 2, rowGap: 0.5 }}>
+              {groupStaff(work.staff ?? []).map(([role, names]) => (
+                <Box key={role} sx={{ display: 'contents' }}>
+                  <Box component="dt" sx={{ color: 'text.secondary', fontSize: 13, mt: { xs: 0.75, sm: 0 } }}>
+                    {role}
+                  </Box>
+                  <Box component="dd" sx={{ m: 0 }}>
+                    {names.join('、')}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+          {work.series?.map((g) => (
+            <Box key={g.name} sx={{ mt: (work.staff?.length ?? 0) > 0 ? 2.5 : 0 }}>
+              <Typography variant="subtitle2" component="h2" sx={{ mb: 0.5 }}>
+                {retro ? `[シリーズ: ${g.name}]` : `「${g.name}」シリーズ`}
+              </Typography>
+              <RelatedWorks works={g.works} currentId={work.id} showSeason />
+            </Box>
+          ))}
+          <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1.5 }}>
+            スタッフ・シリーズの情報：
+            <Link href="https://annict.com/" target="_blank" rel="noopener noreferrer" color="inherit">
+              Annict
+            </Link>
+          </Typography>
+        </Window>
+      )}
 
       <Window file="tags.txt" title="タグ">
         <TagEditor work={work} />
@@ -171,6 +251,15 @@ export default function WorkDetailPage() {
       </Window>
 
       <ThreadSection workId={work.id} workTitle={work.title} />
+      {(work.seasonWorks?.length ?? 0) > 0 && seasonTag && (
+        <Window file="season.txt" title={`同じ${seasonTag.name}のアニメ`}>
+          <RelatedWorks works={work.seasonWorks ?? []} />
+          <Link component={RouterLink} to={tagPath(seasonTag)} color="secondary" sx={{ display: 'inline-block', mt: 1.5, fontSize: 14 }}>
+            {retro ? '> ' : ''}
+            {seasonTag.name}のアニメをもっと見る
+          </Link>
+        </Window>
+      )}
       {getAdminToken() && <AdminWorkControls work={work} />}
     </Stack>
   )
@@ -182,7 +271,8 @@ function AdminWorkControls({ work }: { work: Work }) {
   const navigate = useNavigate()
   const update = useMutation({
     mutationFn: (patch: { approved?: boolean; locked?: boolean; removeMedia?: boolean }) => api.admin.updateWork(work.id, patch),
-    onSuccess: (w) => qc.setQueryData<Work>(['work', work.id], w),
+    // 管理APIの返す作品にはシリーズ等の追加情報が無いので、今の表示に重ねる
+    onSuccess: (w) => qc.setQueryData<Work>(['work', work.id], (old) => (old ? { ...old, ...w } : w)),
   })
   const del = useMutation({
     mutationFn: () => api.admin.deleteWork(work.id),
@@ -215,4 +305,15 @@ function AdminWorkControls({ work }: { work: Work }) {
       <AdminMediaEditor key={work.id} work={work} />
     </Window>
   )
+}
+
+/** 役職ごとに名前をまとめる（API は役職の順に並んでいる） */
+function groupStaff(staff: { role: string; name: string }[]): [string, string[]][] {
+  const out: [string, string[]][] = []
+  for (const s of staff) {
+    const last = out[out.length - 1]
+    if (last && last[0] === s.role) last[1].push(s.name)
+    else out.push([s.role, [s.name]])
+  }
+  return out
 }

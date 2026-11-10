@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import { usePageViewTracking } from './lib/analytics'
-import { AddWorkPage, AdminPage, AuthPage, ContactPage, MyPage, StaticPage, TagsPage } from './lazyPages'
+import { AddWorkPage, AdminPage, AuthPage, ContactPage, MyPage, RankingPage, StaticPage, TagsPage } from './lazyPages'
 import NotFoundPage from './pages/NotFoundPage'
 import ThreadPage from './pages/ThreadPage'
 import WorkDetailPage from './pages/WorkDetailPage'
-import WorksPage from './pages/WorksPage'
+import WorksPage, { SeasonWorksPage, TagWorksPage } from './pages/WorksPage'
 
 export default function App() {
   usePageViewTracking()
@@ -17,6 +17,11 @@ export default function App() {
         <Route path="works/:id" element={<WorkDetailPage />} />
         <Route path="threads/:id" element={<ThreadPage />} />
         <Route path="tags" element={<TagsPage />} />
+        <Route path="tags/:id" element={<TagWorksPage />} />
+        <Route path="season/:slug" element={<SeasonWorksPage />} />
+        <Route path="ranking" element={<RankingPage />} />
+        <Route path="ranking/:kind" element={<RankingPage />} />
+        <Route path="ranking/:kind/:season" element={<RankingPage />} />
         <Route path="about" element={<StaticPage slug="about" />} />
         <Route path="terms" element={<StaticPage slug="terms" />} />
         <Route path="privacy" element={<StaticPage slug="privacy" />} />

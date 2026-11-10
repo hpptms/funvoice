@@ -1,7 +1,7 @@
 // /tags  タグ一覧
 import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
-import { TAGS_PAGE_DESCRIPTION, TAGS_PAGE_TITLE } from '../edge/seo'
+import { TAGS_PAGE_DESCRIPTION, TAGS_PAGE_TITLE, tagPath } from '../edge/seo'
 
 const KIND_LABEL = { season: '放送時期', source: '原作・掲載誌', genre: 'ジャンル', other: 'その他' } as const
 
@@ -14,7 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       const items = tags.filter((t) => t.kind === k)
       if (!items.length) return ''
       return `<h2>${KIND_LABEL[k]}</h2><ul>${items
-        .map((t) => `<li><a href="/?tag=${t.id}">#${escapeHtml(t.name)}</a>（${t.workCount}作品）</li>`)
+        .map((t) => `<li><a href="${tagPath(t)}">#${escapeHtml(t.name)}</a>（${t.workCount}作品）</li>`)
         .join('')}</ul>`
     })
     .join('')

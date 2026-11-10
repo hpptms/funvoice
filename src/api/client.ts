@@ -63,6 +63,41 @@ export interface Work {
   image?: { id: string; url: string; fullUrl: string; thumbUrl: string; width: number; height: number }
   tags: Tag[]
   tally: Tally
+  // 以下は作品ページ（getWork）だけで返る
+  /** 検索エンジンに載せるか（票・コメントのある作品、今期・前期の作品、人気作品） */
+  indexable?: boolean
+  /** 主なスタッフ（原作・監督・アニメーション制作など） */
+  staff?: StaffCredit[]
+  /** 同じシリーズの作品（1期・2期・劇場版など。放送順） */
+  series?: { name: string; works: RelatedWork[] }[]
+  /** 同じ放送時期の人気作品 */
+  seasonWorks?: RelatedWork[]
+  /** 同じ放送時期の中での続編希望の順位 */
+  seasonRank?: { rank: number; total: number }
+}
+
+export interface StaffCredit {
+  role: string
+  name: string
+}
+
+export interface RelatedWork {
+  id: number
+  title: string
+  media: string
+  seasonName: string
+  /** シリーズ内での説明（1期・2期・劇場版など） */
+  summary?: string
+  sequel: number
+  complete: number
+}
+
+export interface Ranking {
+  kind: 'sequel' | 'complete'
+  season: string
+  works: Work[]
+  /** まだ票の少ない人気作品 */
+  candidates: Work[]
 }
 
 export type Season = 'winter' | 'spring' | 'summer' | 'autumn'
@@ -298,6 +333,8 @@ export const api = {
   unvote: (id: number) =>
     request<{ tally: Tally; myVote: MyVote | null }>(`/works/${id}/vote`, { method: 'DELETE' }),
   listTags: () => request<{ tags: Tag[] }>('/tags'),
+  getRanking: (kind: 'sequel' | 'complete', season?: string) =>
+    request<Ranking>(`/rankings?kind=${kind}${season ? `&season=${season}` : ''}`),
 
   listThreads: (workId: number, sort: ThreadSort = 'active', page = 1) =>
     request<{ threads: ThreadSummary[]; total: number; page: number; perPage: number }>(

@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { TAG_KIND_LABEL, api, getAdminToken, type SeasonInput, type Tag, type TagKind, type Work } from '../../api/client'
 import { EMPTY_SEASON, seasonNameLabel, seasonValueLabel, toSeasonInput, type SeasonValue } from '../../lib/season'
+import { tagPath } from '../../../edge/seo'
 import { useRetro } from '../../lib/styleMode'
 import SeasonSelect from './SeasonSelect'
 
@@ -83,7 +84,7 @@ export default function TagEditor({ work }: { work: Work }) {
                     key={t.id}
                     label={`#${t.name}`}
                     component={RouterLink}
-                    to={`/?tag=${t.id}`}
+                    to={tagPath(t)}
                     clickable
                     disabled={remove.isPending && remove.variables?.id === t.id}
                     onDelete={

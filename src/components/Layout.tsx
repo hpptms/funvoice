@@ -25,7 +25,10 @@ const RETRO_HEADER_GREEN = '#5fd38a'
 
 export default function Layout() {
   const retro = useRetro()
-  const isTop = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const isTop = pathname === '/'
+  // ランキングは「続編希望／キレイに終わった」「時期」でURLが変わるので、どれを開いていてもナビを選択中にする
+  const isRanking = pathname.startsWith('/ranking')
   const me = useMe()
 
   const navSx = {
@@ -82,9 +85,9 @@ export default function Layout() {
                 ...(retro ? { outline: 2, outlineColor: 'primary.main' } : {}),
               }}
             />
-            {/* ごく狭い画面（〜359px）ではロゴ画像だけにして、ヘッダーのボタンを1行に収める */}
+            {/* スマホ（〜479px）ではロゴ画像だけにして、ヘッダーのボタン（作品・タグ・ランキング）を1行に収める */}
             {/* サイト名はブラウザの自動翻訳で訳させない */}
-            <Box component="span" translate="no" sx={{ '@media (max-width: 359.95px)': { display: 'none' } }}>
+            <Box component="span" translate="no" sx={{ '@media (max-width: 479.95px)': { display: 'none' } }}>
               FanVoice
             </Box>
             {retro && (
@@ -98,6 +101,9 @@ export default function Layout() {
           </Button>
           <Button component={NavLink} to="/tags" sx={navSx}>
             <NavLabel retro={retro}>タグ</NavLabel>
+          </Button>
+          <Button component={NavLink} to="/ranking/sequel" sx={navSx} className={isRanking ? 'active' : undefined}>
+            <NavLabel retro={retro}>ランキング</NavLabel>
           </Button>
           <Box sx={{ flex: 1 }} />
           {/* 読み込み中（undefined）は何も出さず、ログイン状態が分かってから表示する（ちらつき防止） */}

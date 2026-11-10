@@ -119,8 +119,10 @@ export interface PageMeta {
   canonical: string
   noindex?: boolean
   ogType?: 'website' | 'article' | 'video.tv_show' | 'video.movie'
-  /** SNSで共有したときに表示する画像（絶対URL） */
+  /** SNSで共有したときに表示する画像（絶対URL）。省略時はサイト共通のカード画像 */
   ogImage?: string
+  /** ogImage の代替テキスト */
+  ogImageAlt?: string
   jsonLd?: unknown
   /** JSなしでも読める本文（#root に入れる。React起動時に置き換わる） */
   bodyHtml?: string
@@ -134,8 +136,11 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
   const shell = await env.ASSETS.fetch(new URL('/', request.url))
   const title = pageTitle(meta.title)
   const description = meta.description ?? DEFAULT_DESCRIPTION
-  // 画像の無いページは、サイトのアイコンを SNS 共有の画像にする（小さめのカード）
-  const ogImage = meta.ogImage ?? `${siteOrigin(env, request)}/icon-512.png`
+  // 画像の無いページは、サイト共通のカード画像（バックエンドが描く 1200x630 の PNG）
+  const origin = siteOrigin(env, request)
+  const ogImage = meta.ogImage ?? `${origin}/api/og/site.png`
+  // 自サイトで描いたカード画像（/api/og/）は大きさが決まっているので、SNS が画像を取りに行く前に枠を確保できる
+  const ownCard = ogImage.startsWith(`${origin}/api/og/`)
 
   // meta はすべて escapeHtml（& < > " ' を変換）を通して自前で出力する
   const head = [
@@ -148,7 +153,9 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
     `<meta property="og:description" content="${escapeHtml(description)}">`,
     `<meta property="og:url" content="${escapeHtml(meta.canonical)}">`,
     `<meta property="og:image" content="${escapeHtml(ogImage)}">`,
-    `<meta name="twitter:card" content="${meta.ogImage ? 'summary_large_image' : 'summary'}">`,
+    ownCard ? `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">` : '',
+    `<meta property="og:image:alt" content="${escapeHtml(meta.ogImageAlt ?? title)}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
     meta.noindex ? `<meta name="robots" content="noindex, follow">` : '',
     meta.jsonLd ? `<script type="application/ld+json">${safeJSON(meta.jsonLd)}</script>` : '',
   ].join('')
@@ -184,7 +191,18 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
 /** JSなしで読めるページ本文の外枠（React起動までの一瞬だけ表示される） */
 export function shellHtml(inner: string): string {
   return `<main style="max-width:960px;margin:0 auto;padding:24px 16px;font-family:monospace;line-height:1.7">` +
-    `<nav><a href="/">${SITE_NAME}</a> / <a href="/tags">タグ</a></nav>${inner}</main>`
+    `<nav><a href="/">${SITE_NAME}</a> / <a href="/tags">タグ</a> / <a href="/ranking/sequel">ランキング</a></nav>${inner}</main>`
+}
+
+/** 作品へのリンクの一覧（続編希望／キレイに終わった の票数付き） */
+export function workLinkList(works: { id: number; title: string; sequel: number; complete: number; summary?: string }[]): string {
+  return `<ul>${works
+    .map(
+      (w) =>
+        `<li><a href="/works/${w.id}">${escapeHtml(w.title)}</a>${w.summary ? `（${escapeHtml(w.summary)}）` : ''}` +
+        ` 続編希望 ${w.sequel} / キレイに終わった ${w.complete}</li>`,
+    )
+    .join('')}</ul>`
 }
 
 // ---- API の型（frontend/src/api/client.ts と同じ形） ----
@@ -217,6 +235,27 @@ export interface ApiWork {
     anonymous: { sequel: number; complete: number }
     total: { sequel: number; complete: number }
   }
+  // 以下は作品ページ（GET /api/works/:id）だけ。古いバックエンドでは無いことがある
+  indexable?: boolean
+  staff?: { role: string; name: string }[]
+  series?: { name: string; works: ApiRelatedWork[] }[]
+  seasonWorks?: ApiRelatedWork[]
+  seasonRank?: { rank: number; total: number }
+}
+export interface ApiRelatedWork {
+  id: number
+  title: string
+  media: string
+  seasonName: string
+  summary?: string
+  sequel: number
+  complete: number
+}
+export interface ApiRanking {
+  kind: 'sequel' | 'complete'
+  season: string
+  works: ApiWork[]
+  candidates: ApiWork[]
 }
 export interface ApiWorkList {
   works: ApiWork[]

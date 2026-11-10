@@ -11,6 +11,7 @@
 // Cache API はデータセンターごとなので、無効化が即時に効くのは書き込んだ人と同じデータセンター。
 // 他のデータセンターでは最大 s-maxage 秒遅れる（バックエンドの publicCache の秒数がその上限）。
 import { backendHeaders, type Env } from './lib'
+import { normalizeOgQuery } from './seo'
 
 /** Pages Functions の context のうち、ここで使うもの */
 export interface CacheContext {
@@ -31,7 +32,10 @@ const SWR_SECONDS = 600
  */
 export function cacheGroups(pathname: string): string[] | null {
   let m: RegExpMatchArray | null
-  if (/^\/api\/(works|tags|tags\/\d+|sitemap)$/.test(pathname)) return ['all', 'works']
+  if (/^\/api\/(works|tags|tags\/\d+|sitemap|rankings)$/.test(pathname)) return ['all', 'works']
+  // SNS共有用の画像（作品の票が変わったら描き直す）
+  if ((m = pathname.match(/^\/api\/og\/works\/(\d+)\.png$/))) return ['all', `work:${m[1]}`]
+  if (/^\/api\/og\/(rankings\/(sequel|complete)|site)\.png$/.test(pathname)) return ['all', 'works']
   if ((m = pathname.match(/^\/api\/works\/(\d+)(?:\/(?:edits|threads))?$/))) return ['all', `work:${m[1]}`]
   if ((m = pathname.match(/^\/api\/threads\/(\d+)(?:\/posts(?:\/\d+)?)?$/))) return ['all', `thread:${m[1]}`]
   return null
@@ -112,6 +116,7 @@ function fromCache(res: Response, state: 'HIT' | 'STALE'): Response {
  * 例外（Macに繋がらない等）はキャッシュが無いときだけ投げる。
  */
 export async function cachedApiFetch(ctx: CacheContext, pathAndQuery: string): Promise<Response> {
+  pathAndQuery = normalizeOgQuery(pathAndQuery)
   const url = new URL(pathAndQuery, 'https://x.invalid')
   const groups = cacheGroups(url.pathname)
   if (!groups) return fetchOrigin(ctx, pathAndQuery)
