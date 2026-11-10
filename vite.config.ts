@@ -10,7 +10,14 @@ function fontsourceWoff2Only(): Plugin {
     enforce: 'pre',
     transform(code, id) {
       if (!/[\\/]@fontsource[\\/].*\.css$/.test(id)) return null
-      return { code: code.replace(/,\s*url\([^)]*\.woff\)\s*format\(['"]woff['"]\)/g, ''), map: null }
+      return {
+        code: code
+          .replace(/,\s*url\([^)]*\.woff\)\s*format\(['"]woff['"]\)/g, '')
+          // swap だと、フォントが遅れて届いたときに文字の高さが変わってページ全体がずれる（Lighthouse の CLS 0.19 の原因）。
+          // optional は最初の描画に間に合わなければそのページではシステムのフォントのまま切り替えない（次のページからはキャッシュ済みのフォント）
+          .replace(/font-display:\s*swap/g, 'font-display: optional'),
+        map: null,
+      }
     },
   }
 }
@@ -18,6 +25,8 @@ function fontsourceWoff2Only(): Plugin {
 export default defineConfig({
   plugins: [fontsourceWoff2Only(), react()],
   build: {
+    // 小さいフォントファイルを base64 でCSSに埋め込まない（描画を止めるCSSが80KB超に膨らむため。フォントは別ファイルで十分）
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
     rolldownOptions: {
       output: {
         // ランタイムは中身がほぼ変わらずハッシュも固定のため、名前を変えて誤ってキャッシュされたURLを避ける

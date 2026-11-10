@@ -50,5 +50,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         },
       }
 
-  return renderPage(env, request, { title, description, canonical, noindex, jsonLd, bodyHtml: body })
+  // 画面（WorksPage）が同じ一覧をもう一度取りに行かないよう、初期データとして埋め込む。
+  // 読み込み中の表示から一覧に切り替わるときにフッターが押し下げられる（Lighthouse の CLS）のも防げる。
+  // 検索・並び替え・ページ送りなどの条件付きは埋め込まない（タグ指定でタグが見つからなかった場合も）
+  const embed = list.data && !extra && (tags.length === 0 || tag)
+  const initialData = embed ? { id: 'fv-initial-works', data: { tag: tag?.id ?? null, list: list.data } } : undefined
+
+  return renderPage(env, request, { title, description, canonical, noindex, jsonLd, bodyHtml: body, initialData })
 }

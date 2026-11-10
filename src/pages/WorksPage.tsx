@@ -15,13 +15,13 @@ import {
   Typography,
 } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
-import { TAG_KIND_LABEL, api, type Tag, type WorkSort } from '../api/client'
+import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../api/client'
 import { Cursor, Prompt } from '../components/Retro'
 import WorkCard from '../components/WorkCard'
 import { TOP_HEADING, TOP_LEAD, tagPageDescription, tagPageTitle } from '../../edge/seo'
-import { usePageMeta } from '../lib/pageMeta'
+import { takeInitialData, usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 
 const SORT_LABEL: Record<WorkSort, string> = {
@@ -44,10 +44,21 @@ export default function WorksPage() {
   const allTags = tagsQuery.data?.tags ?? []
   const selectedTags = tagIds.map((id) => allTags.find((t) => t.id === id)).filter((t): t is Tag => !!t)
 
+  // Pages Functions がHTMLに埋め込んだ一覧（条件なし、またはタグ1つだけの1ページ目）。最初の1回だけ読む
+  const isDefaultList = !q && page === 1 && sort === 'recommended' && tagIds.length <= 1
+  const [initial] = useState(() =>
+    takeInitialData<{ tag: number | null; list: WorkList }>(
+      'fv-initial-works',
+      (d) => isDefaultList && (d.tag === null ? tagIds.length === 0 : tagIds[0] === d.tag),
+    ),
+  )
+  const fromInitial = !!initial && isDefaultList && (initial.tag === null ? tagIds.length === 0 : tagIds[0] === initial.tag)
+
   const worksQuery = useQuery({
     queryKey: ['works', { q, tagIds, sort, page }],
     queryFn: () => api.listWorks({ q, tags: tagIds, sort, page }),
     placeholderData: keepPreviousData,
+    initialData: fromInitial ? initial.list : undefined,
   })
 
   const update = (patch: { q?: string; tags?: number[]; sort?: WorkSort; page?: number }) => {
@@ -147,8 +158,9 @@ export default function WorksPage() {
         <TextField
           select
           size="small"
-          aria-label="並び替え"
           sx={{ width: { xs: 128, sm: 160 } }}
+          // 名前は選択欄（role=combobox の要素）に付ける。外側の div に付けると ARIA の誤用になる
+          slotProps={{ htmlInput: { 'aria-label': '並び替え' } }}
           value={sort}
           onChange={(e) => update({ sort: e.target.value as WorkSort })}
         >

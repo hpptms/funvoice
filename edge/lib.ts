@@ -92,13 +92,14 @@ export const SECURITY_HEADERS: Record<string, string> = {
   // MUI(emotion) がインラインstyleを使うため style-src のみ 'unsafe-inline' を許可。スクリプトは自サイトのファイルのみ
   'Content-Security-Policy': [
     "default-src 'self'",
-    // Google タグマネージャー / GA4（src/lib/analytics.ts）、ユーザー登録の人間チェック（Cloudflare Turnstile）
-    "script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com",
+    // Google タグマネージャー / GA4（src/lib/analytics.ts）、ユーザー登録の人間チェック（Cloudflare Turnstile）、
+    // Cloudflare Web Analytics（Pages が自動で読み込むビーコン。送信先は cloudflareinsights.com）
+    "script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     // コメントに貼られた画像は元のサイトから直接表示するため、https の画像は許可する（画像はスクリプトを実行できない）
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.cloudinary.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+    "connect-src 'self' https://api.cloudinary.com https://cloudflareinsights.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
     // 埋め込みプレーヤーは YouTube（Cookie を使わない youtube-nocookie.com）・Vimeo・ニコニコ動画だけを許可する
     // 人間チェック（Turnstile）も iframe で表示される
     "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://embed.nicovideo.jp https://challenges.cloudflare.com",

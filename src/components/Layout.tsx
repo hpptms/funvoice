@@ -17,6 +17,12 @@ const FOOTER_LINKS = [
   ['/contact', 'お問い合わせ'],
 ] as const
 
+/**
+ * レトロモードの黒いヘッダー上の緑。テーマの success（紙色の背景用の濃い緑）だと黒地とのコントラスト比が 3.4 しかなく
+ * 読みにくいので、ヘッダーでは明るい緑にする（#141414 に対して約 10:1）
+ */
+const RETRO_HEADER_GREEN = '#5fd38a'
+
 export default function Layout() {
   const retro = useRetro()
   const isTop = useLocation().pathname === '/'
@@ -29,7 +35,7 @@ export default function Layout() {
     minWidth: 0,
     height: 40,
     whiteSpace: 'nowrap',
-    '&.active': retro ? { color: 'success.main' } : { color: 'primary.main' },
+    '&.active': retro ? { color: RETRO_HEADER_GREEN } : { color: 'primary.main' },
   } as const
 
   return (
@@ -126,7 +132,8 @@ export default function Layout() {
                   aria-label="ユーザー登録"
                   sx={{
                     ...navSx,
-                    color: retro ? 'success.main' : 'primary.main',
+                    color: retro ? RETRO_HEADER_GREEN : 'primary.main',
+                    borderColor: retro ? RETRO_HEADER_GREEN : undefined,
                     height: { xs: 32, sm: 34 },
                     px: { xs: 0.75, sm: 1.25 },
                     mr: { xs: 0.5, sm: 1 },
