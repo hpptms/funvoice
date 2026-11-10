@@ -8,7 +8,6 @@ import {
   Chip,
   CircularProgress,
   InputAdornment,
-  Link,
   MenuItem,
   Pagination,
   Stack,
@@ -19,7 +18,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Fragment, useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../api/client'
-import { Cursor, Prompt } from '../components/Retro'
+import { Cursor, Prompt, RankingBanner } from '../components/Retro'
 import WorkCard from '../components/WorkCard'
 import {
   TOP_HEADING,
@@ -144,12 +143,16 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           {pageTag ? tagPageDescription(pageTag.name, data?.total) : TOP_LEAD}
         </Typography>
         {(isSeasonName(season) || !baseTagId) && (
-          <Stack direction="row" spacing={2} useFlexGap sx={{ mt: 1, flexWrap: 'wrap', fontSize: 14 }}>
+          <Stack direction="row" useFlexGap sx={{ mt: 2, mb: 0.5, gap: 2, flexWrap: 'wrap' }}>
             {(['sequel', 'complete'] as const).map((kind) => (
-              <Link key={kind} component={RouterLink} to={rankingPath(kind, isSeasonName(season) ? season : undefined)} color={kind === 'sequel' ? 'primary' : 'secondary'}>
-                {retro ? '> ' : ''}
+              <RankingBanner
+                key={kind}
+                to={rankingPath(kind, isSeasonName(season) ? season : undefined)}
+                color={kind === 'sequel' ? 'primary' : 'secondary'}
+                badge={kind === 'sequel' ? '★HOT★' : '★必見★'}
+              >
                 {rankingTitle(kind, isSeasonName(season) ? season : undefined)}
-              </Link>
+              </RankingBanner>
             ))}
           </Stack>
         )}
