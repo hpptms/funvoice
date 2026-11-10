@@ -39,8 +39,16 @@ export interface TurnstileHandle {
   reset: () => void
 }
 
-const Turnstile = forwardRef<TurnstileHandle, { siteKey: string; onToken: (token: string) => void; onError?: (msg: string) => void }>(
-  function Turnstile({ siteKey, onToken, onError }, ref) {
+interface Props {
+  siteKey: string
+  /** どの画面のチェックか。サーバーが一致を確認する（英数字・_・- で32文字まで） */
+  action: string
+  onToken: (token: string) => void
+  onError?: (msg: string) => void
+}
+
+const Turnstile = forwardRef<TurnstileHandle, Props>(
+  function Turnstile({ siteKey, action, onToken, onError }, ref) {
     const el = useRef<HTMLDivElement>(null)
     const widget = useRef<string | null>(null)
     // コールバックは最新のものを使う（描画し直さずに済むように）
@@ -63,6 +71,7 @@ const Turnstile = forwardRef<TurnstileHandle, { siteKey: string; onToken: (token
           if (cancelled || !el.current) return
           widget.current = t.render(el.current, {
             sitekey: siteKey,
+            action,
             language: 'ja',
             theme: 'auto',
             callback: (token: string) => cb.current.onToken(token),
@@ -79,7 +88,7 @@ const Turnstile = forwardRef<TurnstileHandle, { siteKey: string; onToken: (token
         if (widget.current && window.turnstile) window.turnstile.remove(widget.current)
         widget.current = null
       }
-    }, [siteKey])
+    }, [siteKey, action])
 
     // ウィジェットの高さ（65px）を先に確保して、読み込み後にレイアウトがずれないようにする
     return <Box ref={el} sx={{ minHeight: 65 }} />

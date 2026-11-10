@@ -129,7 +129,7 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
             )}
             {register && siteKey && (
               <Box>
-                <Turnstile ref={captcha} siteKey={siteKey} onToken={setToken} onError={setCaptchaError} />
+                <Turnstile ref={captcha} siteKey={siteKey} action="register" onToken={setToken} onError={setCaptchaError} />
                 {captchaError && !token && (
                   <Typography variant="caption" color="error">
                     {captchaError}
