@@ -271,12 +271,14 @@ async function request<T>(path: string, init: RequestInit & { admin?: boolean } 
 }
 
 export const api = {
-  listWorks(params: { q?: string; tags?: number[]; sort?: WorkSort; page?: number }) {
+  /** noMedia: 動画・画像がどちらも未設定の作品だけ（管理画面用） */
+  listWorks(params: { q?: string; tags?: number[]; sort?: WorkSort; page?: number; noMedia?: boolean }) {
     const sp = new URLSearchParams()
     if (params.q) sp.set('q', params.q)
     params.tags?.forEach((t) => sp.append('tag', String(t)))
     if (params.sort) sp.set('sort', params.sort)
     if (params.page && params.page > 1) sp.set('page', String(params.page))
+    if (params.noMedia) sp.set('media', 'none')
     return request<WorkList>(`/works?${sp}`)
   },
   getWork: (id: number) => request<Work>(`/works/${id}`),

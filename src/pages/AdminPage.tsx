@@ -1,7 +1,7 @@
-import { Alert, Box, Button, Card, CardContent, Chip, Link, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, FormControlLabel, Link, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import { MEDIA_LABEL, TAG_KIND_LABEL, api, getAdminToken, setAdminToken, type TagKind, type Work } from '../api/client'
 import AdminMediaEditor from '../components/works/AdminMediaEditor'
 import { EditRow } from '../components/works/EditHistory'
@@ -132,14 +132,27 @@ export default function AdminPage() {
  * 検索語が空のときは人気順（Annictの視聴者数順）に並べ、よく見られる作品から設定できるようにする。
  */
 function WorkMediaManager() {
-  const [input, setInput] = useState('')
-  const [q, setQ] = useState('')
-  const [page, setPage] = useState(1)
+  // 検索語・ページ・絞り込みは URL に持つ。作品ページへ移動してブラウザバックしても同じページに戻れる
+  const [sp, setSp] = useSearchParams()
+  const q = sp.get('mq') ?? ''
+  const page = Math.max(1, Number(sp.get('mp')) || 1)
+  const noMedia = sp.get('mnone') === '1'
+  const [input, setInput] = useState(q)
   const [editing, setEditing] = useState<number | null>(null)
+  const update = (next: { q?: string; page?: number; noMedia?: boolean }) => {
+    const p = new URLSearchParams(sp)
+    const set = (k: string, v: string) => (v ? p.set(k, v) : p.delete(k))
+    set('mq', next.q ?? q)
+    set('mp', (next.page ?? page) > 1 ? String(next.page ?? page) : '')
+    set('mnone', (next.noMedia ?? noMedia) ? '1' : '')
+    // ページ送りで履歴を増やさない（戻るで管理画面の前のページへ戻れるように）
+    setSp(p, { replace: true })
+    setEditing(null)
+  }
   // queryKey を ['works', …] にして、保存後の invalidateQueries(['works']) で一覧も更新されるようにする
   const { data, isFetching, isError, error } = useQuery({
-    queryKey: ['works', 'admin-media', { q, page }],
-    queryFn: () => api.listWorks({ q, sort: 'popular', page }),
+    queryKey: ['works', 'admin-media', { q, page, noMedia }],
+    queryFn: () => api.listWorks({ q, sort: 'popular', page, noMedia }),
     placeholderData: (prev) => prev,
   })
   const pageCount = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1
@@ -159,16 +172,25 @@ function WorkMediaManager() {
           component="form"
           onSubmit={(e) => {
             e.preventDefault()
-            setQ(input.trim())
-            setPage(1)
-            setEditing(null)
+            update({ q: input.trim(), page: 1 })
           }}
-          sx={{ mb: 2 }}
+          sx={{ mb: 1 }}
         >
           <TextField size="small" label="作品名で検索" value={input} onChange={(e) => setInput(e.target.value)} sx={{ flex: 1 }} />
           <Button type="submit" variant="outlined">
             検索
           </Button>
+        </Stack>
+        <Stack direction="row" sx={{ mb: 2, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+          <FormControlLabel
+            control={<Checkbox size="small" checked={noMedia} onChange={(e) => update({ noMedia: e.target.checked, page: 1 })} />}
+            label="動画・画像なしのみ"
+          />
+          {data && (
+            <Typography variant="body2" color="text.secondary">
+              {data.total}件
+            </Typography>
+          )}
         </Stack>
         {isError && <Alert severity="error">{(error as Error).message}</Alert>}
         {data && data.works.length === 0 && <Typography color="text.secondary">見つかりませんでした</Typography>}
@@ -199,13 +221,13 @@ function WorkMediaManager() {
         </Stack>
         {data && pageCount > 1 && (
           <Stack direction="row" spacing={1} sx={{ mt: 2, alignItems: 'center', justifyContent: 'center' }}>
-            <Button size="small" disabled={page <= 1} onClick={() => (setPage(page - 1), setEditing(null))}>
+            <Button size="small" disabled={page <= 1} onClick={() => update({ page: page - 1 })}>
               前へ
             </Button>
             <Typography variant="body2">
               {page} / {pageCount}
             </Typography>
-            <Button size="small" disabled={page >= pageCount} onClick={() => (setPage(page + 1), setEditing(null))}>
+            <Button size="small" disabled={page >= pageCount} onClick={() => update({ page: page + 1 })}>
               次へ
             </Button>
           </Stack>
