@@ -1,10 +1,13 @@
 import { Alert, Box, Button, Card, CardContent, Link, Stack, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useRef, useState } from 'react'
 import { Navigate, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
+import IconPicker from '../components/account/IconPicker'
+import Turnstile, { type TurnstileHandle } from '../components/account/Turnstile'
 import { Prompt } from '../components/Retro'
 import { useMe, useSetMe } from '../lib/auth'
+import { hasIconChoice, iconChoiceError, saveIcon, type IconChoice } from '../lib/iconUpload'
 import { usePageMeta } from '../lib/pageMeta'
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/
@@ -19,17 +22,36 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [icon, setIcon] = useState<IconChoice>({ kind: 'file', file: null })
+  const [token, setToken] = useState('')
+  const [captchaError, setCaptchaError] = useState('')
+  const captcha = useRef<TurnstileHandle>(null)
+
+  // 人間チェックのサイトキー（未設定なら人間チェックなし）
+  const config = useQuery({ queryKey: ['authConfig'], queryFn: api.auth.config, enabled: register, staleTime: Infinity })
+  const siteKey = config.data?.turnstileSiteKey ?? ''
 
   const mutation = useMutation({
-    mutationFn: async () =>
-      register
-        ? (await api.auth.register({ username, password, passwordConfirm: confirm })).user
-        : (await api.auth.login(username, password)).user,
-    onSuccess: (user) => {
-      setMe(user)
-      // 登録したらアイコンを設定できるマイページへ
-      navigate('/mypage', { replace: true })
+    mutationFn: async () => {
+      if (!register) return { user: (await api.auth.login(username, password)).user, iconError: '' }
+      let user = (await api.auth.register({ username, password, passwordConfirm: confirm, turnstileToken: token })).user
+      // アイコンは登録できてから設定する（失敗しても登録は済んでいるので、マイページで設定し直してもらう）
+      let iconError = ''
+      if (hasIconChoice(icon)) {
+        try {
+          user = await saveIcon(icon)
+        } catch (e) {
+          iconError = (e as Error).message
+        }
+      }
+      return { user, iconError }
     },
+    onSuccess: ({ user, iconError }) => {
+      setMe(user)
+      navigate('/mypage', { replace: true, state: iconError ? { iconError } : undefined })
+    },
+    // 人間チェックのトークンは1回しか使えないので、失敗したらやり直す
+    onError: () => captcha.current?.reset(),
   })
 
   if (me && !mutation.isPending && !mutation.isSuccess) return <Navigate to="/mypage" replace />
@@ -38,7 +60,13 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
   const passError = register && password !== '' && [...password].length < 8
   const confirmError = register && confirm !== '' && confirm !== password
   const canSubmit = register
-    ? USERNAME_RE.test(username) && [...password].length >= 8 && confirm === password && !mutation.isPending
+    ? USERNAME_RE.test(username) &&
+      [...password].length >= 8 &&
+      confirm === password &&
+      !iconChoiceError(icon) &&
+      config.isSuccess &&
+      (!siteKey || token !== '') &&
+      !mutation.isPending
     : username !== '' && password !== '' && !mutation.isPending
 
   return (
@@ -91,6 +119,24 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
                 slotProps={{ htmlInput: { maxLength: 128, autoComplete: 'new-password' } }}
               />
             )}
+            {register && (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  アイコン（任意・あとからマイページでも設定できます）
+                </Typography>
+                <IconPicker value={icon} onChange={setIcon} />
+              </Box>
+            )}
+            {register && siteKey && (
+              <Box>
+                <Turnstile ref={captcha} siteKey={siteKey} onToken={setToken} onError={setCaptchaError} />
+                {captchaError && !token && (
+                  <Typography variant="caption" color="error">
+                    {captchaError}
+                  </Typography>
+                )}
+              </Box>
+            )}
             {mutation.isError && <Alert severity="error">{(mutation.error as Error).message}</Alert>}
             {register && (
               <Typography variant="caption" color="text.secondary">
@@ -106,7 +152,7 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
               </Typography>
             )}
             <Button type="submit" variant="contained" size="large" disabled={!canSubmit} sx={{ height: 48 }}>
-              {mutation.isPending ? '送信中…' : register ? '登録する' : 'ログイン'}
+              {mutation.isPending ? '送信中…' : register ? (siteKey && !token ? '人間チェックを待っています…' : '登録する') : 'ログイン'}
             </Button>
             <Typography variant="body2" sx={{ textAlign: 'center' }}>
               {register ? (

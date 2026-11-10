@@ -153,8 +153,18 @@ export interface Post {
 export interface User {
   id: number
   name: string
-  /** アイコン（外部の画像URL）。未設定なら空 */
+  /** 表示用のアイコンURL（アップロードした画像なら Cloudinary の変換済みURL）。未設定なら空 */
   iconUrl: string
+  /** upload = アップロードした画像 / url = 外部の画像URL / '' = なし */
+  iconKind: 'upload' | 'url' | ''
+}
+
+/** アイコン画像を Cloudinary へ直接アップロードするための署名 */
+export interface IconUploadSignature {
+  uploadUrl: string
+  params: Record<string, string>
+  publicId: string
+  maxBytes: number
 }
 
 
@@ -320,12 +330,16 @@ export const api = {
 
   auth: {
     me: () => request<{ user: User | null }>('/me'),
-    register: (input: { username: string; password: string; passwordConfirm: string }) =>
+    config: () => request<{ turnstileSiteKey: string }>('/auth/config'),
+    register: (input: { username: string; password: string; passwordConfirm: string; turnstileToken: string }) =>
       request<{ user: User }>('/auth/register', { method: 'POST', body: JSON.stringify(input) }),
     login: (username: string, password: string) =>
       request<{ user: User }>('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
     logout: () => request<void>('/auth/logout', { method: 'POST' }),
-    setIcon: (iconUrl: string) => request<{ user: User }>('/me/icon', { method: 'PUT', body: JSON.stringify({ iconUrl }) }),
+    /** 外部の画像URL（{ iconUrl }。空でアイコンを外す）か、アップロードした画像（{ iconPublicId }）をアイコンにする */
+    setIcon: (input: { iconUrl: string } | { iconPublicId: string }) =>
+      request<{ user: User }>('/me/icon', { method: 'PUT', body: JSON.stringify(input) }),
+    iconUploadSignature: () => request<IconUploadSignature>('/me/icon/upload', { method: 'POST' }),
   },
 
   admin: {
