@@ -1,5 +1,5 @@
 import { Alert, Button, Stack, Typography } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, type Work } from '../../api/client'
 import { isMediaValid, type MediaChoice } from '../../lib/media'
@@ -16,9 +16,25 @@ function currentChoice(work: Work): MediaChoice {
  * 管理者用: 作品の紹介動画（YouTube）・画像を設定・変更する。
  * 管理画面の「作品の動画・画像」と、作品ページの管理者メニューで使う。
  */
-export default function AdminMediaEditor({ work, onSaved }: { work: Work; onSaved?: (w: Work) => void }) {
+export default function AdminMediaEditor({ work: given, onSaved }: { work: Work; onSaved?: (w: Work) => void }) {
   const qc = useQueryClient()
+  // 渡された作品データは一覧を読んだ時点のもので古いことがある（別タブ・一括作業で設定済みなど）。
+  // 開いたときに最新を取り直し、それを初期値・比較の基準にする
+  const latest = useQuery({
+    queryKey: ['work', given.id],
+    queryFn: () => api.getWork(given.id),
+    staleTime: 0,
+    placeholderData: given,
+  })
+  const work = latest.data ?? given
   const [choice, setChoice] = useState<MediaChoice>(() => currentChoice(work))
+  // サーバー側の動画・画像が変わったら（最新を読み込んだ・他で変更された）入力欄もそれに合わせる
+  const serverMedia = `${work.youtubeId ?? ''}|${work.imageUrl ?? ''}|${work.image ? 1 : 0}`
+  const [syncedMedia, setSyncedMedia] = useState(serverMedia)
+  if (syncedMedia !== serverMedia) {
+    setSyncedMedia(serverMedia)
+    setChoice(currentChoice(work))
+  }
   const save = useMutation({
     mutationFn: () =>
       api.admin.updateWork(work.id, {
@@ -51,7 +67,7 @@ export default function AdminMediaEditor({ work, onSaved }: { work: Work; onSave
       <Stack direction="row" spacing={1}>
         <Button
           variant="contained"
-          disabled={save.isPending || !isMediaValid(choice) || (!changed && !legacyImage)}
+          disabled={save.isPending || latest.isPlaceholderData || !isMediaValid(choice) || (!changed && !legacyImage)}
           onClick={() => save.mutate()}
         >
           {url(choice) ? '動画・画像を保存' : '動画・画像を外して保存'}

@@ -154,6 +154,9 @@ function WorkMediaManager() {
     queryKey: ['works', 'admin-media', { q, page, noMedia }],
     queryFn: () => api.listWorks({ q, sort: 'popular', page, noMedia }),
     placeholderData: (prev) => prev,
+    // 別タブや一括作業で設定した動画・画像が「なし」のまま残らないよう、画面に戻るたびに取り直す
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   })
   const pageCount = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1
 
