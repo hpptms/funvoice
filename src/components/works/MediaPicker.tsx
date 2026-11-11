@@ -81,8 +81,7 @@ export default function MediaPicker({ value, onChange }: { value: MediaChoice; o
           {/* URLが変わったら作り直して、読み込み状態をリセットする */}
           {imageUrl && <ImagePreview key={imageUrl} url={imageUrl} />}
           <Alert severity="warning">
-            キービジュアル・アニメのスクリーンショットなどを無断で掲載しているページの画像は使えません。公式サイトの画像を使う場合も、公式が利用を認めているものに限ります。
-            公式の映像を紹介したい場合は、YouTube の公式PVを選んでください。
+            ファンアートを表示する場合があります、権利の問題がある場合はお手数かけますがお知らせください
           </Alert>
         </Stack>
       )}
