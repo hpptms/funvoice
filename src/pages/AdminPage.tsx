@@ -127,6 +127,9 @@ export default function AdminPage() {
   )
 }
 
+/** 動画・画像なしの絞り込み。'' = 絞り込みなし／all = すべての年／1990 = 1990年以降の放送のみ */
+type NoMediaMode = '' | 'all' | '1990'
+
 /**
  * 作品の紹介動画（YouTube）・画像の設定。
  * 検索語が空のときは人気順（Annictの視聴者数順）に並べ、よく見られる作品から設定できるようにする。
@@ -136,23 +139,26 @@ function WorkMediaManager() {
   const [sp, setSp] = useSearchParams()
   const q = sp.get('mq') ?? ''
   const page = Math.max(1, Number(sp.get('mp')) || 1)
-  const noMedia = sp.get('mnone') === '1'
+  // mnone=1: 動画・画像なしのみ／mnone=1990: そのうち1990年以降に放送の作品のみ（古い作品はYouTubeに映像が残っていないことが多いため）
+  const noMediaMode: NoMediaMode = sp.get('mnone') === '1990' ? '1990' : sp.get('mnone') === '1' ? 'all' : ''
   const [input, setInput] = useState(q)
   const [editing, setEditing] = useState<number | null>(null)
-  const update = (next: { q?: string; page?: number; noMedia?: boolean }) => {
+  const update = (next: { q?: string; page?: number; noMediaMode?: NoMediaMode }) => {
     const p = new URLSearchParams(sp)
     const set = (k: string, v: string) => (v ? p.set(k, v) : p.delete(k))
     set('mq', next.q ?? q)
     set('mp', (next.page ?? page) > 1 ? String(next.page ?? page) : '')
-    set('mnone', (next.noMedia ?? noMedia) ? '1' : '')
+    const mode = next.noMediaMode ?? noMediaMode
+    set('mnone', mode === 'all' ? '1' : mode)
     // ページ送りで履歴を増やさない（戻るで管理画面の前のページへ戻れるように）
     setSp(p, { replace: true })
     setEditing(null)
   }
   // queryKey を ['works', …] にして、保存後の invalidateQueries(['works']) で一覧も更新されるようにする
   const { data, isFetching, isError, error } = useQuery({
-    queryKey: ['works', 'admin-media', { q, page, noMedia }],
-    queryFn: () => api.listWorks({ q, sort: 'popular', page, noMedia }),
+    queryKey: ['works', 'admin-media', { q, page, noMediaMode }],
+    queryFn: () =>
+      api.listWorks({ q, sort: 'popular', page, noMedia: noMediaMode !== '', minYear: noMediaMode === '1990' ? 1990 : undefined }),
     placeholderData: (prev) => prev,
     // 別タブや一括作業で設定した動画・画像が「なし」のまま残らないよう、画面に戻るたびに取り直す
     staleTime: 0,
@@ -185,10 +191,28 @@ function WorkMediaManager() {
           </Button>
         </Stack>
         <Stack direction="row" sx={{ mb: 2, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-          <FormControlLabel
-            control={<Checkbox size="small" checked={noMedia} onChange={(e) => update({ noMedia: e.target.checked, page: 1 })} />}
-            label="動画・画像なしのみ"
-          />
+          <Stack direction="row" sx={{ flexWrap: 'wrap', columnGap: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={noMediaMode === 'all'}
+                  onChange={(e) => update({ noMediaMode: e.target.checked ? 'all' : '', page: 1 })}
+                />
+              }
+              label="動画・画像なしのみ"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={noMediaMode === '1990'}
+                  onChange={(e) => update({ noMediaMode: e.target.checked ? '1990' : '', page: 1 })}
+                />
+              }
+              label="動画・画像なしのみ(1990以降)"
+            />
+          </Stack>
           {data && (
             <Typography variant="body2" color="text.secondary">
               {data.total}件
