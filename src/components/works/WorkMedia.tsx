@@ -70,10 +70,14 @@ function RightsNotice() {
     <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.5 }}>
       公式映像が無い場合、公式絵、ファンアートを表示する場合があります。
       権利の問題がある場合はお手数をおかけしますが、
-      <Link component={RouterLink} to="/contact?category=copyright">
-        お問い合わせ
+      <Link component={RouterLink} to="/copyright">
+        著作権・削除依頼
       </Link>
-      ください。
+      をご確認のうえ、
+      <Link component={RouterLink} to="/contact?category=copyright">
+        削除依頼フォーム
+      </Link>
+      からお問い合わせください。
     </Typography>
   )
 }
