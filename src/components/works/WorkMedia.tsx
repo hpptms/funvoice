@@ -98,7 +98,7 @@ export default function WorkMedia({ work }: { work: Work }) {
   if (work.imageUrl)
     return (
       <Box>
-        <RemoteImage url={work.imageUrl} alt={`${work.title}の画像`} maxHeight={420} />
+        <RemoteImage url={work.imageUrl} alt={`${work.title}の画像`} maxHeight={420} showSource />
         <RightsNotice />
       </Box>
     )

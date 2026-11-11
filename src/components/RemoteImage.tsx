@@ -1,13 +1,24 @@
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, ButtonBase, Dialog, IconButton, Typography } from '@mui/material'
+import { Box, ButtonBase, Dialog, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useRetro } from '../lib/styleMode'
 
 /**
  * 外部サイトの画像（コメントに貼られた画像・作品の紹介画像）。元のサイトから直接表示し、自サイトにはコピーを持たない。
  * Referer は送らない。読み込めない（画像ではない・削除された）場合は何も表示しない。タップで拡大。
+ * showSource を付けると、ホスト名の代わりに引用元のURLをリンクで表示する（作品の紹介画像用）。
  */
-export default function RemoteImage({ url, maxHeight, alt = 'コメントに貼られた画像' }: { url: string; maxHeight: number; alt?: string }) {
+export default function RemoteImage({
+  url,
+  maxHeight,
+  alt = 'コメントに貼られた画像',
+  showSource = false,
+}: {
+  url: string
+  maxHeight: number
+  alt?: string
+  showSource?: boolean
+}) {
   const retro = useRetro()
   const [failed, setFailed] = useState(false)
   const [open, setOpen] = useState(false)
@@ -44,7 +55,16 @@ export default function RemoteImage({ url, maxHeight, alt = 'コメントに貼�
         })}
       </ButtonBase>
       <Typography variant="caption" color="text.secondary" component="div" sx={{ overflowWrap: 'anywhere' }}>
-        {new URL(url).hostname} の画像
+        {showSource && /^https?:\/\//i.test(url) ? (
+          <>
+            引用元：
+            <Link href={url} target="_blank" rel="noopener noreferrer nofollow ugc" referrerPolicy="no-referrer">
+              {url}
+            </Link>
+          </>
+        ) : (
+          <>{new URL(url).hostname} の画像</>
+        )}
       </Typography>
       <Dialog
         open={open}
