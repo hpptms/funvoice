@@ -1,6 +1,7 @@
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import { Box, ButtonBase, Typography } from '@mui/material'
+import { Box, ButtonBase, Link, Typography } from '@mui/material'
 import { useState } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import type { Work } from '../../api/client'
 import { useRetro } from '../../lib/styleMode'
 import { youtubeEmbedUrl, youtubeThumbnail } from '../../lib/youtube'
@@ -63,20 +64,47 @@ export function YouTubeEmbed({ id, title }: { id: string; title: string }) {
   )
 }
 
+/** 紹介メディア下の権利表記。公式映像が無い作品では公式絵・ファンアートを載せることがあるため */
+function RightsNotice() {
+  return (
+    <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.5 }}>
+      公式映像が無い場合、公式絵、ファンアートを表示する場合があります。
+      権利の問題がある場合はお手数をおかけしますが、
+      <Link component={RouterLink} to="/contact?category=copyright">
+        お問い合わせ
+      </Link>
+      ください。
+    </Typography>
+  )
+}
+
 /** 作品の紹介メディア（YouTube か画像のどちらか）。無ければ何も表示しない */
 export default function WorkMedia({ work }: { work: Work }) {
   if (work.youtubeId) {
     return (
       <Box>
         <YouTubeEmbed id={work.youtubeId} title={work.title} />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" component="p">
           再生すると YouTube（youtube-nocookie.com）から動画を読み込みます
         </Typography>
+        <RightsNotice />
       </Box>
     )
   }
-  if (work.imageUrl) return <RemoteImage url={work.imageUrl} alt={`${work.title}の画像`} maxHeight={420} />
+  if (work.imageUrl)
+    return (
+      <Box>
+        <RemoteImage url={work.imageUrl} alt={`${work.title}の画像`} maxHeight={420} />
+        <RightsNotice />
+      </Box>
+    )
   // 以前にアップロードされた画像（アップロードは終了。既存データの表示用）
-  if (work.image) return <PostImage image={work.image} alt={`${work.title}の画像`} maxHeight={420} />
+  if (work.image)
+    return (
+      <Box>
+        <PostImage image={work.image} alt={`${work.title}の画像`} maxHeight={420} />
+        <RightsNotice />
+      </Box>
+    )
   return null
 }
