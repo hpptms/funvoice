@@ -298,7 +298,12 @@ async function request<T>(path: string, init: RequestInit & { admin?: boolean } 
   if (init.admin) headers.set('Authorization', `Bearer ${getAdminToken()}`)
   const res = await fetch(`/api${path}`, { ...init, headers, credentials: 'same-origin' })
   if (res.status === 204) return undefined as T
-  const data = await res.json().catch(() => ({}))
+  const data = await res.json().catch(() => null)
+  // JSON 以外（Functions が止まって SPA の index.html が 200 で返る等）を正常データとして扱うと、
+  // 画面側で works.length などが undefined になり全体が真っ白になる。接続エラーとして扱う
+  if (data === null) {
+    throw new ApiError(res.ok ? 503 : res.status, 'サーバーに接続できません。しばらくしてから再度お試しください', {})
+  }
   // 管理APIで認証に失敗した（期限切れ・ADMIN_TOKEN の変更など）ら、保存しているトークンを捨てる
   if (init.admin && res.status === 401) setAdminToken('')
   if (!res.ok) throw new ApiError(res.status, data.error ?? `エラーが発生しました (${res.status})`, data)
