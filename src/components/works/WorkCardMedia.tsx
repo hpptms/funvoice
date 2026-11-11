@@ -2,26 +2,27 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import { Box } from '@mui/material'
 import { useState } from 'react'
 import type { Work } from '../../api/client'
+import { NO_MEDIA_THUMB } from '../../lib/media'
 import { useRetro } from '../../lib/styleMode'
 import { youtubeCardThumbnail } from '../../lib/youtube'
 
 /**
  * 一覧のカード上部に出す、作品の紹介メディアのサムネイル（16:9）。
  * YouTube はサムネイルに再生マークを重ねる（カードを押すと作品ページへ移動し、そこで再生できる）。
- * 添付が無い作品では何も表示しない。
+ * 添付が無い作品・画像が読み込めない作品では「参考画像がありません」の画像を表示する。
  */
 export default function WorkCardMedia({ work }: { work: Work }) {
   const retro = useRetro()
-  // 外部の画像URLが読み込めない（削除された等）場合は、枠ごと表示しない
+  // 外部の画像URLが読み込めない（削除された等）場合は、代わりの画像にする
   const [failed, setFailed] = useState(false)
-  const src = work.imageUrl
+  const media = work.imageUrl
     ? work.imageUrl
     : work.image
       ? work.image.thumbUrl
       : work.youtubeId
         ? youtubeCardThumbnail(work.youtubeId)
         : null
-  if (!src || failed) return null
+  const src = !media || failed ? NO_MEDIA_THUMB : media
   return (
     <Box
       sx={{
@@ -39,7 +40,7 @@ export default function WorkCardMedia({ work }: { work: Work }) {
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
+        onError={() => src !== NO_MEDIA_THUMB && setFailed(true)}
         width={480}
         height={270}
         sx={{
@@ -52,7 +53,7 @@ export default function WorkCardMedia({ work }: { work: Work }) {
           '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         }}
       />
-      {work.youtubeId && !work.imageUrl && !work.image && (
+      {work.youtubeId && !work.imageUrl && !work.image && !failed && (
         <Box
           aria-label="PV動画あり"
           sx={{

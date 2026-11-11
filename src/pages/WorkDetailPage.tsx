@@ -159,11 +159,9 @@ export default function WorkDetailPage() {
             </Link>
           )}
         </Stack>
-        {(work.youtubeId || work.imageUrl || work.image) && (
-          <Box sx={{ mt: 2 }}>
-            <WorkMedia work={work} />
-          </Box>
-        )}
+        <Box sx={{ mt: 2 }}>
+          <WorkMedia work={work} />
+        </Box>
       </Box>
 
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, alignItems: 'start' }}>

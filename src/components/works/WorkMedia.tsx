@@ -3,6 +3,7 @@ import { Box, ButtonBase, Link, Typography } from '@mui/material'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import type { Work } from '../../api/client'
+import { NO_MEDIA_IMAGE } from '../../lib/media'
 import { useRetro } from '../../lib/styleMode'
 import { youtubeEmbedUrl, youtubeThumbnail } from '../../lib/youtube'
 import PostImage from '../bbs/PostImage'
@@ -82,7 +83,31 @@ function RightsNotice() {
   )
 }
 
-/** 作品の紹介メディア（YouTube か画像のどちらか）。無ければ何も表示しない */
+/** 紹介メディアが無い作品に出す「参考画像がありません」の画像 */
+function NoMediaImage() {
+  const retro = useRetro()
+  return (
+    <Box
+      component="img"
+      src={NO_MEDIA_IMAGE}
+      alt="参考画像がありません"
+      width={1672}
+      height={941}
+      decoding="async"
+      sx={{
+        display: 'block',
+        width: '100%',
+        maxWidth: 720,
+        height: 'auto',
+        aspectRatio: '1672 / 941',
+        borderRadius: retro ? 0 : 2,
+        ...(retro ? { border: 2, borderColor: 'divider' } : {}),
+      }}
+    />
+  )
+}
+
+/** 作品の紹介メディア（YouTube か画像のどちらか）。無ければ「参考画像がありません」の画像を表示する */
 export default function WorkMedia({ work }: { work: Work }) {
   if (work.youtubeId) {
     return (
@@ -110,5 +135,5 @@ export default function WorkMedia({ work }: { work: Work }) {
         <RightsNotice />
       </Box>
     )
-  return null
+  return <NoMediaImage />
 }
