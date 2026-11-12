@@ -33,10 +33,15 @@ import {
 } from '../../edge/seo'
 import NotFoundPage from './NotFoundPage'
 import { takeInitialData, usePageMeta } from '../lib/pageMeta'
+import { currentSeasonName, seasonNameLabel } from '../lib/season'
 import { useRetro } from '../lib/styleMode'
 
-const SORT_LABEL: Record<WorkSort, string> = {
+/** 並び替え欄の選択肢。onair = 今期（日本時間の日付から自動判定）の作品だけをおすすめ順で出す */
+type ListSort = WorkSort | 'onair'
+
+const SORT_LABEL: Record<ListSort, string> = {
   recommended: 'おすすめ順',
+  onair: '放送中',
   new: '新しい順',
   popular: '人気順',
   votes: '投票数順',
@@ -53,13 +58,19 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const q = sp.get('q') ?? ''
   const queryTagIds = sp.getAll('tag').map(Number).filter(Boolean)
   const tagIds = baseTagId ? [baseTagId, ...queryTagIds.filter((id) => id !== baseTagId)] : queryTagIds
-  const sort = (sp.get('sort') as WorkSort) || 'recommended'
+  const sort = (sp.get('sort') as ListSort) || 'recommended'
   const page = Number(sp.get('page') ?? 1)
   const retro = useRetro()
 
   const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: api.listTags })
   const allTags = tagsQuery.data?.tags ?? []
   const selectedTags = tagIds.map((id) => allTags.find((t) => t.id === id)).filter((t): t is Tag => !!t)
+  // 「放送中」は今期の放送時期タグで絞り込む（季節が変わると自動で次の時期のタグになる）
+  const onAir = sort === 'onair'
+  const onAirLabel = seasonNameLabel(currentSeasonName())
+  const onAirTag = onAir ? allTags.find((t) => t.kind === 'season' && t.name === onAirLabel) : undefined
+  const queryTags = onAirTag && !tagIds.includes(onAirTag.id) ? [...tagIds, onAirTag.id] : tagIds
+  const apiSort: WorkSort = onAir ? 'recommended' : sort
 
   // Pages Functions がHTMLに埋め込んだ一覧（条件なし、またはタグ1つだけの1ページ目）。最初の1回だけ読む
   const isDefaultList = !q && page === 1 && sort === 'recommended' && tagIds.length <= 1
@@ -72,13 +83,15 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const fromInitial = !!initial && isDefaultList && (initial.tag === null ? tagIds.length === 0 : tagIds[0] === initial.tag)
 
   const worksQuery = useQuery({
-    queryKey: ['works', { q, tagIds, sort, page }],
-    queryFn: () => api.listWorks({ q, tags: tagIds, sort, page }),
+    queryKey: ['works', { q, tagIds: queryTags, sort: apiSort, page }],
+    queryFn: () => api.listWorks({ q, tags: queryTags, sort: apiSort, page }),
+    // 放送中は、タグの一覧を読んで今期のタグが分かってから取りに行く
+    enabled: !onAir || !!onAirTag,
     placeholderData: keepPreviousData,
     initialData: fromInitial ? initial.list : undefined,
   })
 
-  const update = (patch: { q?: string; tags?: number[]; sort?: WorkSort; page?: number }) => {
+  const update = (patch: { q?: string; tags?: number[]; sort?: ListSort; page?: number }) => {
     const nextQ = patch.q ?? q
     const nextTags = patch.tags ?? tagIds
     const nextSort = patch.sort ?? sort
@@ -205,9 +218,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           // 名前は選択欄（role=combobox の要素）に付ける。外側の div に付けると ARIA の誤用になる
           slotProps={{ htmlInput: { 'aria-label': '並び替え' } }}
           value={sort}
-          onChange={(e) => update({ sort: e.target.value as WorkSort })}
+          onChange={(e) => update({ sort: e.target.value as ListSort })}
         >
-          {(Object.keys(SORT_LABEL) as WorkSort[]).map((s) => (
+          {(Object.keys(SORT_LABEL) as ListSort[]).map((s) => (
             <MenuItem key={s} value={s}>
               {SORT_LABEL[s]}
             </MenuItem>
@@ -236,10 +249,14 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
       )}
 
       {worksQuery.isError && <Alert severity="error">{(worksQuery.error as Error).message}</Alert>}
-      {worksQuery.isLoading && (
+      {(worksQuery.isLoading || (onAir && tagsQuery.isLoading)) && (
         <Box sx={{ display: 'grid', placeItems: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
+      )}
+
+      {onAir && !tagsQuery.isLoading && !onAirTag && (
+        <Alert severity="info">{onAirLabel}の作品はまだ登録されていません。</Alert>
       )}
 
       {data && data.works.length === 0 && (
