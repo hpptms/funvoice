@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  broadcastDateIso,
+  broadcastDateLabel,
+  castSummary,
   recentSeasonNames,
   rankingTitle,
   seasonLabelFromSlug,
@@ -81,5 +84,24 @@ describe('SNS共有用の画像URL', () => {
     expect(normalizeOgQuery('/api/og/rankings/sequel.png?season=2026-autumn&v=9')).toBe('/api/og/rankings/sequel.png?season=2026-autumn')
     expect(normalizeOgQuery('/api/og/rankings/sequel.png?season=evil')).toBe('/api/og/rankings/sequel.png')
     expect(normalizeOgQuery('/api/works?tag=1')).toBe('/api/works?tag=1')
+  })
+})
+
+describe('キャスト・放送日', () => {
+  it('説明文用に声優を重複なく2人まで並べる', () => {
+    const cast = [
+      { character: '猫猫', name: '悠木碧' },
+      { character: '猫猫（幼少期）', name: '悠木碧' },
+      { character: '壬氏', name: '大塚剛央' },
+      { character: '高順', name: '小西克幸' },
+    ]
+    expect(castSummary(cast)).toBe('出演 悠木碧、大塚剛央')
+    expect(castSummary([])).toBe('')
+  })
+  it('日本時間の RFC3339 から日付を取り出す', () => {
+    expect(broadcastDateLabel('2026-10-02T23:00:00+09:00')).toBe('2026年10月2日')
+    expect(broadcastDateIso('2026-10-02T23:00:00+09:00')).toBe('2026-10-02')
+    expect(broadcastDateLabel(undefined)).toBe('')
+    expect(broadcastDateIso('<script>')).toBe('')
   })
 })

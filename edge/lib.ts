@@ -282,6 +282,10 @@ export interface ApiWork {
   // 以下は作品ページ（GET /api/works/:id）だけ。古いバックエンドでは無いことがある
   indexable?: boolean
   staff?: { role: string; name: string }[]
+  cast?: { character: string; name: string }[]
+  titleEn?: string
+  broadcastStartedAt?: string
+  channels?: string[]
   series?: { name: string; works: ApiRelatedWork[] }[]
   seasonWorks?: ApiRelatedWork[]
   seasonRank?: { rank: number; total: number }

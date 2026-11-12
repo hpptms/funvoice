@@ -63,15 +63,17 @@ export function mediaLabel(media: string): string {
 export interface WorkForSeo extends WorkForTitle {
   tags: { name: string; kind: string }[]
   staff?: { role: string; name: string }[]
+  cast?: { character: string; name: string }[]
 }
 
 export function workPageDescription(w: WorkForSeo): string {
   const season = w.tags.find((t) => t.kind === 'season')?.name
   const { sequel, complete } = w.tally.total
   const staff = staffSummary(w.staff ?? [])
+  const cast = castSummary(w.cast ?? [])
   return summarize(
     `${season ? season + 'の' : ''}${mediaLabel(w.media)}「${w.title}」の${sequelPhrase(w.title, w.media)}、見たい？` +
-      `続編希望${sequel}票・キレイに終わった${complete}票。${staff ? staff + '。' : ''}` +
+      `続編希望${sequel}票・キレイに終わった${complete}票。${staff ? staff + '。' : ''}${cast ? cast + '。' : ''}` +
       `ファンのみんなの評価と掲示板。あなたの1票で続編を応援しよう。`,
     160,
   )
@@ -91,6 +93,24 @@ export function staffSummary(staff: { role: string; name: string }[]): string {
     })
     .filter(Boolean)
     .join('、')
+}
+
+/** 「出演 〇〇、〇〇」（説明文用。主要キャストの声優を2人まで） */
+export function castSummary(cast: { character: string; name: string }[], max = 2): string {
+  const names = [...new Set(cast.map((c) => c.name))].slice(0, max)
+  return names.length ? `出演 ${names.join('、')}` : ''
+}
+
+/** API の放送開始日時（日本時間の RFC3339）を「2026年10月2日」にする。形式が違えば空 */
+export function broadcastDateLabel(iso: string | undefined): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T/.exec(iso ?? '')
+  return m ? `${Number(m[1])}年${Number(m[2])}月${Number(m[3])}日` : ''
+}
+
+/** 構造化データ用の日付（YYYY-MM-DD、日本時間）。形式が違えば空 */
+export function broadcastDateIso(iso: string | undefined): string {
+  const m = /^(\d{4}-\d{2}-\d{2})T/.exec(iso ?? '')
+  return m ? m[1] : ''
 }
 
 /** "2004-autumn" から今日までの、おおよその年数（放送開始の季節の初めから数える）。1年未満・不明は null */

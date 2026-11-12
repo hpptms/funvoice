@@ -14,6 +14,8 @@ import {
 } from '../../edge/lib'
 import { apiGet } from '../../edge/cache'
 import {
+  broadcastDateIso,
+  broadcastDateLabel,
   mediaLabel,
   rankingPath,
   rankingTitle,
@@ -57,6 +59,9 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const description = workPageDescription(work)
   const phrase = sequelPhrase(work.title, work.media)
   const staff = work.staff ?? []
+  const cast = work.cast ?? []
+  const channels = work.channels ?? []
+  const startDate = broadcastDateIso(work.broadcastStartedAt)
   const seasonTag = work.tags.find((t) => t.kind === 'season')
 
   // SNS で共有したときのカード画像（作品名と票の割合）。?v= は票が変わったときに SNS 側のキャッシュを更新させるため
@@ -80,6 +85,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         '@type': work.media === 'movie' ? 'Movie' : 'TVSeries',
         '@id': workNodeId,
         name: work.title,
+        ...(work.titleEn && work.titleEn !== work.title ? { alternateName: work.titleEn } : {}),
         url: canonical,
         description,
         ...(sameAs.length ? { sameAs } : {}),
@@ -87,6 +93,16 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         ...(work.media !== 'movie' && work.episodesCount > 0 ? { numberOfEpisodes: work.episodesCount } : {}),
         ...(people('監督').length ? { director: people('監督') } : {}),
         ...(studios.length ? { productionCompany: studios } : {}),
+        ...(cast.length
+          ? {
+              actor: cast.map((c) => ({
+                '@type': 'PerformanceRole',
+                actor: { '@type': 'Person', name: c.name },
+                characterName: c.character,
+              })),
+            }
+          : {}),
+        ...(startDate ? (work.media === 'movie' ? { datePublished: startDate } : { startDate }) : {}),
         genre: work.tags.filter((t) => t.kind === 'genre').map((t) => t.name),
         keywords: work.tags.map((t) => t.name).join(','),
         ...(video ? { subjectOf: { '@id': `${canonical}#video` } } : {}),
@@ -123,6 +139,9 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const facts = [
     seasonTag ? `<li>放送時期: <a href="${tagPath(seasonTag)}">${escapeHtml(seasonTag.name)}</a>${years ? `（放送から約${years}年）` : ''}</li>` : '',
     `<li>種類: ${escapeHtml(mediaLabel(work.media))}</li>`,
+    startDate ? `<li>${work.media === 'movie' ? '公開日' : '放送開始日'}: ${escapeHtml(broadcastDateLabel(work.broadcastStartedAt))}</li>` : '',
+    channels.length ? `<li>放送・配信: ${channels.map(escapeHtml).join('、')}</li>` : '',
+    work.titleEn && work.titleEn !== work.title ? `<li>英語タイトル: ${escapeHtml(work.titleEn)}</li>` : '',
     work.episodesCount > 0 && work.media !== 'movie' ? `<li>話数: 全${work.episodesCount}話</li>` : '',
     ...staff.map((s) => `<li>${escapeHtml(s.role)}: ${escapeHtml(s.name)}</li>`),
   ].join('')
@@ -158,6 +177,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           `<figcaption>${escapeHtml(video.title)}（YouTube）</figcaption></figure>`
         : '') +
       `<h2>作品データ</h2><ul>${facts}</ul>` +
+      (cast.length
+        ? `<h2>「${escapeHtml(work.title)}」のキャスト・声優</h2><ul>${cast
+            .map((c) => `<li>${escapeHtml(c.character)}: ${escapeHtml(c.name)}</li>`)
+            .join('')}</ul>`
+        : '') +
       (official ? `<p><a href="${escapeHtml(official)}" rel="noopener" target="_blank">公式サイト</a></p>` : '') +
       series +
       (tagLinks ? `<h2>タグ</h2><ul>${tagLinks}</ul>` : '') +

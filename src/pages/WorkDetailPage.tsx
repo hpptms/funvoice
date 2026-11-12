@@ -15,6 +15,7 @@ import {
   type Theme,
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   CHOICE_LABEL,
@@ -35,6 +36,7 @@ import WorkMedia from '../components/works/WorkMedia'
 import { Prompt, Window } from '../components/Retro'
 import VoteTally from '../components/VoteTally'
 import {
+  broadcastDateLabel,
   rankingPath,
   rankingTitle,
   sequelPhrase,
@@ -104,6 +106,15 @@ export default function WorkDetailPage() {
     ? `「${work.title}」の${phrase}、私は「${CHOICE_LABEL[myVote.choice]}」に投票しました！ いまの結果は 続編希望${sequel}票・キレイに終わった${complete}票`
     : `「${work.title}」の${phrase}、見たい？ それとも、キレイに終わった？ いまの結果は 続編希望${sequel}票・キレイに終わった${complete}票`
   const isSeason = /^\d{4}-(winter|spring|summer|autumn)$/.test(work.seasonName)
+  const startLabel = broadcastDateLabel(work.broadcastStartedAt)
+  // 作品データの表（放送情報 → スタッフ）
+  const dataRows: [string, string][] = [
+    ...(startLabel ? [[work.media === 'movie' ? '公開日' : '放送開始日', startLabel] as [string, string]] : []),
+    ...((work.channels?.length ?? 0) > 0 ? [['放送・配信', (work.channels ?? []).join('、')] as [string, string]] : []),
+    ...(work.titleEn && work.titleEn !== work.title ? [['英語タイトル', work.titleEn] as [string, string]] : []),
+    ...groupStaff(work.staff ?? []).map(([role, names]) => [role, names.join('、')] as [string, string]),
+  ]
+  const cast = work.cast ?? []
 
   const voteButton = (choice: Choice, color: 'primary' | 'secondary') => {
     const selected = myVote?.choice === choice
@@ -210,24 +221,19 @@ export default function WorkDetailPage() {
         <ShareButtons url={`${window.location.origin}/works/${work.id}`} text={shareText} />
       </Box>
 
-      {((work.staff?.length ?? 0) > 0 || (work.series?.length ?? 0) > 0) && (
+      {(dataRows.length > 0 || cast.length > 0 || (work.series?.length ?? 0) > 0) && (
         <Window file="data.txt" title="作品データ">
-          {(work.staff?.length ?? 0) > 0 && (
-            <Box component="dl" sx={{ m: 0, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '160px minmax(0, 1fr)' }, columnGap: 2, rowGap: 0.5 }}>
-              {groupStaff(work.staff ?? []).map(([role, names]) => (
-                <Box key={role} sx={{ display: 'contents' }}>
-                  <Box component="dt" sx={{ color: 'text.secondary', fontSize: 13, mt: { xs: 0.75, sm: 0 } }}>
-                    {role}
-                  </Box>
-                  <Box component="dd" sx={{ m: 0 }}>
-                    {names.join('、')}
-                  </Box>
-                </Box>
-              ))}
+          {dataRows.length > 0 && <DataList rows={dataRows} />}
+          {cast.length > 0 && (
+            <Box sx={{ mt: dataRows.length > 0 ? 2.5 : 0 }}>
+              <Typography variant="subtitle2" component="h2" sx={{ mb: 0.5 }}>
+                {retro ? '[キャスト・声優]' : 'キャスト・声優'}
+              </Typography>
+              <CastList cast={cast} />
             </Box>
           )}
           {work.series?.map((g) => (
-            <Box key={g.name} sx={{ mt: (work.staff?.length ?? 0) > 0 ? 2.5 : 0 }}>
+            <Box key={g.name} sx={{ mt: dataRows.length > 0 || cast.length > 0 ? 2.5 : 0 }}>
               <Typography variant="subtitle2" component="h2" sx={{ mb: 0.5 }}>
                 {retro ? `[シリーズ: ${g.name}]` : `「${g.name}」シリーズ`}
               </Typography>
@@ -235,7 +241,7 @@ export default function WorkDetailPage() {
             </Box>
           ))}
           <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1.5 }}>
-            スタッフ・シリーズの情報：
+            作品データ・キャスト・シリーズの情報：
             <Link href="https://annict.com/" target="_blank" rel="noopener noreferrer" color="inherit">
               Annict
             </Link>
@@ -302,6 +308,56 @@ function AdminWorkControls({ work }: { work: Work }) {
       {/* key: 別の作品に移ったら入力欄を作り直す */}
       <AdminMediaEditor key={work.id} work={work} />
     </Window>
+  )
+}
+
+/** 見出し・内容の2列の表（スマホでは縦に並べる） */
+function DataList({ rows }: { rows: [string, string][] }) {
+  return (
+    <Box component="dl" sx={{ m: 0, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '160px minmax(0, 1fr)' }, columnGap: 2, rowGap: 0.5 }}>
+      {rows.map(([label, value]) => (
+        <Box key={label} sx={{ display: 'contents' }}>
+          <Box component="dt" sx={{ color: 'text.secondary', fontSize: 13, mt: { xs: 0.75, sm: 0 } }}>
+            {label}
+          </Box>
+          <Box component="dd" sx={{ m: 0, overflowWrap: 'anywhere' }}>
+            {value}
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
+const CAST_INITIAL = 12
+
+/** キャラクター名と声優名。多い作品は最初の数人だけ出して「すべて表示」で広げる */
+function CastList({ cast }: { cast: { character: string; name: string }[] }) {
+  const [open, setOpen] = useState(false)
+  const shown = open ? cast : cast.slice(0, CAST_INITIAL)
+  return (
+    <>
+      <Box
+        component="dl"
+        sx={{ m: 0, display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr) minmax(0, 1fr)', sm: '160px minmax(0, 1fr)' }, columnGap: 2, rowGap: 0.5 }}
+      >
+        {shown.map((c) => (
+          <Box key={`${c.character}\u0000${c.name}`} sx={{ display: 'contents' }}>
+            <Box component="dt" sx={{ color: 'text.secondary', fontSize: 13, overflowWrap: 'anywhere' }}>
+              {c.character}
+            </Box>
+            <Box component="dd" sx={{ m: 0, overflowWrap: 'anywhere' }}>
+              {c.name}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+      {cast.length > CAST_INITIAL && (
+        <Button size="small" color="secondary" onClick={() => setOpen((v) => !v)} sx={{ mt: 0.5, px: 0 }}>
+          {open ? '閉じる' : `すべて表示（${cast.length}人）`}
+        </Button>
+      )}
+    </>
   )
 }
 

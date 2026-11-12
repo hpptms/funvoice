@@ -71,6 +71,14 @@ export interface Work {
   indexable?: boolean
   /** 主なスタッフ（原作・監督・アニメーション制作など） */
   staff?: StaffCredit[]
+  /** 主なキャスト（キャラクター名と声優名。主要キャラが先） */
+  cast?: CastCredit[]
+  /** 英語などのタイトル */
+  titleEn?: string
+  /** 最初の放送・配信の日時（日本時間の RFC3339） */
+  broadcastStartedAt?: string
+  /** 放送・配信した局（最初に放送した順） */
+  channels?: string[]
   /** 同じシリーズの作品（1期・2期・劇場版など。放送順） */
   series?: { name: string; works: RelatedWork[] }[]
   /** 同じ放送時期の人気作品 */
@@ -83,6 +91,11 @@ export interface Work {
 
 export interface StaffCredit {
   role: string
+  name: string
+}
+
+export interface CastCredit {
+  character: string
   name: string
 }
 
