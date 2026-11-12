@@ -49,15 +49,13 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
   // SNS で共有したときのカード画像（作品名と票の割合）。?v= は票が変わったときに SNS 側のキャッシュを更新させるため
   const ogImage = `${origin}/api/og/works/${work.id}.png?v=${sequel}-${complete}`
-  // 構造化データの image は、作品の紹介画像（外部URL・以前のアップロード画像・YouTube のサムネイル）があればそれ
-  const image =
-    work.imageUrl && /^https:\/\//.test(work.imageUrl)
-      ? work.imageUrl
-      : work.image
-        ? work.image.fullUrl.replace('f_webp,fl_awebp', 'f_jpg')
-        : work.youtubeId && /^[A-Za-z0-9_-]{11}$/.test(work.youtubeId)
-          ? `https://i.ytimg.com/vi/${work.youtubeId}/hqdefault.jpg`
-          : undefined
+  // 構造化データの image は、作品の紹介画像（Cloudinary に取り込んだ画像・YouTube のサムネイル）があればそれ。
+  // 外部サイトの画像URL（引用元）は直接使わない
+  const image = work.image
+    ? work.image.fullUrl.replace('f_webp,fl_awebp', 'f_jpg')
+    : work.youtubeId && /^[A-Za-z0-9_-]{11}$/.test(work.youtubeId)
+      ? `https://i.ytimg.com/vi/${work.youtubeId}/hqdefault.jpg`
+      : undefined
 
   const sameAs = [safeUrl(work.officialSiteUrl), safeUrl(work.wikipediaUrl)].filter(Boolean)
   const people = (role: string) => staff.filter((s) => s.role === role).map((s) => ({ '@type': 'Person', name: s.name }))

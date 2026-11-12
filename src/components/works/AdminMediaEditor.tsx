@@ -53,6 +53,8 @@ export default function AdminMediaEditor({ work: given, onSaved }: { work: Work;
   const changed = before.kind !== (url(choice) ? choice.kind : 'none') || url(before) !== url(choice)
   // 以前の仕組みでアップロードされた画像。保存すると置き換わる（Cloudinary からも削除される）
   const legacyImage = !!work.image && !work.imageUrl
+  // 画像URLはあるが、まだ取り込めていない（取り込み待ち・失敗）。同じURLのままでも保存すると取り込み直す
+  const notImported = !!work.imageUrl && !work.image
 
   return (
     <Stack spacing={1.5}>
@@ -61,13 +63,18 @@ export default function AdminMediaEditor({ work: given, onSaved }: { work: Work;
           アップロードされた画像が設定されています。保存するとこの画像は削除され、下の内容に置き換わります。
         </Typography>
       )}
+      {notImported && (
+        <Alert severity="info">
+          この画像はまだ取り込まれていないため、ページには表示されていません。保存すると取り込み直します（読み込めない場合は別の画像URLにしてください）。
+        </Alert>
+      )}
       <MediaPicker value={choice} onChange={setChoice} />
       {save.isError && <Alert severity="error">{(save.error as Error).message}</Alert>}
       {save.isSuccess && !changed && <Alert severity="success">保存しました</Alert>}
       <Stack direction="row" spacing={1}>
         <Button
           variant="contained"
-          disabled={save.isPending || latest.isPlaceholderData || !isMediaValid(choice) || (!changed && !legacyImage)}
+          disabled={save.isPending || latest.isPlaceholderData || !isMediaValid(choice) || (!changed && !legacyImage && !notImported)}
           onClick={() => save.mutate()}
         >
           {url(choice) ? '動画・画像を保存' : '動画・画像を外して保存'}

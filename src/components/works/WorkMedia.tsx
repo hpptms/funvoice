@@ -7,7 +7,6 @@ import { NO_MEDIA_IMAGE } from '../../lib/media'
 import { useRetro } from '../../lib/styleMode'
 import { youtubeEmbedUrl, youtubeThumbnail } from '../../lib/youtube'
 import PostImage from '../bbs/PostImage'
-import RemoteImage from '../RemoteImage'
 
 /** YouTube の動画。最初はサムネイルだけを表示し、押したときに初めてプレーヤーを読み込む（軽量化・外部通信の抑制） */
 export function YouTubeEmbed({ id, title }: { id: string; title: string }) {
@@ -83,6 +82,26 @@ function RightsNotice() {
   )
 }
 
+/** 紹介画像の引用元（元の画像URL）。サイト名が分かるよう、ホスト名を先に示してURL全体をリンクにする */
+function ImageSource({ url }: { url: string }) {
+  let host = ''
+  try {
+    const u = new URL(url)
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null
+    host = u.hostname
+  } catch {
+    return null
+  }
+  return (
+    <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.5, overflowWrap: 'anywhere' }}>
+      画像の引用元（{host}）：
+      <Link href={url} target="_blank" rel="noopener noreferrer nofollow ugc" referrerPolicy="no-referrer">
+        {url}
+      </Link>
+    </Typography>
+  )
+}
+
 /** 紹介メディアが無い作品に出す「参考画像がありません」の画像 */
 function NoMediaImage() {
   const retro = useRetro()
@@ -120,18 +139,13 @@ export default function WorkMedia({ work }: { work: Work }) {
       </Box>
     )
   }
-  if (work.imageUrl)
-    return (
-      <Box>
-        <RemoteImage url={work.imageUrl} alt={`${work.title}の画像`} maxHeight={420} showSource />
-        <RightsNotice />
-      </Box>
-    )
-  // 以前にアップロードされた画像（アップロードは終了。既存データの表示用）
+  // 画像は Cloudinary に取り込んだもの（WebP）を表示し、元の画像URLは引用元として明記する。
+  // 取り込み待ち・取り込み失敗の作品は、外部サイトの画像を直接表示せず「参考画像がありません」にする
   if (work.image)
     return (
       <Box>
         <PostImage image={work.image} alt={`${work.title}の画像`} maxHeight={420} />
+        {work.imageUrl && <ImageSource url={work.imageUrl} />}
         <RightsNotice />
       </Box>
     )

@@ -57,9 +57,12 @@ export interface Work {
   locked: boolean
   /** 紹介メディア（任意・どちらか一方）。YouTube は動画IDだけ */
   youtubeId?: string
-  /** 外部の画像URL（元のサイトから直接表示） */
+  /** 画像の引用元（入力された外部の画像URL）。出典として表示するだけで、この画像は直接表示しない */
   imageUrl?: string
-  /** 以前にアップロードされた画像（アップロードは終了。既存データの表示用） */
+  /**
+   * 表示する画像（Cloudinary に取り込んだ WebP）。以前にアップロードされた画像もここに入る。
+   * imageUrl があって image が無いのは取り込み待ち・取り込み失敗の作品（画像なしとして表示する）
+   */
   image?: { id: string; url: string; fullUrl: string; thumbUrl: string; width: number; height: number }
   tags: Tag[]
   tally: Tally

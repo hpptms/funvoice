@@ -13,15 +13,14 @@ import { youtubeCardThumbnail } from '../../lib/youtube'
  */
 export default function WorkCardMedia({ work }: { work: Work }) {
   const retro = useRetro()
-  // 外部の画像URLが読み込めない（削除された等）場合は、代わりの画像にする
+  // 画像が読み込めない場合は、代わりの画像にする
   const [failed, setFailed] = useState(false)
-  const media = work.imageUrl
-    ? work.imageUrl
-    : work.image
-      ? work.image.thumbUrl
-      : work.youtubeId
-        ? youtubeCardThumbnail(work.youtubeId)
-        : null
+  // 画像は Cloudinary に取り込んだもの（WebP）だけを表示する。外部サイトの画像は直接表示しない
+  const media = work.image
+    ? work.image.thumbUrl
+    : work.youtubeId
+      ? youtubeCardThumbnail(work.youtubeId)
+      : null
   const src = !media || failed ? NO_MEDIA_THUMB : media
   return (
     <Box
@@ -53,7 +52,7 @@ export default function WorkCardMedia({ work }: { work: Work }) {
           '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         }}
       />
-      {work.youtubeId && !work.imageUrl && !work.image && !failed && (
+      {work.youtubeId && !work.image && !failed && (
         <Box
           aria-label="PV動画あり"
           sx={{

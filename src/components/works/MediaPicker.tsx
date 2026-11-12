@@ -8,7 +8,7 @@ import { parseYouTubeId, youtubeThumbnail } from '../../lib/youtube'
 
 /**
  * 作品の紹介メディア（YouTube の動画URL か 外部の画像URL）を任意で選ぶ。
- * 画像はアップロードせず、元のサイトから直接表示する。
+ * 画像は Cloudinary に取り込んで WebP で表示し、元の画像URLは引用元として表示する。
  */
 export default function MediaPicker({ value, onChange }: { value: MediaChoice; onChange: (m: MediaChoice) => void }) {
   const retro = useRetro()
@@ -74,7 +74,7 @@ export default function MediaPicker({ value, onChange }: { value: MediaChoice; o
             helperText={
               value.url.trim() !== '' && !imageUrl
                 ? 'https:// で始まり、.png / .jpg / .gif / .webp で終わる画像のURLを入力してください'
-                : '画像は保存せず、元のサイトから直接表示します'
+                : '画像はこのサイトに取り込んで表示し、このURLを引用元として表示します'
             }
             slotProps={{ htmlInput: { maxLength: 1000, inputMode: 'url' } }}
           />
