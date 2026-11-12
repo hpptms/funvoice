@@ -38,6 +38,12 @@ export function isStripeUrl(u: string): boolean {
   }
 }
 
+/** Stripe の画面へ移動する（想定外のURLなら移動しない） */
+export function goToStripe(url: string) {
+  if (!isStripeUrl(url)) throw new Error('移動先のURLが不正です。時間をおいてやり直してください')
+  window.location.assign(url)
+}
+
 /** 日付だけ（2026年12月12日） */
 export function formatDay(iso: string): string {
   return new Date(iso).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Tokyo' })

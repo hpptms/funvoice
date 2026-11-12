@@ -4,15 +4,9 @@ import { useEffect, useRef } from 'react'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import { api, type SubscriptionInfo } from '../../api/client'
 import { ME_KEY } from '../../lib/auth'
-import { formatDay, formatPrice, isStripeUrl, SUPPORTER_PERKS } from '../../lib/billing'
+import { formatDay, formatPrice, goToStripe, SUPPORTER_PERKS } from '../../lib/billing'
 
 const SUB_KEY = ['subscription'] as const
-
-/** Stripe の画面へ移動する（想定外のURLなら移動しない） */
-function goToStripe(url: string) {
-  if (!isStripeUrl(url)) throw new Error('移動先のURLが不正です。時間をおいてやり直してください')
-  window.location.assign(url)
-}
 
 /**
  * マイページの「サポーター」欄。
@@ -103,7 +97,11 @@ export default function SupporterCard() {
         ) : (
           <>
             <Typography variant="body2" sx={{ mb: 1.5 }}>
-              サブスクリプションでFanVoiceの運営を支援できます。サポーターには次の特典があります。
+              サブスクリプションでFanVoiceの運営を支援できます。サポーターには次の特典があります（
+              <Link component={RouterLink} to="/supporter">
+                詳しく
+              </Link>
+              ）。
             </Typography>
             <PerkList />
             {info.price && (

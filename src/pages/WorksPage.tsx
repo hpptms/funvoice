@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import {
   Alert,
   Autocomplete,
@@ -8,6 +9,7 @@ import {
   Chip,
   CircularProgress,
   InputAdornment,
+  Link,
   MenuItem,
   Pagination,
   Stack,
@@ -34,6 +36,7 @@ import {
 import NotFoundPage from './NotFoundPage'
 import { takeInitialData, usePageMeta } from '../lib/pageMeta'
 import { currentSeasonName, previousSeasonName, seasonNameLabel } from '../lib/season'
+import { useMe } from '../lib/auth'
 import { useRetro } from '../lib/styleMode'
 
 /**
@@ -73,6 +76,7 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const sort = explicitSort || defaultSort(baseTagId, q, tagIds)
   const page = Number(sp.get('page') ?? 1)
   const retro = useRetro()
+  const me = useMe()
 
   const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: api.listTags })
   const allTags = tagsQuery.data?.tags ?? []
@@ -182,6 +186,17 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
               </RankingBanner>
             ))}
           </Stack>
+        )}
+        {/* サポーターの案内（トップだけ）。ずれ（CLS）を防ぐため、ログイン状態の読み込み中も出しておき、サポーター本人のときだけ消す */}
+        {!baseTagId && !me?.premium && (
+          <Link
+            component={RouterLink}
+            to="/supporter"
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 1.5, fontSize: 13, color: 'text.secondary', minHeight: 24 }}
+          >
+            <StarRoundedIcon aria-hidden sx={{ fontSize: 18, color: '#F2B705' }} />
+            FanVoiceを月額で応援する（サポーター）
+          </Link>
         )}
       </Box>
       <Button component={RouterLink} to="/works/new" variant="outlined" startIcon={<AddIcon />} sx={{ height: 44, flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'auto' } }}>

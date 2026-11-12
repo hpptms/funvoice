@@ -1,4 +1,5 @@
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import { AppBar, Box, Button, Container, Link, Toolbar, Typography } from '@mui/material'
 import { Suspense } from 'react'
 import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-dom'
@@ -14,6 +15,7 @@ const FOOTER_LINKS = [
   ['/about', 'サイトについて'],
   ['/help', '使い方'],
   ['/faq', 'よくある質問'],
+  ['/supporter', 'サポーター（応援プラン）'],
   ['/terms', '利用規約'],
   ['/privacy', 'プライバシーポリシー'],
   ['/copyright', '著作権・削除依頼'],
@@ -125,6 +127,30 @@ export default function Layout() {
           <Button component={NavLink} to="/ranking/sequel" sx={navSx} className={isRanking ? 'active' : undefined}>
             <NavLabel retro={retro}>ランキング</NavLabel>
           </Button>
+          {/* サポーターの案内（サポーター本人には名前の横に★が出るので出さない）。
+              タブレット幅は★だけ、スマホ幅はヘッダーに入りきらないので出さない（トップページとフッターに案内がある） */}
+          {!me?.premium && (
+            <Button component={NavLink} to="/supporter" sx={{ ...navSx, gap: 0.25, display: { xs: 'none', sm: 'inline-flex' } }}>
+              <StarRoundedIcon aria-hidden sx={{ fontSize: 20, color: '#F2B705' }} />
+              {/* md 未満は見た目だけ隠し、リンクの読み上げ名として残す（ロゴの「FanVoice」と同じ方式） */}
+              <Box
+                component="span"
+                sx={{
+                  '@media (max-width: 899.95px)': {
+                    position: 'absolute',
+                    width: '1px',
+                    height: '1px',
+                    overflow: 'hidden',
+                    clip: 'rect(0 0 0 0)',
+                    clipPath: 'inset(50%)',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              >
+                <NavLabel retro={retro}>サポーター</NavLabel>
+              </Box>
+            </Button>
+          )}
           <Box sx={{ flex: 1 }} />
           {/* 読み込み中（undefined）は何も出さず、ログイン状態が分かってから表示する（ちらつき防止） */}
           {me ? (

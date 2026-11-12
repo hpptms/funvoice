@@ -412,6 +412,8 @@ export const api = {
     iconUploadSignature: () => request<IconUploadSignature>('/me/icon/upload', { method: 'POST' }),
   },
   billing: {
+    /** 受付状況と価格（ログイン不要） */
+    plan: () => request<Pick<SubscriptionInfo, 'enabled' | 'price'>>('/billing/plan'),
     subscription: () => request<SubscriptionInfo>('/me/subscription'),
     /** Stripe の決済ページのURL */
     checkout: () => request<{ url: string }>('/billing/checkout', { method: 'POST' }),

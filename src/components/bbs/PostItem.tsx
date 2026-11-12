@@ -57,7 +57,7 @@ export function PostHeader({ post }: { post: Post }) {
               {post.name}
             </Box>
           </Box>
-          {post.premium && <SupporterBadge />}
+          {post.premium && <SupporterBadge link />}
           {owner}
         </>
       )}

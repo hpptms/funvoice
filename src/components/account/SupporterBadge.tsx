@@ -1,5 +1,6 @@
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import { Box, Chip } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
 import { useRetro } from '../../lib/styleMode'
 import { PIXEL_FONT } from '../../theme'
 
@@ -13,8 +14,9 @@ export const SUPPORTER_LABEL = 'サポーター'
  * サポーター（サブスクリプション中のユーザー）のバッジ。
  * - 通常: 「★サポーター」のチップ（コメント欄・マイページ）
  * - compact: ★だけ（ヘッダーなど幅の狭いところ）。読み上げでは「サポーター」と読む
+ * - link: 押すとサポーターの案内ページへ（コメント欄。サブスクリプションがあることを知ってもらうため）
  */
-export default function SupporterBadge({ compact = false }: { compact?: boolean }) {
+export default function SupporterBadge({ compact = false, link = false }: { compact?: boolean; link?: boolean }) {
   const retro = useRetro()
   if (compact) {
     return (
@@ -34,7 +36,8 @@ export default function SupporterBadge({ compact = false }: { compact?: boolean 
       icon={<StarRoundedIcon />}
       label={SUPPORTER_LABEL}
       size="small"
-      title="サブスクリプションでサイトを支援しているユーザー"
+      title="サブスクリプションでサイトを応援しているユーザー"
+      {...(link ? { component: RouterLink, to: '/supporter', clickable: true } : {})}
       sx={{
         height: 20,
         fontSize: 11,
@@ -45,6 +48,7 @@ export default function SupporterBadge({ compact = false }: { compact?: boolean 
         borderRadius: retro ? 0 : undefined,
         '& .MuiChip-icon': { color: INK, fontSize: 14, ml: 0.5, mr: -0.25 },
         '& .MuiChip-label': { px: 0.75 },
+        '&.MuiChip-clickable:hover': { bgcolor: '#FFC933' },
         ...(retro ? { fontFamily: PIXEL_FONT } : {}),
       }}
     />

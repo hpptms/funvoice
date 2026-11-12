@@ -33,6 +33,8 @@ const SWR_SECONDS = 600
 export function cacheGroups(pathname: string): string[] | null {
   let m: RegExpMatchArray | null
   if (/^\/api\/(works|tags|tags\/\d+|sitemap|rankings)$/.test(pathname)) return ['all', 'works']
+  // サポーターの価格（人によって変わらない）
+  if (pathname === '/api/billing/plan') return ['all']
   // SNS共有用の画像（作品の票が変わったら描き直す）
   if ((m = pathname.match(/^\/api\/og\/works\/(\d+)\.png$/))) return ['all', `work:${m[1]}`]
   if (/^\/api\/og\/(rankings\/(sequel|complete)|site)\.png$/.test(pathname)) return ['all', 'works']
