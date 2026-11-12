@@ -1,5 +1,5 @@
 // タグ別のアニメ一覧ページ（/season/2026-autumn・/tags/123）の共通処理
-import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from './lib'
+import { escapeHtml, firstCardImage, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from './lib'
 import { apiGet, type CacheContext } from './cache'
 import { isSeasonName, rankingPath, rankingTitle, tagPageDescription, tagPageTitle, tagPath } from './seo'
 
@@ -51,6 +51,7 @@ export async function renderTagPage(ctx: CacheContext, tag: ApiTag): Promise<Res
     bodyHtml: shellHtml(`<h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p>${rankingLinks}<ul>${items}</ul>`),
     // 画面（WorksPage）が同じ一覧をもう一度取りに行かないよう、初期データとして埋め込む
     initialData: list.data && !extra ? { id: 'fv-initial-works', data: { tag: tag.id, list: list.data } } : undefined,
+    preloadImage: list.data && !extra ? firstCardImage(list.data.works) : undefined,
   })
 }
 

@@ -2,6 +2,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { StyleModeContext, loadStyleMode, saveStyleMode, type StyleMode } from '../lib/styleMode'
 import { createAppTheme } from '../theme'
+import { applyFonts } from '../fonts'
 
 /** 表示スタイル（レトロ/シンプル）を保持し、対応するテーマを適用する */
 export default function StyleModeProvider({ children }: { children: ReactNode }) {
@@ -18,6 +19,8 @@ export default function StyleModeProvider({ children }: { children: ReactNode })
     () => ({
       mode,
       setMode: (m: StyleMode) => {
+        // シンプル表示から切り替えたときは、レトロ表示のフォントをここで読み込む
+        if (m === 'retro') void applyFonts()
         setModeState(m)
         saveStyleMode(m)
       },

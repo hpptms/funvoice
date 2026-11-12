@@ -7,6 +7,8 @@ import { initAnalytics } from './lib/analytics'
 import StyleModeProvider from './components/StyleModeProvider'
 import { preloadRoute } from './lazyPages'
 import { installTranslateGuard } from './lib/translateGuard'
+import { setupFonts } from './fonts'
+import { loadStyleMode } from './lib/styleMode'
 
 // ブラウザの自動翻訳で画面が落ちないようにする（Reactの描画より前に入れておく）
 installTranslateGuard()
@@ -19,8 +21,9 @@ const queryClient = new QueryClient({
 
 initAnalytics()
 
-// 遅延読み込みのページへ直接来た場合は、そのページのJSを読み終えてから描画する（埋め込み本文のちらつき防止）
-await preloadRoute(location.pathname)
+// 遅延読み込みのページへ直接来た場合は、そのページのJSを読み終えてから描画する（埋め込み本文のちらつき防止）。
+// フォントがキャッシュ済みなら、そのCSSも描画前に読み込む（後から切り替わって文字がずれないように）
+await Promise.all([preloadRoute(location.pathname), setupFonts(loadStyleMode() === 'retro')])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

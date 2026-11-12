@@ -8,7 +8,7 @@ import { TitleBar } from './Retro'
 import WorkCardMedia from './works/WorkCardMedia'
 import { TallyBar } from './VoteTally'
 
-export default function WorkCard({ work }: { work: Work }) {
+export default function WorkCard({ work, priority = false }: { work: Work; priority?: boolean }) {
   const retro = useRetro()
   const { sequel, complete } = work.tally.total
   const votes = sequel + complete
@@ -44,7 +44,7 @@ export default function WorkCard({ work }: { work: Work }) {
             {media && ` / ${media}`}
           </TitleBar>
         )}
-        <WorkCardMedia work={work} />
+        <WorkCardMedia work={work} priority={priority} />
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flex: 1 }}>
           {!retro && (season || media || onAir) && (
             <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', rowGap: 0.5 }}>

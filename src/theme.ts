@@ -1,10 +1,7 @@
-import '@fontsource/dotgothic16/400.css'
-import '@fontsource/m-plus-1-code/400.css'
-import '@fontsource/m-plus-1-code/700.css'
 import { createTheme, type Theme } from '@mui/material'
 import type { StyleMode } from './lib/styleMode'
 
-// 見出し・ボタンはドット文字、本文は等幅。どちらもnpmパッケージで同梱しているのでオフラインでも表示できる
+// 見出し・ボタンはドット文字、本文は等幅。どちらもnpmパッケージで同梱している（読み込み方は src/fonts/index.ts）
 export const PIXEL_FONT = '"DotGothic16", "M PLUS 1 Code", monospace'
 export const MONO_FONT = '"M PLUS 1 Code", "Osaka-Mono", "MS Gothic", monospace'
 

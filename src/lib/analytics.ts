@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { afterPageLoad } from './afterPageLoad'
 
 // Google タグマネージャー（GA4 は GTM のコンテナ内で設定する）。
 // CSP で script-src 'self' にしているため、インラインの <script> ではなくここから読み込む。
@@ -30,10 +31,15 @@ export function initAnalytics() {
   const gtag = function (..._args: unknown[]) { dl.push(arguments) }
   gtag('js', new Date())
   dl.push({ 'gtm.start': Date.now(), event: 'gtm.js' })
-  const s = document.createElement('script')
-  s.async = true
-  s.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`
-  document.head.appendChild(s)
+  // gtm.js（約180KB）は画面の表示に必要な通信（JS・画像）と回線を取り合い、スマホの LCP を大きく遅らせるため、
+  // ページの読み込みが終わって手が空いてから読み込む。それまでの page_view は dataLayer に溜まり、読み込み後にまとめて送られる
+  const load = () => {
+    const s = document.createElement('script')
+    s.async = true
+    s.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`
+    document.head.appendChild(s)
+  }
+  afterPageLoad(load)
 }
 
 // ページのタイトルはデータ取得後に usePageMeta が書き換えるので、少し待ってから送る

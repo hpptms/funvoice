@@ -1,6 +1,6 @@
 // /  トップ（作品一覧）。
 // タグ1つだけの一覧（以前の /?tag=N）は、タグ別ページ（/season/2026-autumn・/tags/N）へ 301 で転送する
-import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
+import { escapeHtml, firstCardImage, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
 import {
   DEFAULT_DESCRIPTION,
@@ -74,5 +74,5 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   // 読み込み中の表示から一覧に切り替わるときにフッターが押し下げられる（Lighthouse の CLS）のも防げる。
   const initialData = list?.data ? { id: 'fv-initial-works', data: { tag: null, sort: seasonTag ? 'onair' : 'recommended', list: list.data } } : undefined
 
-  return renderPage(env, request, { canonical: `${origin}/`, noindex, jsonLd, bodyHtml: body, initialData })
+  return renderPage(env, request, { canonical: `${origin}/`, noindex, jsonLd, bodyHtml: body, initialData, preloadImage: initialData ? firstCardImage(works) : undefined })
 }

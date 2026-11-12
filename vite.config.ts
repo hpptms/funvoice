@@ -9,7 +9,7 @@ function fontsourceWoff2Only(): Plugin {
     name: 'fontsource-woff2-only',
     enforce: 'pre',
     transform(code, id) {
-      if (!/[\\/]@fontsource[\\/].*\.css$/.test(id)) return null
+      if (!/[\\/]@fontsource[\\/].*\.css(\?.*)?$/.test(id)) return null
       return {
         code: code
           .replace(/,\s*url\([^)]*\.woff\)\s*format\(['"]woff['"]\)/g, '')
@@ -38,7 +38,8 @@ export default defineConfig({
           groups: [
             { name: 'react', test: /[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|cookie|set-cookie-parser)[\\/]/, priority: 30 },
             { name: 'mui', test: /[\\/]node_modules[\\/](@mui|@emotion|@babel[\\/]runtime|stylis|hoist-non-react-statics|react-is|react-transition-group|clsx|prop-types|@popperjs)[\\/]/, priority: 20 },
-            { name: 'vendor', test: /[\\/]node_modules[\\/]/, priority: 10 },
+            // フォント（@fontsource）は表示後に遅れて読み込むもの（src/fonts）なので、最初に読む vendor に入れない
+            { name: 'vendor', test: /[\\/]node_modules[\\/](?!@fontsource[\\/])/, priority: 10 },
           ],
         },
       },

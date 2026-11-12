@@ -295,8 +295,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
             opacity: worksQuery.isPlaceholderData ? 0.6 : 1,
           }}
         >
-          {data.works.map((w) => (
-            <WorkCard key={w.id} work={w} />
+          {data.works.map((w, i) => (
+            // 最初の数枚は画面の一番上に出る（LCP）ので、遅延読み込みにせず優先して取りに行く
+            <WorkCard key={w.id} work={w} priority={i < 2} />
           ))}
         </Box>
       )}

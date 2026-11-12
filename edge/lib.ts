@@ -99,7 +99,9 @@ export const SECURITY_HEADERS: Record<string, string> = {
     // コメントに貼られた画像は元のサイトから直接表示するため、https の画像は許可する（画像はスクリプトを実行できない）
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.cloudinary.com https://cloudflareinsights.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+    // GA4 の送信先。*.analytics.google.com はサブドメインのみで analytics.google.com 自体に一致しないため別に書く。
+    // www.google.com・*.g.doubleclick.net は Google シグナル（ユーザー属性）用の送信先
+    "connect-src 'self' https://api.cloudinary.com https://cloudflareinsights.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com https://*.g.doubleclick.net",
     // 埋め込みプレーヤーは YouTube（Cookie を使わない youtube-nocookie.com）・Vimeo・ニコニコ動画だけを許可する
     // 人間チェック（Turnstile）も iframe で表示される
     "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://embed.nicovideo.jp https://challenges.cloudflare.com",
@@ -128,6 +130,8 @@ export interface PageMeta {
   bodyHtml?: string
   /** SPAに渡す初期データ（APIの二重取得を避ける） */
   initialData?: { id: string; data: unknown }
+  /** 画面の一番上に出る画像（LCP）。JSの実行を待たずに取りに行かせる */
+  preloadImage?: string
   status?: number
 }
 
@@ -158,6 +162,10 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
     `<meta name="twitter:card" content="summary_large_image">`,
     meta.noindex ? `<meta name="robots" content="noindex, follow">` : '',
     meta.jsonLd ? `<script type="application/ld+json">${safeJSON(meta.jsonLd)}</script>` : '',
+    // 画面側の <img> と同じく Referer を送らない（違うと先読みが使い回されない）
+    meta.preloadImage
+      ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" fetchpriority="high" referrerpolicy="no-referrer">`
+      : '',
   ].join('')
 
   let rewriter = new HTMLRewriter()
@@ -186,6 +194,14 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
   headers.set('Cache-Control', 'public, max-age=0, must-revalidate')
   if (meta.noindex) headers.set('X-Robots-Tag', 'noindex')
   return new Response(res.body, { status: meta.status ?? 200, headers })
+}
+
+/** 一覧の先頭の作品カードの画像（src/components/works/WorkCardMedia.tsx と同じ選び方）。無ければ undefined */
+export function firstCardImage(works: ApiWork[]): string | undefined {
+  const w = works[0]
+  if (!w) return undefined
+  if (w.image) return w.image.thumbUrl
+  return w.youtubeId && /^[A-Za-z0-9_-]{11}$/.test(w.youtubeId) ? `https://i.ytimg.com/vi/${w.youtubeId}/mqdefault.jpg` : undefined
 }
 
 /** JSなしで読めるページ本文の外枠（React起動までの一瞬だけ表示される） */
@@ -228,7 +244,7 @@ export interface ApiWork {
   locked: boolean
   youtubeId?: string
   imageUrl?: string
-  image?: { id: string; url: string; fullUrl: string; width: number; height: number }
+  image?: { id: string; url: string; fullUrl: string; thumbUrl?: string; width: number; height: number }
   tags: ApiTag[]
   tally: {
     registered: { sequel: number; complete: number }

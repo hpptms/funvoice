@@ -58,6 +58,8 @@ export default function Layout() {
           <Typography
             component={RouterLink}
             to="/"
+            // スマホではサイト名の文字を隠してロゴ画像だけになるため、読み上げ用の名前を付けておく
+            aria-label="FanVoice トップへ"
             sx={{
               display: 'inline-flex',
               alignItems: 'center',

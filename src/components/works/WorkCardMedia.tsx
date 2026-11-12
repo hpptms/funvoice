@@ -11,7 +11,7 @@ import { youtubeCardThumbnail } from '../../lib/youtube'
  * YouTube はサムネイルに再生マークを重ねる（カードを押すと作品ページへ移動し、そこで再生できる）。
  * 添付が無い作品・画像が読み込めない作品では「参考画像がありません」の画像を表示する。
  */
-export default function WorkCardMedia({ work }: { work: Work }) {
+export default function WorkCardMedia({ work, priority = false }: { work: Work; priority?: boolean }) {
   const retro = useRetro()
   // 画像が読み込めない場合は、代わりの画像にする
   const [failed, setFailed] = useState(false)
@@ -36,7 +36,8 @@ export default function WorkCardMedia({ work }: { work: Work }) {
         component="img"
         src={src}
         alt=""
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
         decoding="async"
         referrerPolicy="no-referrer"
         onError={() => src !== NO_MEDIA_THUMB && setFailed(true)}
