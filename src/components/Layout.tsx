@@ -58,8 +58,9 @@ export default function Layout() {
           <Typography
             component={RouterLink}
             to="/"
-            // スマホではサイト名の文字を隠してロゴ画像だけになるため、読み上げ用の名前を付けておく
-            aria-label="FanVoice トップへ"
+            // スマホではサイト名の文字を隠してロゴ画像だけになるため、読み上げ用の名前を付けておく。
+            // 表示している文字（FanVoice・レトロのPC幅では v0.1-alpha も）をそのまま含める（Lighthouse の label-content-name-mismatch）
+            aria-label={retro ? 'FanVoice v0.1-alpha' : 'FanVoice'}
             sx={{
               display: 'inline-flex',
               alignItems: 'center',

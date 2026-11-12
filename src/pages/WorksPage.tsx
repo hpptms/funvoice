@@ -261,7 +261,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
       )}
 
       {worksQuery.isError && <Alert severity="error">{(worksQuery.error as Error).message}</Alert>}
-      {(worksQuery.isLoading || (onAir && tagsQuery.isLoading)) && (
+      {/* 一覧がもう出ているとき（HTMLに埋め込まれた初期データ）は、タグ一覧の読み込み中でもスピナーを出さない。
+          出すと一覧の上に差し込まれて消えるので、一覧全体が上下にずれる（Lighthouse の CLS） */}
+      {!data && (worksQuery.isLoading || (onAir && tagsQuery.isLoading)) && (
         <Box sx={{ display: 'grid', placeItems: 'center', py: 8 }}>
           <CircularProgress />
         </Box>

@@ -46,11 +46,12 @@ export default function StyleSwitch() {
         },
       }}
     >
-      <ToggleButton value="retro" aria-label="レトロモード" title="レトロ">
+      {/* 読み上げ名は表示している文字と同じにする（音声操作で「レトロ」と言って押せるように。Lighthouse の label-content-name-mismatch） */}
+      <ToggleButton value="retro" aria-label="レトロ" title="レトロ">
         <TerminalIcon sx={{ fontSize: 18 }} />
         <span className="fv-style-label">レトロ</span>
       </ToggleButton>
-      <ToggleButton value="simple" aria-label="シンプルモード" title="シンプル">
+      <ToggleButton value="simple" aria-label="シンプル" title="シンプル">
         <AutoAwesomeOutlinedIcon sx={{ fontSize: 18 }} />
         <span className="fv-style-label">シンプル</span>
       </ToggleButton>
