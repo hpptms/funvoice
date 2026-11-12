@@ -219,3 +219,14 @@ export function normalizeOgQuery(pathAndQuery: string): string {
   const keep = season && /^\d{4}-(winter|spring|summer|autumn)$/.test(season) && url.pathname.startsWith('/api/og/rankings/')
   return url.pathname + (keep ? `?season=${season}` : '')
 }
+
+const SEASONS_BY_QUARTER = ['winter', 'spring', 'summer', 'autumn'] as const
+
+/**
+ * 今期の放送時期（works.season_name の形式。例: "2026-autumn"）。
+ * 日本時間で 1〜3月=冬 / 4〜6月=春 / 7〜9月=夏 / 10〜12月=秋 として、日付から自動で切り替わる。
+ */
+export function currentSeasonName(now: Date = new Date()): string {
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  return `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[Math.floor(jst.getUTCMonth() / 3)]}`
+}

@@ -40,12 +40,20 @@ import { useRetro } from '../lib/styleMode'
 type ListSort = WorkSort | 'onair'
 
 const SORT_LABEL: Record<ListSort, string> = {
-  recommended: 'おすすめ順',
   onair: '放送中',
+  recommended: 'おすすめ順',
   new: '新しい順',
   popular: '人気順',
   votes: '投票数順',
   sequel: '続編希望順',
+}
+
+/**
+ * 並び替えの既定。条件なしのトップは「放送中」、検索・タグ絞り込み・タグ別のページは全期間の「おすすめ順」
+ * （過去の時期のページや検索で、今期の作品に絞られて何も出ないのを防ぐ）
+ */
+function defaultSort(baseTagId: number | undefined, q: string, tagIds: number[]): ListSort {
+  return !baseTagId && !q && tagIds.length === 0 ? 'onair' : 'recommended'
 }
 
 /**
@@ -58,7 +66,8 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const q = sp.get('q') ?? ''
   const queryTagIds = sp.getAll('tag').map(Number).filter(Boolean)
   const tagIds = baseTagId ? [baseTagId, ...queryTagIds.filter((id) => id !== baseTagId)] : queryTagIds
-  const sort = (sp.get('sort') as ListSort) || 'recommended'
+  const explicitSort = sp.get('sort') as ListSort | null
+  const sort = explicitSort || defaultSort(baseTagId, q, tagIds)
   const page = Number(sp.get('page') ?? 1)
   const retro = useRetro()
 
@@ -73,20 +82,20 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const apiSort: WorkSort = onAir ? 'recommended' : sort
 
   // Pages Functions がHTMLに埋め込んだ一覧（条件なし、またはタグ1つだけの1ページ目）。最初の1回だけ読む
-  const isDefaultList = !q && page === 1 && sort === 'recommended' && tagIds.length <= 1
+  // トップは今期で絞った「放送中」、タグ別のページは「おすすめ順」の一覧が埋め込まれる（sort で区別）
+  const isDefaultList = !q && page === 1 && !explicitSort && tagIds.length <= 1
+  const matchesInitial = (d: { tag: number | null; sort?: ListSort }) =>
+    isDefaultList && (d.sort ?? 'recommended') === sort && (d.tag === null ? tagIds.length === 0 : tagIds[0] === d.tag)
   const [initial] = useState(() =>
-    takeInitialData<{ tag: number | null; list: WorkList }>(
-      'fv-initial-works',
-      (d) => isDefaultList && (d.tag === null ? tagIds.length === 0 : tagIds[0] === d.tag),
-    ),
+    takeInitialData<{ tag: number | null; sort?: ListSort; list: WorkList }>('fv-initial-works', matchesInitial),
   )
-  const fromInitial = !!initial && isDefaultList && (initial.tag === null ? tagIds.length === 0 : tagIds[0] === initial.tag)
+  const fromInitial = !!initial && matchesInitial(initial)
 
   const worksQuery = useQuery({
     queryKey: ['works', { q, tagIds: queryTags, sort: apiSort, page }],
     queryFn: () => api.listWorks({ q, tags: queryTags, sort: apiSort, page }),
     // 放送中は、タグの一覧を読んで今期のタグが分かってから取りに行く
-    enabled: !onAir || !!onAirTag,
+    enabled: fromInitial || !onAir || !!onAirTag,
     placeholderData: keepPreviousData,
     initialData: fromInitial ? initial.list : undefined,
   })
@@ -94,13 +103,16 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const update = (patch: { q?: string; tags?: number[]; sort?: ListSort; page?: number }) => {
     const nextQ = patch.q ?? q
     const nextTags = patch.tags ?? tagIds
-    const nextSort = patch.sort ?? sort
+    const nextDefault = defaultSort(undefined, nextQ, nextTags)
+    // 検索したときは、並び替えを明示していなければ既定（全期間のおすすめ順）に戻す（今期だけを検索して何も出ないのを防ぐ）。
+    // タグの付け外しやページ送りでは、いま表示している並び（放送中など）を保つ
+    const nextSort = patch.sort ?? (patch.q !== undefined && patch.q !== q ? (explicitSort ?? nextDefault) : sort)
     const next = new URLSearchParams()
     if (nextQ) next.set('q', nextQ)
     // タグ1つだけ（検索語なし）ならタグ別のページへ。タグの一覧がまだ読めていなければトップの ?tag= のまま
     const single = !nextQ && nextTags.length === 1 ? allTags.find((t) => t.id === nextTags[0]) : undefined
     if (!single) nextTags.forEach((t) => next.append('tag', String(t)))
-    if (nextSort !== 'recommended') next.set('sort', nextSort)
+    if (nextSort !== nextDefault) next.set('sort', nextSort)
     // 条件が変わったら1ページ目に戻す
     if (patch.page !== undefined && patch.page > 1) next.set('page', String(patch.page))
     const qs = next.toString()

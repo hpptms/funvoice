@@ -1,4 +1,7 @@
 import { SEASON_LABEL, type Season, type SeasonInput } from '../api/client'
+import { currentSeasonName } from '../../edge/seo'
+
+export { currentSeasonName }
 
 /** 放送時期の選択欄の値。year: '' = 未設定 / 'unknown' = 不明 / 数値 = 年。season: '' = 未選択 */
 export type SeasonValue = { year: number | '' | 'unknown'; season: Season | '' }
@@ -25,17 +28,6 @@ export function seasonNameLabel(name: string): string | null {
   if (/^\d{4}$/.test(name)) return `${name}年`
   const m = /^(\d{4})-(winter|spring|summer|autumn)$/.exec(name)
   return m ? `${m[1]}年${SEASON_LABEL[m[2] as Season]}` : null
-}
-
-const SEASONS_BY_QUARTER: Season[] = ['winter', 'spring', 'summer', 'autumn']
-
-/**
- * 今期の放送時期（works.season_name の形式。例: "2026-autumn"）。
- * 日本時間で 1〜3月=冬 / 4〜6月=春 / 7〜9月=夏 / 10〜12月=秋 として、日付から自動で切り替わる。
- */
-export function currentSeasonName(now: Date = new Date()): string {
-  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-  return `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[Math.floor(jst.getUTCMonth() / 3)]}`
 }
 
 /** 作品が今期の放送作品か */

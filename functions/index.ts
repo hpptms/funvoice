@@ -2,7 +2,17 @@
 // タグ1つだけの一覧（以前の /?tag=N）は、タグ別ページ（/season/2026-autumn・/tags/N）へ 301 で転送する
 import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
-import { DEFAULT_DESCRIPTION, SITE_NAME, TOP_HEADING, TOP_LEAD, rankingPath, rankingTitle, tagPath } from '../edge/seo'
+import {
+  DEFAULT_DESCRIPTION,
+  SITE_NAME,
+  TOP_HEADING,
+  TOP_LEAD,
+  currentSeasonName,
+  rankingPath,
+  rankingTitle,
+  seasonLabelFromSlug,
+  tagPath,
+} from '../edge/seo'
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const { request, env } = ctx
@@ -22,7 +32,15 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
   // 検索・並び替え・ページ送り・複数タグの組み合わせは無数にあるので索引させない（リンクはたどらせる）
   const noindex = url.search.length > 1
-  const list = noindex ? undefined : await apiGet<ApiWorkList>(ctx, '/api/works')
+  // 画面の既定は「放送中」（今期の放送時期タグで絞ったおすすめ順）なので、同じ一覧を埋め込む。
+  // 今期のタグがまだ無ければ、全期間のおすすめ順にする（画面側は埋め込みを使わずに取り直す）
+  const seasonLabel = seasonLabelFromSlug(currentSeasonName())
+  const seasonTag = noindex
+    ? undefined
+    : (await apiGet<{ tags: ApiTag[] }>(ctx, '/api/tags?kind=season')).data?.tags.find((t) => t.name === seasonLabel)
+  const list = noindex
+    ? undefined
+    : await apiGet<ApiWorkList>(ctx, seasonTag ? `/api/works?tag=${seasonTag.id}` : '/api/works')
   const works = list?.data?.works ?? []
 
   const items = works
@@ -31,7 +49,10 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const body = shellHtml(
     `<h1>${escapeHtml(TOP_HEADING)}</h1><p>${escapeHtml(TOP_LEAD)}</p>` +
       `<p><a href="${rankingPath('sequel')}">${rankingTitle('sequel')}</a> / <a href="${rankingPath('complete')}">${rankingTitle('complete')}</a></p>` +
-      `<h2>みんなの評価が集まっているアニメ</h2><ul>${items}</ul>`,
+      (seasonTag
+        ? `<h2><a href="${tagPath(seasonTag)}">放送中のアニメ（${escapeHtml(seasonTag.name)}）</a></h2>`
+        : `<h2>みんなの評価が集まっているアニメ</h2>`) +
+      `<ul>${items}</ul>`,
   )
 
   const jsonLd = {
@@ -51,7 +72,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
   // 画面（WorksPage）が同じ一覧をもう一度取りに行かないよう、初期データとして埋め込む。
   // 読み込み中の表示から一覧に切り替わるときにフッターが押し下げられる（Lighthouse の CLS）のも防げる。
-  const initialData = list?.data ? { id: 'fv-initial-works', data: { tag: null, list: list.data } } : undefined
+  const initialData = list?.data ? { id: 'fv-initial-works', data: { tag: null, sort: seasonTag ? 'onair' : 'recommended', list: list.data } } : undefined
 
   return renderPage(env, request, { canonical: `${origin}/`, noindex, jsonLd, bodyHtml: body, initialData })
 }
