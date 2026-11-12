@@ -1,5 +1,17 @@
 // /works/:id  作品ページ。タイトル・説明文・OGP・構造化データ・本文をHTMLに埋め込む
-import { escapeHtml, renderPage, safeUrl, shellHtml, siteOrigin, workLinkList, type ApiWork, type Env } from '../../edge/lib'
+import {
+  escapeHtml,
+  isoDuration,
+  renderPage,
+  safeUrl,
+  shellHtml,
+  siteOrigin,
+  workImageUrl,
+  workLinkList,
+  youtubeThumbnailUrl,
+  type ApiWork,
+  type Env,
+} from '../../edge/lib'
 import { apiGet } from '../../edge/cache'
 import {
   mediaLabel,
@@ -49,13 +61,14 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
   // SNS で共有したときのカード画像（作品名と票の割合）。?v= は票が変わったときに SNS 側のキャッシュを更新させるため
   const ogImage = `${origin}/api/og/works/${work.id}.png?v=${sequel}-${complete}`
-  // 構造化データの image は、作品の紹介画像（Cloudinary に取り込んだ画像・YouTube のサムネイル）があればそれ。
-  // 外部サイトの画像URL（引用元）は直接使わない
-  const image = work.image
-    ? work.image.fullUrl.replace('f_webp,fl_awebp', 'f_jpg')
-    : work.youtubeId && /^[A-Za-z0-9_-]{11}$/.test(work.youtubeId)
-      ? `https://i.ytimg.com/vi/${work.youtubeId}/hqdefault.jpg`
-      : undefined
+  // 構造化データの image は、作品の紹介画像（Cloudinary に取り込んだ画像・YouTube のサムネイル）があればそれ
+  const image = workImageUrl(work)
+
+  // 紹介動画（YouTube）。Google の動画の構造化データは name・thumbnailUrl・uploadDate が必須なので、
+  // バックエンドがタイトルと公開日時を取得できた（削除・非公開でない）動画だけ VideoObject を出す
+  const thumb = youtubeThumbnailUrl(work.youtubeId)
+  const video = thumb && work.video ? { ...work.video, id: work.youtubeId!, thumb } : null
+  const workNodeId = `${canonical}#work`
 
   const sameAs = [safeUrl(work.officialSiteUrl), safeUrl(work.wikipediaUrl)].filter(Boolean)
   const people = (role: string) => staff.filter((s) => s.role === role).map((s) => ({ '@type': 'Person', name: s.name }))
@@ -65,6 +78,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     '@graph': [
       {
         '@type': work.media === 'movie' ? 'Movie' : 'TVSeries',
+        '@id': workNodeId,
         name: work.title,
         url: canonical,
         description,
@@ -75,7 +89,23 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         ...(studios.length ? { productionCompany: studios } : {}),
         genre: work.tags.filter((t) => t.kind === 'genre').map((t) => t.name),
         keywords: work.tags.map((t) => t.name).join(','),
+        ...(video ? { subjectOf: { '@id': `${canonical}#video` } } : {}),
       },
+      ...(video
+        ? [
+            {
+              '@type': 'VideoObject',
+              '@id': `${canonical}#video`,
+              name: video.title,
+              description: `${mediaLabel(work.media)}「${work.title}」の紹介動画（YouTube）：${video.title}`,
+              thumbnailUrl: [video.thumb],
+              uploadDate: video.uploadDate,
+              ...(video.durationSec ? { duration: isoDuration(video.durationSec) } : {}),
+              embedUrl: `https://www.youtube.com/embed/${video.id}`,
+              about: { '@id': workNodeId },
+            },
+          ]
+        : []),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -120,6 +150,13 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       `<li>続編希望: ${sequel}票（登録ユーザー ${work.tally.registered.sequel} / 匿名 ${work.tally.anonymous.sequel}）</li>` +
       `<li>キレイに終わった: ${complete}票（登録ユーザー ${work.tally.registered.complete} / 匿名 ${work.tally.anonymous.complete}）</li></ul>` +
       rankLine +
+      // 動画のサムネイル（画面の YouTubeEmbed と同じ画像なので、React に置き換わっても二重に読み込まない）
+      (video
+        ? `<h2>「${escapeHtml(work.title)}」の動画</h2><figure>` +
+          `<a href="https://www.youtube.com/watch?v=${video.id}" rel="noopener" target="_blank">` +
+          `<img src="${video.thumb}" alt="${escapeHtml(video.title)}" width="480" height="360" loading="lazy" style="max-width:100%;height:auto"></a>` +
+          `<figcaption>${escapeHtml(video.title)}（YouTube）</figcaption></figure>`
+        : '') +
       `<h2>作品データ</h2><ul>${facts}</ul>` +
       (official ? `<p><a href="${escapeHtml(official)}" rel="noopener" target="_blank">公式サイト</a></p>` : '') +
       series +

@@ -77,6 +77,8 @@ export interface Work {
   seasonWorks?: RelatedWork[]
   /** 同じ放送時期の中での続編希望の順位 */
   seasonRank?: { rank: number; total: number }
+  /** 紹介動画（YouTube）の情報。バックエンドが取得済みで、視聴できる動画の場合だけ */
+  video?: { title: string; uploadDate: string; durationSec?: number }
 }
 
 export interface StaffCredit {

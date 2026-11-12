@@ -132,6 +132,11 @@ export default function WorkMedia({ work }: { work: Work }) {
     return (
       <Box>
         <YouTubeEmbed id={work.youtubeId} title={work.title} />
+        {work.video && (
+          <Typography variant="body2" component="p" sx={{ mt: 0.75, maxWidth: 720, overflowWrap: 'anywhere' }}>
+            {work.video.title}
+          </Typography>
+        )}
         <Typography variant="caption" color="text.secondary" component="p">
           再生すると YouTube（youtube-nocookie.com）から動画を読み込みます
         </Typography>

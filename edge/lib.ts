@@ -224,6 +224,31 @@ export function workLinkList(works: { id: number; title: string; sequel: number;
     .join('')}</ul>`
 }
 
+// ---- 作品の画像 ----
+
+const YOUTUBE_ID_RE = /^[A-Za-z0-9_-]{11}$/
+
+/** YouTube のサムネイル（480x360。画面の YouTubeEmbed と同じ画像） */
+export function youtubeThumbnailUrl(id: string | undefined): string | undefined {
+  return id && YOUTUBE_ID_RE.test(id) ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : undefined
+}
+
+/**
+ * 構造化データ・sitemap に載せる作品の画像。Cloudinary に取り込んだ画像（JPEGで配信）か、YouTube のサムネイル。
+ * 外部サイトの画像URL（引用元）は直接使わない
+ */
+export function workImageUrl(w: { youtubeId?: string; image?: { fullUrl: string } }): string | undefined {
+  return w.image ? w.image.fullUrl.replace('f_webp,fl_awebp', 'f_jpg') : youtubeThumbnailUrl(w.youtubeId)
+}
+
+/** 秒 → ISO 8601 の長さ（281 → PT4M41S） */
+export function isoDuration(sec: number): string {
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  return `PT${h ? `${h}H` : ''}${m ? `${m}M` : ''}${s || (!h && !m) ? `${s}S` : ''}`
+}
+
 // ---- API の型（frontend/src/api/client.ts と同じ形） ----
 
 export interface ApiTag {
@@ -260,6 +285,8 @@ export interface ApiWork {
   series?: { name: string; works: ApiRelatedWork[] }[]
   seasonWorks?: ApiRelatedWork[]
   seasonRank?: { rank: number; total: number }
+  /** 紹介動画（YouTube）の情報。バックエンドが取得済みで、視聴できる動画の場合だけ */
+  video?: { title: string; uploadDate: string; durationSec?: number }
 }
 export interface ApiRelatedWork {
   id: number
