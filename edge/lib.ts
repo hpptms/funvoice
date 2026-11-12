@@ -298,19 +298,45 @@ export interface ApiPostPage {
 /** 固定ページの本文を、JSなしでも読めるHTMLにして返す */
 export function renderStaticPage(env: Env, request: Request, slug: StaticSlug): Promise<Response> {
   const page = STATIC_PAGES[slug]
+  const origin = siteOrigin(env, request)
   const sections = page.sections
     .map(
       (s) =>
         `<h2>${escapeHtml(s.heading)}</h2>` +
         (s.paragraphs ?? []).map((p) => `<p>${escapeHtml(p)}</p>`).join('') +
-        (s.list ? `<ul>${s.list.map((li) => `<li>${escapeHtml(li)}</li>`).join('')}</ul>` : ''),
+        (s.list ? `<ul>${s.list.map((li) => `<li>${escapeHtml(li)}</li>`).join('')}</ul>` : '') +
+        (s.qa ?? []).map((x) => `<h3>${escapeHtml(x.q)}</h3><p>${escapeHtml(x.a)}</p>`).join('') +
+        (s.links ? `<p>${s.links.map((l) => `<a href="${escapeHtml(l.to)}">${escapeHtml(l.label)}</a>`).join(' / ')}</p>` : ''),
     )
     .join('')
+  const qa = page.sections.flatMap((s) => s.qa ?? [])
+  const breadcrumb = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${origin}/` },
+      { '@type': 'ListItem', position: 2, name: page.title, item: `${origin}/${slug}` },
+    ],
+  }
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumb,
+      ...(qa.length
+        ? [
+            {
+              '@type': 'FAQPage',
+              mainEntity: qa.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })),
+            },
+          ]
+        : []),
+    ],
+  }
   return renderPage(env, request, {
     title: page.title,
     description: page.description,
-    canonical: `${siteOrigin(env, request)}/${slug}`,
+    canonical: `${origin}/${slug}`,
     ogType: 'article',
+    jsonLd,
     bodyHtml: shellHtml(
       `<h1>${escapeHtml(page.title)}</h1>${page.updated ? `<p>最終更新：${escapeHtml(page.updated)}</p>` : ''}${sections}`,
     ),

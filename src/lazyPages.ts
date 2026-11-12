@@ -16,7 +16,7 @@ const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/(register|login)\/?$/, AuthPage.preload],
   [/^\/mypage\/?$/, MyPage.preload],
   [/^\/contact\/?$/, ContactPage.preload],
-  [/^\/(about|terms|privacy|copyright)\/?$/, StaticPage.preload],
+  [/^\/(about|help|faq|terms|privacy|copyright)\/?$/, StaticPage.preload],
   [/^\/tags\/?$/, TagsPage.preload],
   [/^\/ranking(\/|$)/, RankingPage.preload],
 ]

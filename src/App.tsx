@@ -23,6 +23,8 @@ export default function App() {
         <Route path="ranking/:kind" element={<RankingPage />} />
         <Route path="ranking/:kind/:season" element={<RankingPage />} />
         <Route path="about" element={<StaticPage slug="about" />} />
+        <Route path="help" element={<StaticPage slug="help" />} />
+        <Route path="faq" element={<StaticPage slug="faq" />} />
         <Route path="terms" element={<StaticPage slug="terms" />} />
         <Route path="privacy" element={<StaticPage slug="privacy" />} />
         <Route path="copyright" element={<StaticPage slug="copyright" />} />

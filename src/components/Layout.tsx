@@ -11,6 +11,8 @@ import StyleSwitch from './StyleSwitch'
 
 const FOOTER_LINKS = [
   ['/about', 'サイトについて'],
+  ['/help', '使い方'],
+  ['/faq', 'よくある質問'],
   ['/terms', '利用規約'],
   ['/privacy', 'プライバシーポリシー'],
   ['/copyright', '著作権・削除依頼'],

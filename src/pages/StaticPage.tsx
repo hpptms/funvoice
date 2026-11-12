@@ -5,7 +5,7 @@ import { Prompt } from '../components/Retro'
 import { usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 
-/** サイトについて・利用規約・プライバシーポリシー・著作権（本文は edge/content.ts） */
+/** サイトについて・使い方ガイド・よくある質問・利用規約・プライバシーポリシー・著作権（本文は edge/content.ts） */
 export default function StaticPage({ slug }: { slug: StaticSlug }) {
   const page = STATIC_PAGES[slug]
   const retro = useRetro()
@@ -38,6 +38,23 @@ export default function StaticPage({ slug }: { slug: StaticSlug }) {
                 <Box component="ul" sx={{ pl: 3, my: 1.5, '& li': { lineHeight: 1.9, mb: 0.5 } }}>
                   {sec.list.map((li, i) => (
                     <li key={i}>{li}</li>
+                  ))}
+                </Box>
+              )}
+              {sec.qa?.map((x) => (
+                <Box key={x.q} sx={{ '& + &': { mt: 2.5 } }}>
+                  <Typography component="h3" sx={{ fontWeight: 700, lineHeight: 1.7, mb: 0.5 }}>
+                    {retro ? `> Q. ${x.q}` : `Q. ${x.q}`}
+                  </Typography>
+                  <Typography sx={{ lineHeight: 1.9, pl: { xs: 0, sm: 2 } }}>{`A. ${x.a}`}</Typography>
+                </Box>
+              ))}
+              {sec.links && (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                  {sec.links.map((l) => (
+                    <Button key={l.to} component={RouterLink} to={l.to} variant="outlined" size="small">
+                      {l.label}
+                    </Button>
                   ))}
                 </Box>
               )}

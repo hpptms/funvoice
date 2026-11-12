@@ -27,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const urls = [
     url(`${origin}/`),
     url(`${origin}/tags`),
-    ...['about', 'terms', 'privacy', 'copyright', 'contact'].map((p) => url(`${origin}/${p}`)),
+    ...['about', 'help', 'faq', 'terms', 'privacy', 'copyright', 'contact'].map((p) => url(`${origin}/${p}`)),
     ...rankings,
     ...(tags.data?.tags ?? []).filter((t) => (t.workCount ?? 0) > 0).map((t) => url(`${origin}${tagPath(t)}`)),
     ...works.data.works.map((w) => url(`${origin}/works/${w.id}`, w.updatedAt)),
