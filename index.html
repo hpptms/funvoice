@@ -16,6 +16,19 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <!--
+      エッジが #root に入れるSEO用の本文（.fv-ssr）は、JSが動く環境ではReactの画面に置き換わるまで隠す
+      （素のHTMLが一瞬見えるのを防ぐ）。中身はHTMLに残るので検索エンジンには読まれる。
+      JS無効なら noscript で表示し、JSの読み込みに失敗した場合も4秒後には表示する。
+      背景はReact起動後と同じ色（既定のレトロ表示）にして、切り替わりの白いちらつきを抑える。
+      CSPでインラインscriptは使えないので、CSSだけで行う
+    -->
+    <style>
+      body { margin: 0; background: #ecebe3; }
+      .fv-ssr { visibility: hidden; animation: fv-ssr-show 0s 4s forwards; }
+      @keyframes fv-ssr-show { to { visibility: visible; } }
+    </style>
+    <noscript><style>.fv-ssr { visibility: visible; animation: none; }</style></noscript>
   </head>
   <body>
     <div id="root"></div>

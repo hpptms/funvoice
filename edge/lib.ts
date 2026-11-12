@@ -204,9 +204,12 @@ export function firstCardImage(works: ApiWork[]): string | undefined {
   return w.youtubeId && /^[A-Za-z0-9_-]{11}$/.test(w.youtubeId) ? `https://i.ytimg.com/vi/${w.youtubeId}/mqdefault.jpg` : undefined
 }
 
-/** JSなしで読めるページ本文の外枠（React起動までの一瞬だけ表示される） */
+/**
+ * JSなしで読めるページ本文の外枠。検索エンジン・JS無効の閲覧者向け。
+ * fv-ssr クラスは index.html のCSSで、JSが動く環境では見えないようにしている（React起動までの素のHTMLのちらつき防止）
+ */
 export function shellHtml(inner: string): string {
-  return `<main style="max-width:960px;margin:0 auto;padding:24px 16px;font-family:monospace;line-height:1.7">` +
+  return `<main class="fv-ssr" style="max-width:960px;margin:0 auto;padding:24px 16px;font-family:monospace;line-height:1.7">` +
     `<nav><a href="/">${SITE_NAME}</a> / <a href="/tags">タグ</a> / <a href="/ranking/sequel">ランキング</a></nav>${inner}</main>`
 }
 
