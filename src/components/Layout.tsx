@@ -5,6 +5,7 @@ import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-d
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
 import { useMe } from '../lib/auth'
+import SupporterBadge from './account/SupporterBadge'
 import UserIcon from './account/UserIcon'
 import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
@@ -16,6 +17,7 @@ const FOOTER_LINKS = [
   ['/terms', '利用規約'],
   ['/privacy', 'プライバシーポリシー'],
   ['/copyright', '著作権・削除依頼'],
+  ['/tokushoho', '特定商取引法に基づく表記'],
   ['/contact', 'お問い合わせ'],
 ] as const
 
@@ -137,6 +139,11 @@ export default function Layout() {
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {me.name}
               </Box>
+              {me.premium && (
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+                  <SupporterBadge compact />
+                </Box>
+              )}
             </Button>
           ) : (
             me === null && (

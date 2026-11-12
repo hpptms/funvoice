@@ -187,6 +187,8 @@ export interface Post {
   image?: { id: string; url: string; fullUrl: string; width: number; height: number }
   /** ログイン中に書かれたコメントなら、そのユーザーのアイコン（外部の画像URL） */
   iconUrl?: string
+  /** 書いたユーザーが今サポーター（サブスクリプション中）ならバッジを出す */
+  premium?: boolean
 }
 
 /** 登録ユーザー */
@@ -197,6 +199,24 @@ export interface User {
   iconUrl: string
   /** upload = アップロードした画像 / url = 外部の画像URL / '' = なし */
   iconKind: 'upload' | 'url' | ''
+  /** サポーター（サブスクリプション中）。バッジ・広告の非表示などに使う */
+  premium: boolean
+}
+
+/** サポーター（サブスクリプション）の状態 */
+export interface SubscriptionInfo {
+  /** サポーターの受付をしているか（サーバーに Stripe の設定があるか） */
+  enabled: boolean
+  premium: boolean
+  /** Stripe の status（一度も登録していなければ null） */
+  status: string | null
+  currentPeriodEnd: string | null
+  /** 解約の予約中（期間の終わりまでは特典が続く） */
+  cancelAtPeriodEnd: boolean
+  /** お支払い・解約の管理（Stripe の顧客ポータル）を開けるか */
+  hasCustomer: boolean
+  /** 新しく登録するときの価格（取得できなければ null）。amount は最小単位（円なら円） */
+  price: { amount: number; currency: string; interval: string; intervalCount: number } | null
 }
 
 /** アイコン画像を Cloudinary へ直接アップロードするための署名 */
@@ -390,6 +410,15 @@ export const api = {
     setIcon: (input: { iconUrl: string } | { iconPublicId: string }) =>
       request<{ user: User }>('/me/icon', { method: 'PUT', body: JSON.stringify(input) }),
     iconUploadSignature: () => request<IconUploadSignature>('/me/icon/upload', { method: 'POST' }),
+  },
+  billing: {
+    subscription: () => request<SubscriptionInfo>('/me/subscription'),
+    /** Stripe の決済ページのURL */
+    checkout: () => request<{ url: string }>('/billing/checkout', { method: 'POST' }),
+    /** Stripe の顧客ポータル（解約・カード変更・領収書）のURL */
+    portal: () => request<{ url: string }>('/billing/portal', { method: 'POST' }),
+    /** 決済ページから戻ったときに Stripe から状態を取り直す */
+    sync: () => request<SubscriptionInfo>('/billing/sync', { method: 'POST' }),
   },
 
   admin: {

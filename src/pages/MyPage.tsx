@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { api, type User } from '../api/client'
 import IconPicker from '../components/account/IconPicker'
+import SupporterBadge from '../components/account/SupporterBadge'
+import SupporterCard from '../components/account/SupporterCard'
 import UserIcon from '../components/account/UserIcon'
 import { Prompt } from '../components/Retro'
 import { useMe, useSetMe } from '../lib/auth'
@@ -14,7 +16,7 @@ import { useRetro } from '../lib/styleMode'
 /** 今のアイコンに合わせた入力の初期値（外部URLならそのURLを入れておく） */
 const initialChoice = (me: User): IconChoice => (me.iconKind === 'url' ? { kind: 'url', url: me.iconUrl } : { kind: 'file', file: null })
 
-/** マイページ: アイコンの設定とログアウト */
+/** マイページ: サポーター（サブスクリプション）、アイコンの設定とログアウト */
 export default function MyPage() {
   usePageMeta({ title: 'マイページ', noindex: true })
   const retro = useRetro()
@@ -72,11 +74,16 @@ export default function MyPage() {
               <Typography variant="caption" color="text.secondary">
                 ユーザー名
               </Typography>
-              <Typography sx={{ fontWeight: 700, fontSize: 18, overflowWrap: 'anywhere' }}>{me.name}</Typography>
+              <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 18, overflowWrap: 'anywhere' }}>{me.name}</Typography>
+                {me.premium && <SupporterBadge />}
+              </Stack>
             </Box>
           </Stack>
         </CardContent>
       </Card>
+
+      <SupporterCard />
 
       <Card sx={{ mb: 2 }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>

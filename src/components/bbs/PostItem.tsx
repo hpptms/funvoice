@@ -6,6 +6,7 @@ import { isPopular } from '../../lib/bbs'
 import { formatDateTime } from '../../lib/format'
 import { useRetro } from '../../lib/styleMode'
 import { PIXEL_FONT } from '../../theme'
+import SupporterBadge from '../account/SupporterBadge'
 import UserIcon from '../account/UserIcon'
 import PostBody from './PostBody'
 import PostEmbeds from './PostEmbeds'
@@ -56,6 +57,7 @@ export function PostHeader({ post }: { post: Post }) {
               {post.name}
             </Box>
           </Box>
+          {post.premium && <SupporterBadge />}
           {owner}
         </>
       )}
