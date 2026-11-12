@@ -26,3 +26,19 @@ export function seasonNameLabel(name: string): string | null {
   const m = /^(\d{4})-(winter|spring|summer|autumn)$/.exec(name)
   return m ? `${m[1]}年${SEASON_LABEL[m[2] as Season]}` : null
 }
+
+const SEASONS_BY_QUARTER: Season[] = ['winter', 'spring', 'summer', 'autumn']
+
+/**
+ * 今期の放送時期（works.season_name の形式。例: "2026-autumn"）。
+ * 日本時間で 1〜3月=冬 / 4〜6月=春 / 7〜9月=夏 / 10〜12月=秋 として、日付から自動で切り替わる。
+ */
+export function currentSeasonName(now: Date = new Date()): string {
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  return `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[Math.floor(jst.getUTCMonth() / 3)]}`
+}
+
+/** 作品が今期の放送作品か */
+export function isOnAir(seasonName: string, now: Date = new Date()): boolean {
+  return !!seasonName && seasonName === currentSeasonName(now)
+}

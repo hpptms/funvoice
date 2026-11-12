@@ -1,6 +1,7 @@
 import { Box, Card, CardActionArea, CardContent, Chip, Stack, Typography } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { MEDIA_LABEL, type Work } from '../api/client'
+import { isOnAir } from '../lib/season'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
 import { TitleBar } from './Retro'
@@ -13,6 +14,8 @@ export default function WorkCard({ work }: { work: Work }) {
   const votes = sequel + complete
   const season = work.tags.find((t) => t.kind === 'season')?.name
   const media = work.media ? (MEDIA_LABEL[work.media] ?? work.media) : ''
+  // 今期（日本時間の日付から自動判定）の作品
+  const onAir = isOnAir(work.seasonName)
 
   return (
     <Card
@@ -30,6 +33,12 @@ export default function WorkCard({ work }: { work: Work }) {
       >
         {retro && (
           <TitleBar>
+            {/* 長いと末尾が省略されるので、放送中は先頭に出す */}
+            {onAir && (
+              <Box component="span" sx={{ bgcolor: 'error.main', color: '#fff', px: 0.5, py: 0.25, mr: 0.75 }}>
+                放送中
+              </Box>
+            )}
             #{String(work.id).padStart(4, '0')}
             {season && ` ${season}`}
             {media && ` / ${media}`}
@@ -37,8 +46,9 @@ export default function WorkCard({ work }: { work: Work }) {
         )}
         <WorkCardMedia work={work} />
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flex: 1 }}>
-          {!retro && (season || media) && (
-            <Stack direction="row" spacing={0.5}>
+          {!retro && (season || media || onAir) && (
+            <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', rowGap: 0.5 }}>
+              {onAir && <Chip label="放送中" size="small" sx={{ fontWeight: 700, bgcolor: 'error.main', color: '#fff' }} />}
               {season && <Chip label={season} size="small" />}
               {media && <Chip label={media} size="small" variant="outlined" />}
             </Stack>
