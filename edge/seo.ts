@@ -230,3 +230,10 @@ export function currentSeasonName(now: Date = new Date()): string {
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
   return `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[Math.floor(jst.getUTCMonth() / 3)]}`
 }
+
+/** 前期の放送時期（今期のひとつ前。例: 今期が "2026-autumn" なら "2026-summer"、"2027-winter" なら "2026-autumn"） */
+export function previousSeasonName(now: Date = new Date()): string {
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const q = Math.floor(jst.getUTCMonth() / 3)
+  return q === 0 ? `${jst.getUTCFullYear() - 1}-autumn` : `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[q - 1]}`
+}

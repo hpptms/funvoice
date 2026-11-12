@@ -1,7 +1,7 @@
 import { SEASON_LABEL, type Season, type SeasonInput } from '../api/client'
-import { currentSeasonName } from '../../edge/seo'
+import { currentSeasonName, previousSeasonName } from '../../edge/seo'
 
-export { currentSeasonName }
+export { currentSeasonName, previousSeasonName }
 
 /** 放送時期の選択欄の値。year: '' = 未設定 / 'unknown' = 不明 / 数値 = 年。season: '' = 未選択 */
 export type SeasonValue = { year: number | '' | 'unknown'; season: Season | '' }

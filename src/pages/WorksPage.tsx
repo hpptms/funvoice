@@ -33,14 +33,17 @@ import {
 } from '../../edge/seo'
 import NotFoundPage from './NotFoundPage'
 import { takeInitialData, usePageMeta } from '../lib/pageMeta'
-import { currentSeasonName, seasonNameLabel } from '../lib/season'
+import { currentSeasonName, previousSeasonName, seasonNameLabel } from '../lib/season'
 import { useRetro } from '../lib/styleMode'
 
-/** 並び替え欄の選択肢。onair = 今期（日本時間の日付から自動判定）の作品だけをおすすめ順で出す */
-type ListSort = WorkSort | 'onair'
+/**
+ * 並び替え欄の選択肢。onair = 今期、prev = 前期（どちらも日本時間の日付から自動判定）の作品だけをおすすめ順で出す
+ */
+type ListSort = WorkSort | 'onair' | 'prev'
 
 const SORT_LABEL: Record<ListSort, string> = {
   onair: '放送中',
+  prev: '前期',
   recommended: 'おすすめ順',
   new: '新しい順',
   popular: '人気順',
@@ -74,9 +77,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: api.listTags })
   const allTags = tagsQuery.data?.tags ?? []
   const selectedTags = tagIds.map((id) => allTags.find((t) => t.id === id)).filter((t): t is Tag => !!t)
-  // 「放送中」は今期の放送時期タグで絞り込む（季節が変わると自動で次の時期のタグになる）
-  const onAir = sort === 'onair'
-  const onAirLabel = seasonNameLabel(currentSeasonName())
+  // 「放送中」は今期、「前期」はそのひとつ前の放送時期タグで絞り込む（季節が変わると自動で次の時期のタグになる）
+  const onAir = sort === 'onair' || sort === 'prev'
+  const onAirLabel = seasonNameLabel(sort === 'prev' ? previousSeasonName() : currentSeasonName())
   const onAirTag = onAir ? allTags.find((t) => t.kind === 'season' && t.name === onAirLabel) : undefined
   const queryTags = onAirTag && !tagIds.includes(onAirTag.id) ? [...tagIds, onAirTag.id] : tagIds
   const apiSort: WorkSort = onAir ? 'recommended' : sort
@@ -94,7 +97,7 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const worksQuery = useQuery({
     queryKey: ['works', { q, tagIds: queryTags, sort: apiSort, page }],
     queryFn: () => api.listWorks({ q, tags: queryTags, sort: apiSort, page }),
-    // 放送中は、タグの一覧を読んで今期のタグが分かってから取りに行く
+    // 放送中・前期は、タグの一覧を読んで対象の時期のタグが分かってから取りに行く
     enabled: fromInitial || !onAir || !!onAirTag,
     placeholderData: keepPreviousData,
     initialData: fromInitial ? initial.list : undefined,

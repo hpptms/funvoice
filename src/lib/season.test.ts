@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { currentSeasonName, isOnAir, seasonNameLabel, seasonValueLabel, toSeasonInput } from './season'
+import { currentSeasonName, isOnAir, previousSeasonName, seasonNameLabel, seasonValueLabel, toSeasonInput } from './season'
 
 describe('放送時期', () => {
   it('年＋季節 / 年だけ / 不明 / 未設定', () => {
@@ -29,5 +29,13 @@ describe('放送時期', () => {
     expect(isOnAir('2026-summer', now)).toBe(false)
     expect(isOnAir('2026', now)).toBe(false)
     expect(isOnAir('', now)).toBe(false)
+  })
+  it('前期（今期のひとつ前。冬なら前年の秋）', () => {
+    expect(previousSeasonName(new Date('2026-11-12T12:00:00+09:00'))).toBe('2026-summer')
+    expect(previousSeasonName(new Date('2026-07-01T00:00:00+09:00'))).toBe('2026-spring')
+    expect(previousSeasonName(new Date('2026-04-01T00:00:00+09:00'))).toBe('2026-winter')
+    // UTC ではまだ12月31日でも、日本時間で1月1日なら今期は冬、前期は前年の秋
+    expect(previousSeasonName(new Date('2027-01-01T00:00:00+09:00'))).toBe('2026-autumn')
+    expect(previousSeasonName(new Date('2027-03-31T23:59:59+09:00'))).toBe('2026-autumn')
   })
 })
