@@ -58,9 +58,6 @@ export default function Layout() {
           <Typography
             component={RouterLink}
             to="/"
-            // スマホではサイト名の文字を隠してロゴ画像だけになるため、読み上げ用の名前を付けておく。
-            // 表示している文字（FanVoice・レトロのPC幅では v0.1-alpha も）をそのまま含める（Lighthouse の label-content-name-mismatch）
-            aria-label={retro ? 'FanVoice v0.1-alpha' : 'FanVoice'}
             sx={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -92,7 +89,23 @@ export default function Layout() {
             />
             {/* スマホ（〜479px）ではロゴ画像だけにして、ヘッダーのボタン（作品・タグ・ランキング）を1行に収める */}
             {/* サイト名はブラウザの自動翻訳で訳させない */}
-            <Box component="span" translate="no" sx={{ '@media (max-width: 479.95px)': { display: 'none' } }}>
+            {/* スマホで隠すときも display:none にせず見た目だけ消し、リンクの読み上げ名（FanVoice）として残す。
+                aria-label で別の名前を付けると表示文字と食い違う（Lighthouse の label-content-name-mismatch） */}
+            <Box
+              component="span"
+              translate="no"
+              sx={{
+                '@media (max-width: 479.95px)': {
+                  position: 'absolute',
+                  width: '1px',
+                  height: '1px',
+                  overflow: 'hidden',
+                  clip: 'rect(0 0 0 0)',
+                  clipPath: 'inset(50%)',
+                  whiteSpace: 'nowrap',
+                },
+              }}
+            >
               FanVoice
             </Box>
             {retro && (
