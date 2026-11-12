@@ -1,10 +1,14 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { afterPageLoad } from './afterPageLoad'
+import { installCollectRewrite } from './collectRewrite'
 
 // Google タグマネージャー（GA4 は GTM のコンテナ内で設定する）。
 // CSP で script-src 'self' にしているため、インラインの <script> ではなくここから読み込む。
-const GTM_ID = 'GTM-MGVRF2F8'
+// 広告ブロッカーに止められにくいよう、スクリプトは自サイトの /gt.js（functions/gt.js.ts が gtm.js を中継）から読み込み、
+// 計測データは自サイトの /k/ 宛てに送る（functions/k/[d].ts が Google へ転送）。どちらもエッジだけで完結する
+const GTM_SRC = '/gt.js'
+const COLLECT_PATH = '/k'
 
 // 管理画面は計測しない
 const EXCLUDED = /^\/admin(\/|$)/
@@ -29,14 +33,18 @@ export function initAnalytics() {
   // gtag() 形式のコマンドも GTM に渡せるようにしておく
   // eslint-disable-next-line prefer-rest-params
   const gtag = function (..._args: unknown[]) { dl.push(arguments) }
+  // GA4 の送信先を自サイトにする（GTM 内の GA4 タグにもこの設定が効く）。'js' より前に入れないと効かない
+  const collectBase = location.origin + COLLECT_PATH
+  gtag('set', 'transport_url', collectBase)
   gtag('js', new Date())
+  installCollectRewrite(collectBase)
   dl.push({ 'gtm.start': Date.now(), event: 'gtm.js' })
   // gtm.js（約180KB）は画面の表示に必要な通信（JS・画像）と回線を取り合い、スマホの LCP を大きく遅らせるため、
   // ページの読み込みが終わって手が空いてから読み込む。それまでの page_view は dataLayer に溜まり、読み込み後にまとめて送られる
   const load = () => {
     const s = document.createElement('script')
     s.async = true
-    s.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`
+    s.src = GTM_SRC
     document.head.appendChild(s)
   }
   afterPageLoad(load)
