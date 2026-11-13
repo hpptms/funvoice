@@ -189,27 +189,30 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
             ))}
           </Stack>
         )}
-        {/* 最終回の直後に投票してもらうための入り口（トップだけ） */}
+        {/* サポーター案内と最終回への入り口（トップだけ）。横に並べ、幅が足りないときだけ折り返す */}
         {!baseTagId && (
-          <Link
-            component={RouterLink}
-            to="/finales"
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1.5, fontSize: 14, fontWeight: 700, minHeight: 24, width: 'fit-content' }}
-          >
-            <FlagIcon aria-hidden sx={{ fontSize: 18 }} />
-            今週最終回のアニメに投票しよう
-          </Link>
-        )}
-        {/* サポーターの案内（トップだけ）。ずれ（CLS）を防ぐため、ログイン状態の読み込み中も出しておき、サポーター本人のときだけ消す */}
-        {!baseTagId && !me?.premium && (
-          <Link
-            component={RouterLink}
-            to="/supporter"
-            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 1.5, fontSize: 13, color: 'text.secondary', minHeight: 24 }}
-          >
-            <StarRoundedIcon aria-hidden sx={{ fontSize: 18, color: '#F2B705' }} />
-            FanVoiceを月額で応援する（サポーター）
-          </Link>
+          <Stack direction="row" useFlexGap sx={{ mt: 1.5, columnGap: 2.5, rowGap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* ずれ（CLS）を防ぐため、ログイン状態の読み込み中も出しておき、サポーター本人のときだけ消す */}
+            {!me?.premium && (
+              <Link
+                component={RouterLink}
+                to="/supporter"
+                sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: 13, color: 'text.secondary', minHeight: 24 }}
+              >
+                <StarRoundedIcon aria-hidden sx={{ fontSize: 18, color: '#F2B705' }} />
+                FanVoiceを月額で応援する（サポーター）
+              </Link>
+            )}
+            {/* 最終回の直後に投票してもらうための入り口 */}
+            <Link
+              component={RouterLink}
+              to="/finales"
+              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: 14, fontWeight: 700, minHeight: 24 }}
+            >
+              <FlagIcon aria-hidden sx={{ fontSize: 18 }} />
+              今週最終回のアニメに投票しよう
+            </Link>
+          </Stack>
         )}
       </Box>
       <Button component={RouterLink} to="/works/new" variant="outlined" startIcon={<AddIcon />} sx={{ height: 44, flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'auto' } }}>
