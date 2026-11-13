@@ -28,6 +28,9 @@ import {
 } from '../api/client'
 import ThreadSection from '../components/bbs/ThreadSection'
 import AdminMediaEditor from '../components/works/AdminMediaEditor'
+import AdminSequelForm from '../components/works/AdminSequelForm'
+import EmbedCode from '../components/works/EmbedCode'
+import SequelSection from '../components/works/SequelSection'
 import EditHistory from '../components/works/EditHistory'
 import RelatedWorks from '../components/works/RelatedWorks'
 import ShareButtons from '../components/works/ShareButtons'
@@ -37,6 +40,9 @@ import { Prompt, Window } from '../components/Retro'
 import VoteTally from '../components/VoteTally'
 import {
   broadcastDateLabel,
+  broadcastTimeLabel,
+  daysSinceJst,
+  isPast,
   rankingPath,
   rankingTitle,
   sequelPhrase,
@@ -68,6 +74,8 @@ export default function WorkDetailPage() {
   })
   const myVoteQuery = useQuery({ queryKey: myVoteKey, queryFn: () => api.getMyVote(id), enabled: id > 0 })
   const myVote = myVoteQuery.data?.myVote ?? null
+  // 今この画面で投票した（シェアの案内を出す）
+  const [justVoted, setJustVoted] = useState(false)
 
   const voteMutation = useMutation({
     mutationFn: (choice: Choice | null) => (choice ? api.vote(id, choice) : api.unvote(id)),
@@ -75,6 +83,8 @@ export default function WorkDetailPage() {
       qc.setQueryData<Work>(key, (old) => old && { ...old, tally: res.tally })
       qc.setQueryData<{ myVote: MyVote | null }>(myVoteKey, { myVote: res.myVote })
       qc.invalidateQueries({ queryKey: ['works'] })
+      qc.invalidateQueries({ queryKey: ['me', 'votes'] })
+      setJustVoted(!!res.myVote)
     },
   })
 
@@ -115,6 +125,13 @@ export default function WorkDetailPage() {
     ...groupStaff(work.staff ?? []).map(([role, names]) => [role, names.join('、')] as [string, string]),
   ]
   const cast = work.cast ?? []
+  // 最終回の前後（14日前〜7日後）は投票を呼びかける
+  const finaleDays = work.lastBroadcastAt ? daysSinceJst(work.lastBroadcastAt) : null
+  const finale =
+    work.lastBroadcastAt && finaleDays !== null && finaleDays >= -7 && finaleDays <= 14
+      ? { past: isPast(work.lastBroadcastAt), label: broadcastTimeLabel(work.lastBroadcastAt) }
+      : null
+  const rankText = work.seasonRank && isSeason ? `（${rankingTitle('sequel', work.seasonName)} ${work.seasonRank.rank}位）` : ''
 
   const voteButton = (choice: Choice, color: 'primary' | 'secondary') => {
     const selected = myVote?.choice === choice
@@ -170,6 +187,13 @@ export default function WorkDetailPage() {
             </Link>
           )}
         </Stack>
+        {finale && (
+          <Alert severity={finale.past ? 'success' : 'info'} sx={{ mt: 1.5 }}>
+            {finale.past
+              ? `${finale.label}に最終回を迎えました。見終わったら、続編を希望するか投票しよう！`
+              : `まもなく最終回（${finale.label}の予定）。見届けたら投票しよう！`}
+          </Alert>
+        )}
         <Box sx={{ mt: 2 }}>
           <WorkMedia work={work} />
         </Box>
@@ -198,6 +222,19 @@ export default function WorkDetailPage() {
               {(voteMutation.error as Error).message}
             </Alert>
           )}
+          {justVoted && myVote && (
+            <Box sx={{ mt: 2, p: 1.5, border: 1, borderColor: myVote.choice === 'sequel' ? 'primary.main' : 'secondary.main', borderRadius: retro ? 0 : 1 }}>
+              <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 14, mb: 1 }}>
+                  {retro && '> '}投票しました！ シェアして{myVote.choice === 'sequel' ? '続編を応援する声' : 'みんなの声'}を広げませんか？
+                </Typography>
+                <Button size="small" color="inherit" onClick={() => setJustVoted(false)} aria-label="シェアの案内を閉じる" sx={{ minWidth: 0, px: 1, mt: -0.5 }}>
+                  ×
+                </Button>
+              </Stack>
+              <ShareButtons url={`${window.location.origin}/works/${work.id}`} text={`${shareText}${rankText}`} />
+            </Box>
+          )}
         </Window>
 
         <Window file="stats.log" title={`「${work.title}」${phrase}希望の声`}>
@@ -219,7 +256,12 @@ export default function WorkDetailPage() {
           {retro ? '> ' : ''}みんなにも聞いてみる（票の割合のカード画像付きで共有されます）
         </Typography>
         <ShareButtons url={`${window.location.origin}/works/${work.id}`} text={shareText} />
+        <Box sx={{ mt: 1 }}>
+          <EmbedCode work={work} />
+        </Box>
       </Box>
+
+      <SequelSection work={work} />
 
       {(dataRows.length > 0 || cast.length > 0 || (work.series?.length ?? 0) > 0) && (
         <Window file="data.txt" title="作品データ">
@@ -307,6 +349,8 @@ function AdminWorkControls({ work }: { work: Work }) {
       <Divider sx={{ my: 2 }} />
       {/* key: 別の作品に移ったら入力欄を作り直す */}
       <AdminMediaEditor key={work.id} work={work} />
+      <Divider sx={{ my: 2 }} />
+      <AdminSequelForm key={`sequel-${work.id}`} work={work} />
     </Window>
   )
 }

@@ -1,7 +1,20 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import { usePageViewTracking } from './lib/analytics'
-import { AddWorkPage, AdminPage, AuthPage, ContactPage, MyPage, RankingPage, StaticPage, SupporterPage, TagsPage } from './lazyPages'
+import {
+  AddWorkPage,
+  AdminPage,
+  AuthPage,
+  ContactPage,
+  FinalesPage,
+  MyPage,
+  NotificationsPage,
+  RankingPage,
+  SequelsPage,
+  StaticPage,
+  SupporterPage,
+  TagsPage,
+} from './lazyPages'
 import NotFoundPage from './pages/NotFoundPage'
 import ThreadPage from './pages/ThreadPage'
 import WorkDetailPage from './pages/WorkDetailPage'
@@ -34,6 +47,9 @@ export default function App() {
         <Route path="register" element={<AuthPage key="register" mode="register" />} />
         <Route path="login" element={<AuthPage key="login" mode="login" />} />
         <Route path="mypage" element={<MyPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="finales" element={<FinalesPage />} />
+        <Route path="sequels" element={<SequelsPage />} />
         <Route path="admin" element={<AdminPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

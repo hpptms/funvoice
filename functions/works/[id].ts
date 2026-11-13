@@ -19,6 +19,7 @@ import {
   mediaLabel,
   rankingPath,
   rankingTitle,
+  sequelAnswer,
   sequelPhrase,
   sequelQuestion,
   tagPath,
@@ -122,6 +123,26 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
             },
           ]
         : []),
+      // 「〇〇 2期」「〇〇 続編」で検索する人への答え
+      {
+        '@type': 'FAQPage',
+        '@id': `${canonical}#faq`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `「${work.title}」の${phrase}はありますか？`,
+            acceptedAnswer: { '@type': 'Answer', text: sequelAnswer(work, work.sequel) },
+          },
+          {
+            '@type': 'Question',
+            name: `「${work.title}」の続編を希望している人はどれくらい？`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `FanVoiceでは「続編希望」${sequel}票、「キレイに終わった」${complete}票が集まっています（登録ユーザー・匿名の合計）。`,
+            },
+          },
+        ],
+      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -169,6 +190,9 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       `<li>続編希望: ${sequel}票（登録ユーザー ${work.tally.registered.sequel} / 匿名 ${work.tally.anonymous.sequel}）</li>` +
       `<li>キレイに終わった: ${complete}票（登録ユーザー ${work.tally.registered.complete} / 匿名 ${work.tally.anonymous.complete}）</li></ul>` +
       rankLine +
+      `<h2>「${escapeHtml(work.title)}」の${escapeHtml(phrase)}はある？</h2>` +
+      `<p>${escapeHtml(sequelAnswer(work, work.sequel))}</p>` +
+      (work.sequel?.works.length ? workLinkList(work.sequel.works) : '') +
       // 動画のサムネイル（画面の YouTubeEmbed と同じ画像なので、React に置き換わっても二重に読み込まない）
       (video
         ? `<h2>「${escapeHtml(work.title)}」の動画</h2><figure>` +

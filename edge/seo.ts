@@ -64,6 +64,7 @@ export interface WorkForSeo extends WorkForTitle {
   tags: { name: string; kind: string }[]
   staff?: { role: string; name: string }[]
   cast?: { character: string; name: string }[]
+  sequel?: { announced: boolean }
 }
 
 export function workPageDescription(w: WorkForSeo): string {
@@ -73,7 +74,7 @@ export function workPageDescription(w: WorkForSeo): string {
   const cast = castSummary(w.cast ?? [])
   return summarize(
     `${season ? season + 'の' : ''}${mediaLabel(w.media)}「${w.title}」の${sequelPhrase(w.title, w.media)}、見たい？` +
-      `続編希望${sequel}票・キレイに終わった${complete}票。${staff ? staff + '。' : ''}${cast ? cast + '。' : ''}` +
+      `${w.sequel?.announced ? '続編（シリーズの新作）の情報あり。' : ''}続編希望${sequel}票・キレイに終わった${complete}票。${staff ? staff + '。' : ''}${cast ? cast + '。' : ''}` +
       `ファンのみんなの評価と掲示板。あなたの1票で続編を応援しよう。`,
     160,
   )
@@ -256,4 +257,59 @@ export function previousSeasonName(now: Date = new Date()): string {
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
   const q = Math.floor(jst.getUTCMonth() / 3)
   return q === 0 ? `${jst.getUTCFullYear() - 1}-autumn` : `${jst.getUTCFullYear()}-${SEASONS_BY_QUARTER[q - 1]}`
+}
+
+// ---- 最終回・続編決定 ----
+
+export const FINALES_TITLE = '今週最終回のアニメ｜2期（続編）見たい？投票受付中'
+export const FINALES_DESCRIPTION =
+  '今週最終回を迎えたアニメと、まもなく最終回のアニメの一覧。見終わったら「続編希望」か「キレイに終わった」かを投票しよう。最終回直後のファンの声を数字にして届けます。'
+
+export const SEQUELS_TITLE = '続編決定アニメ一覧｜FanVoiceで続編を希望された作品'
+export const SEQUELS_DESCRIPTION =
+  'FanVoiceで「続編希望」の声が集まっていたアニメの、続編（2期・劇場版など）決定の一覧。発表時点の続編希望の票数とあわせて紹介します。'
+/** 実績ページを検索エンジンに載せ、サイト内からリンクする件数 */
+export const SEQUELS_MIN_ITEMS = 3
+
+/** 日本時間の「12/24(水) 23:00」。形式が違えば空 */
+export function broadcastTimeLabel(iso: string | undefined): string {
+  if (!iso) return ''
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return ''
+  const d = new Date(t + 9 * 3600 * 1000)
+  const wd = ['日', '月', '火', '水', '木', '金', '土'][d.getUTCDay()]
+  const hh = String(d.getUTCHours()).padStart(2, '0')
+  const mm = String(d.getUTCMinutes()).padStart(2, '0')
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${wd}) ${hh}:${mm}`
+}
+
+/** 最終回から何日たったか（未来なら負）。日本時間の日付で数える */
+export function daysSinceJst(iso: string, now = new Date()): number {
+  const day = (ms: number) => Math.floor((ms + 9 * 3600 * 1000) / 86400000)
+  return day(now.getTime()) - day(Date.parse(iso))
+}
+
+/** 作品ページの「続編（2期）はある？」の答え（画面・検索エンジン向けHTML・構造化データで同じ文にする） */
+export function sequelAnswer(
+  w: { title: string; media: string; tally: { total: { sequel: number; complete: number } } },
+  st: { announced: boolean; works: { title: string; seasonName: string }[]; notes: string[] } | undefined,
+): string {
+  const word = sequelWord(w.title, w.media)
+  const { sequel, complete } = w.tally.total
+  const voices = `FanVoiceでは続編希望${sequel}票・キレイに終わった${complete}票が集まっています。`
+  if (st?.announced) {
+    const first = st.works[0]
+    const label = first ? seasonLabelFromSlug(first.seasonName) : null
+    const what = first ? `「${first.title}」${label ? `（${label}）` : ''}` : ''
+    const note = st.notes[0] ? `（${st.notes[0]}）` : ''
+    return what
+      ? `はい。シリーズの続く作品として${what}があります${note}。${voices}`
+      : `はい。続編の発表がありました${note}。${voices}`
+  }
+  return `現時点で「${w.title}」の${word}（続編）の発表は確認できていません。${voices}あなたの1票で続編を応援しよう。`
+}
+
+/** 日時がもう過ぎたか */
+export function isPast(iso: string, now = new Date()): boolean {
+  return Date.parse(iso) <= now.getTime()
 }

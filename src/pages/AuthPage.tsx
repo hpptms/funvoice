@@ -1,7 +1,7 @@
 import { Alert, Box, Button, Card, CardContent, Link, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
-import { Navigate, Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Navigate, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import IconPicker from '../components/account/IconPicker'
 import Turnstile, { type TurnstileHandle } from '../components/account/Turnstile'
@@ -19,6 +19,9 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
   const me = useMe()
   const setMe = useSetMe()
   const navigate = useNavigate()
+  // ログイン後に戻るページ（作品ページの「ログインすると予想できます」など）。サイト内のパスだけ受け付ける
+  const fromState = (useLocation().state as { from?: unknown } | null)?.from
+  const from = typeof fromState === 'string' && /^\/(?!\/)/.test(fromState) ? fromState : null
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -48,7 +51,8 @@ export default function AuthPage({ mode }: { mode: 'register' | 'login' }) {
     },
     onSuccess: ({ user, iconError }) => {
       setMe(user)
-      navigate('/mypage', { replace: true, state: iconError ? { iconError } : undefined })
+      if (from && !iconError && !register) navigate(from, { replace: true })
+      else navigate('/mypage', { replace: true, state: iconError ? { iconError } : undefined })
     },
     // 人間チェックのトークンは1回しか使えないので、失敗したらやり直す
     onError: () => captcha.current?.reset(),

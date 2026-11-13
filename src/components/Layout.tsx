@@ -1,11 +1,13 @@
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
-import { AppBar, Box, Button, Container, Link, Toolbar, Typography } from '@mui/material'
+import { AppBar, Badge, Box, Button, Container, IconButton, Link, Toolbar, Typography } from '@mui/material'
 import { Suspense } from 'react'
 import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
 import { useMe } from '../lib/auth'
+import { useUnreadCount } from '../lib/notifications'
 import SupporterBadge from './account/SupporterBadge'
 import UserIcon from './account/UserIcon'
 import BackButton from './BackButton'
@@ -36,6 +38,7 @@ export default function Layout() {
   // ランキングは「続編希望／キレイに終わった」「時期」でURLが変わるので、どれを開いていてもナビを選択中にする
   const isRanking = pathname.startsWith('/ranking')
   const me = useMe()
+  const unread = useUnreadCount()
 
   const navSx = {
     color: 'inherit',
@@ -153,6 +156,18 @@ export default function Layout() {
           )}
           <Box sx={{ flex: 1 }} />
           {/* 読み込み中（undefined）は何も出さず、ログイン状態が分かってから表示する（ちらつき防止） */}
+          {me && (
+            <IconButton
+              component={NavLink}
+              to="/notifications"
+              aria-label={unread > 0 ? `通知（未読${unread}件）` : '通知'}
+              sx={{ color: 'inherit', width: 40, height: 40, '&.active': retro ? { color: RETRO_HEADER_GREEN } : { color: 'primary.main' } }}
+            >
+              <Badge badgeContent={unread} color="error" max={99} overlap="circular">
+                <NotificationsNoneIcon />
+              </Badge>
+            </IconButton>
+          )}
           {me ? (
             <Button component={NavLink} to="/mypage" sx={{ ...navSx, gap: 0.75, maxWidth: { xs: 44, sm: 200 } }} aria-label="マイページ">
               {me.iconUrl ? (

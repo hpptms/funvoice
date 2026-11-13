@@ -87,6 +87,124 @@ export interface Work {
   seasonRank?: { rank: number; total: number }
   /** 紹介動画（YouTube）の情報。バックエンドが取得済みで、視聴できる動画の場合だけ */
   video?: { title: string; uploadDate: string; durationSec?: number }
+  /** 続編（2期）はある？（シリーズの後の時期の作品・記録した発表） */
+  sequel?: SequelStatus
+  /** 続編予想の人数と、受け付けているか */
+  predictions?: PredictionCounts
+  /** 最終回の日時の目安（日本時間の RFC3339） */
+  lastBroadcastAt?: string
+}
+
+export interface SequelStatus {
+  announced: boolean
+  /** シリーズの後の時期の作品（放送順） */
+  works: RelatedWork[]
+  /** 管理者が登録した発表のメモ（例: 2027年放送決定） */
+  notes: string[]
+  announcedAt?: string
+  /** シリーズ情報を確認した日時 */
+  checkedAt?: string
+}
+
+export interface PredictionCounts {
+  yes: number
+  no: number
+  /** 予想を受け付けているか（続編が発表済み・放送前の作品は受け付けない） */
+  open: boolean
+}
+
+export interface MyPrediction {
+  willAnnounce: boolean
+  createdAt: string
+  deadline: string
+  /** これを過ぎると変更できない */
+  changeableUntil: string
+  result?: 'hit' | 'miss'
+}
+
+export interface MyVoteItem {
+  work: RelatedWork
+  choice: Choice
+  votedAt: string
+  image?: Work['image']
+  youtubeId?: string
+  sequelAnnounced: boolean
+}
+
+export interface MyPostItem {
+  threadId: number
+  threadTitle: string
+  workId: number
+  workTitle: string
+  no: number
+  excerpt: string
+  createdAt: string
+  replyCount: number
+  plus: number
+  minus: number
+  url: string
+}
+
+export interface MyPredictionItem extends MyPrediction {
+  work: RelatedWork
+}
+
+export interface PredictionStats {
+  /** 「発表される」を当てた数（バッジ） */
+  yesHits: number
+  hits: number
+  misses: number
+  pending: number
+}
+
+export interface Notification {
+  id: number
+  kind: 'reply' | 'sequel'
+  createdAt: string
+  read: boolean
+  url: string
+  workId?: number
+  workTitle?: string
+  threadId?: number
+  threadTitle?: string
+  postNo?: number
+  replyNo?: number
+  excerpt?: string
+  sequelWorkId?: number
+  sequelWorkTitle?: string
+  sequelSeasonName?: string
+  note?: string
+}
+
+export interface NotifySettings {
+  pushReply: boolean
+  pushSequel: boolean
+  /** サーバー側でプッシュ通知が使えるか */
+  pushAvailable: boolean
+  /** 通知を受け取る端末の数 */
+  devices: number
+}
+
+export interface FinaleWork extends Work {
+  lastBroadcastAt: string
+}
+
+export interface SequelAchievement {
+  id: number
+  work: RelatedWork
+  sequelWork?: RelatedWork
+  note?: string
+  /** 発表時点の票 */
+  sequelVotes: number
+  completeVotes: number
+  announcedAt: string
+  source: 'auto' | 'admin'
+}
+
+export interface Paged {
+  total: number
+  page: number
+  perPage: number
 }
 
 export interface StaffCredit {
@@ -116,6 +234,10 @@ export interface Ranking {
   works: Work[]
   /** まだ票の少ない人気作品 */
   candidates: Work[]
+  /** 放送時期別だけ: 確定版（クールが終わって3週間後に固定したランキング） */
+  final?: { createdAt: string; items: { id: number; title: string; sequel: number; complete: number }[] } | null
+  /** 放送時期別だけ: 確定する日時 */
+  finalAt?: string
 }
 
 export type Season = 'winter' | 'spring' | 'summer' | 'autumn'
@@ -376,6 +498,14 @@ export const api = {
     }),
   unvote: (id: number) =>
     request<{ tally: Tally; myVote: MyVote | null }>(`/works/${id}/vote`, { method: 'DELETE' }),
+  getMyPrediction: (id: number) => request<{ prediction: MyPrediction | null }>(`/works/${id}/my-prediction`),
+  predict: (id: number, willAnnounce: boolean) =>
+    request<{ prediction: MyPrediction; counts: PredictionCounts }>(`/works/${id}/prediction`, {
+      method: 'PUT',
+      body: JSON.stringify({ willAnnounce }),
+    }),
+  getFinales: () => request<{ ended: FinaleWork[]; upcoming: FinaleWork[] }>('/finales'),
+  getSequels: () => request<{ sequels: SequelAchievement[] }>('/sequels'),
   listTags: () => request<{ tags: Tag[] }>('/tags'),
   getRanking: (kind: 'sequel' | 'complete', season?: string) =>
     request<Ranking>(`/rankings?kind=${kind}${season ? `&season=${season}` : ''}`),
@@ -424,6 +554,22 @@ export const api = {
       request<{ user: User }>('/me/icon', { method: 'PUT', body: JSON.stringify(input) }),
     iconUploadSignature: () => request<IconUploadSignature>('/me/icon/upload', { method: 'POST' }),
   },
+  me: {
+    votes: (page = 1) => request<Paged & { votes: MyVoteItem[] }>(`/me/votes?page=${page}`),
+    posts: (page = 1) => request<Paged & { posts: MyPostItem[] }>(`/me/posts?page=${page}`),
+    predictions: (page = 1) =>
+      request<Paged & { predictions: MyPredictionItem[]; stats: PredictionStats }>(`/me/predictions?page=${page}`),
+    notifications: (page = 1) => request<Paged & { notifications: Notification[] }>(`/me/notifications?page=${page}`),
+    unread: () => request<{ unread: number }>('/me/notifications/unread'),
+    markRead: (input: { all: true } | { ids: number[] }) =>
+      request<void>('/me/notifications/read', { method: 'POST', body: JSON.stringify(input) }),
+    settings: () => request<NotifySettings>('/me/settings'),
+    saveSettings: (input: Partial<Pick<NotifySettings, 'pushReply' | 'pushSequel'>>) =>
+      request<NotifySettings>('/me/settings', { method: 'PUT', body: JSON.stringify(input) }),
+    pushKey: () => request<{ enabled: boolean; publicKey: string }>('/push/key'),
+    subscribePush: (sub: PushSubscriptionJSON) => request<void>('/me/push', { method: 'POST', body: JSON.stringify(sub) }),
+    unsubscribePush: (endpoint: string) => request<void>('/me/push', { method: 'DELETE', body: JSON.stringify({ endpoint }) }),
+  },
   billing: {
     /** 受付状況と価格（ログイン不要） */
     plan: () => request<Pick<SubscriptionInfo, 'enabled' | 'price'>>('/billing/plan'),
@@ -467,6 +613,10 @@ export const api = {
     ) =>
       request<Work>(`/admin/works/${id}`, { method: 'PATCH', body: JSON.stringify(patch), admin: true }),
     deleteWork: (id: number) => request<void>(`/admin/works/${id}`, { method: 'DELETE', admin: true }),
+    listSequels: () => request<{ sequels: SequelAchievement[] }>('/admin/sequels', { admin: true }),
+    createSequel: (input: { baseWorkId: number; sequelWorkId?: number; note?: string }) =>
+      request<{ id: number }>('/admin/sequels', { method: 'POST', body: JSON.stringify(input), admin: true }),
+    deleteSequel: (id: number) => request<void>(`/admin/sequels/${id}`, { method: 'DELETE', admin: true }),
     resolveContact: (id: number) => request<void>(`/admin/contacts/${id}/resolve`, { method: 'PUT', admin: true }),
   },
 }

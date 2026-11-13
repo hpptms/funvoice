@@ -2,7 +2,7 @@
 // 作品はバックエンドが「載せる作品」（票・コメントのある作品、今期・前期の作品、人気作品）だけを返す
 import { escapeHtml, siteOrigin, workImageUrl, type ApiTag, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
-import { RANKING_MIN_WORKS, rankingPath, tagPath, type RankingKind } from '../edge/seo'
+import { RANKING_MIN_WORKS, SEQUELS_MIN_ITEMS, rankingPath, tagPath, type RankingKind } from '../edge/seo'
 
 interface SitemapData {
   /** 作品の紹介動画・画像（画像の情報として sitemap に載せ、画像検索に出やすくする） */
@@ -10,6 +10,9 @@ interface SitemapData {
   threads?: { id: number; updatedAt: string }[]
   /** ランキングの候補と、それぞれのランキングに入る作品の数（season "" = 全期間） */
   rankings?: { season: string; sequel: number; complete: number }[]
+  /** 今週最終回の作品があるか・続編決定の記録の数（中身のあるときだけ載せる） */
+  finales?: number
+  sequels?: number
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
@@ -31,6 +34,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     url(`${origin}/tags`),
     ...['about', 'help', 'faq', 'terms', 'privacy', 'copyright', 'tokushoho', 'supporter', 'contact'].map((p) => url(`${origin}/${p}`)),
     ...rankings,
+    ...((works.data.finales ?? 0) > 0 ? [url(`${origin}/finales`)] : []),
+    ...((works.data.sequels ?? 0) >= SEQUELS_MIN_ITEMS ? [url(`${origin}/sequels`)] : []),
     ...(tags.data?.tags ?? []).filter((t) => (t.workCount ?? 0) > 0).map((t) => url(`${origin}${tagPath(t)}`)),
     ...works.data.works.map((w) => url(`${origin}/works/${w.id}`, w.updatedAt, workImageUrl(w))),
     ...(works.data.threads ?? []).map((t) => url(`${origin}/threads/${t.id}`, t.updatedAt)),

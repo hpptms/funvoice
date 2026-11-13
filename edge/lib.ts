@@ -291,6 +291,11 @@ export interface ApiWork {
   seasonRank?: { rank: number; total: number }
   /** 紹介動画（YouTube）の情報。バックエンドが取得済みで、視聴できる動画の場合だけ */
   video?: { title: string; uploadDate: string; durationSec?: number }
+  /** 続編（2期）はある？ */
+  sequel?: { announced: boolean; works: ApiRelatedWork[]; notes: string[]; announcedAt?: string; checkedAt?: string }
+  predictions?: { yes: number; no: number; open: boolean }
+  /** 最終回の日時の目安 */
+  lastBroadcastAt?: string
 }
 export interface ApiRelatedWork {
   id: number
@@ -306,6 +311,8 @@ export interface ApiRanking {
   season: string
   works: ApiWork[]
   candidates: ApiWork[]
+  final?: { createdAt: string; items: { id: number; title: string; sequel: number; complete: number }[] } | null
+  finalAt?: string
 }
 export interface ApiWorkList {
   works: ApiWork[]

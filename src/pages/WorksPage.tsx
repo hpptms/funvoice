@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
+import FlagIcon from '@mui/icons-material/SportsScore'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import {
   Alert,
@@ -186,6 +187,17 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
               </RankingBanner>
             ))}
           </Stack>
+        )}
+        {/* 最終回の直後に投票してもらうための入り口（トップだけ） */}
+        {!baseTagId && (
+          <Link
+            component={RouterLink}
+            to="/finales"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1.5, fontSize: 14, fontWeight: 700, minHeight: 24, width: 'fit-content' }}
+          >
+            <FlagIcon aria-hidden sx={{ fontSize: 18 }} />
+            今週最終回のアニメに投票しよう
+          </Link>
         )}
         {/* サポーターの案内（トップだけ）。ずれ（CLS）を防ぐため、ログイン状態の読み込み中も出しておき、サポーター本人のときだけ消す */}
         {!baseTagId && !me?.premium && (

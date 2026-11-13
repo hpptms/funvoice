@@ -5,6 +5,9 @@ export const AddWorkPage = lazyPage(() => import('./pages/AddWorkPage'))
 export const AdminPage = lazyPage(() => import('./pages/AdminPage'))
 export const AuthPage = lazyPage(() => import('./pages/AuthPage'))
 export const MyPage = lazyPage(() => import('./pages/MyPage'))
+export const NotificationsPage = lazyPage(() => import('./pages/NotificationsPage'))
+export const FinalesPage = lazyPage(() => import('./pages/FinalesPage'))
+export const SequelsPage = lazyPage(() => import('./pages/SequelsPage'))
 export const ContactPage = lazyPage(() => import('./pages/ContactPage'))
 export const StaticPage = lazyPage(() => import('./pages/StaticPage'))
 export const TagsPage = lazyPage(() => import('./pages/TagsPage'))
@@ -16,6 +19,9 @@ const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/admin\/?$/, AdminPage.preload],
   [/^\/(register|login)\/?$/, AuthPage.preload],
   [/^\/mypage\/?$/, MyPage.preload],
+  [/^\/notifications\/?$/, NotificationsPage.preload],
+  [/^\/finales\/?$/, FinalesPage.preload],
+  [/^\/sequels\/?$/, SequelsPage.preload],
   [/^\/contact\/?$/, ContactPage.preload],
   [/^\/(about|help|faq|terms|privacy|copyright|tokushoho)\/?$/, StaticPage.preload],
   [/^\/tags\/?$/, TagsPage.preload],

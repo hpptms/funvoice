@@ -8,6 +8,7 @@ import { TallyBar } from '../components/VoteTally'
 import WorkCard from '../components/WorkCard'
 import {
   RANKING_MIN_WORKS,
+  isPast,
   isRankingKind,
   isSeasonName,
   rankingDescription,
@@ -17,6 +18,7 @@ import {
   seasonLabelFromSlug,
   type RankingKind,
 } from '../../edge/seo'
+import { formatDateTime } from '../lib/format'
 import { takeInitialData, usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
@@ -108,8 +110,42 @@ function RankingView({ kind, season }: { kind: RankingKind; season?: string }) {
       )}
       {query.isError && <Alert severity="error">{(query.error as Error).message}</Alert>}
 
+      {data?.final && (
+        <Window file={`final_${kind}.log`} title={`確定版（${formatDateTime(data.final.createdAt, false).slice(0, 10)} 確定）`}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {retro && '// '}クールが終わって3週間後の票で確定したランキングです。下の「現在の票」は今も投票で変わります。
+          </Typography>
+          {data.final.items.length === 0 ? (
+            <Typography color="text.secondary">確定時点で票のある作品はありませんでした。</Typography>
+          ) : (
+            <Box component="ol" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+              {data.final.items.map((w, i) => (
+                <Box
+                  component="li"
+                  key={w.id}
+                  sx={{ display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', gap: 1, alignItems: 'center', py: 0.75, borderTop: i === 0 ? 0 : 1, borderColor: 'divider' }}
+                >
+                  <Typography sx={{ fontFamily: PIXEL_FONT, color: `${accent}.main`, textAlign: 'center' }}>{i + 1}位</Typography>
+                  <Link component={RouterLink} to={`/works/${w.id}`} color="inherit" sx={{ wordBreak: 'break-word' }}>
+                    {w.title}
+                  </Link>
+                  <Typography sx={{ fontFamily: PIXEL_FONT, color: `${accent}.main`, whiteSpace: 'nowrap' }}>
+                    {kind === 'sequel' ? w.sequel : w.complete}票
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Window>
+      )}
+      {data && !data.final && data.finalAt && !isPast(data.finalAt) && (
+        <Typography variant="body2" color="text.secondary">
+          {retro && '// '}このランキングは{formatDateTime(data.finalAt, false).slice(0, 10)}に「確定版」として固定されます。それまでの票で順位が決まります。
+        </Typography>
+      )}
+
       {data && (
-        <Window file={`ranking_${kind}.log`} title="ランキング">
+        <Window file={`ranking_${kind}.log`} title={data.final ? '現在の票' : 'ランキング'}>
           {data.works.length === 0 ? (
             <Typography color="text.secondary">
               {retro && '> '}まだ投票がありません。下の作品に投票すると、ランキングに載ります。

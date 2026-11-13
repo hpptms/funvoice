@@ -17,3 +17,8 @@
   Cache-Control: public, max-age=86400
 /site.webmanifest
   Cache-Control: public, max-age=86400
+
+# プッシュ通知の Service Worker（更新がすぐ届くようにキャッシュさせない）
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /

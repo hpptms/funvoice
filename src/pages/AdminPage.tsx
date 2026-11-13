@@ -120,6 +120,7 @@ export default function AdminPage() {
       <WorkMediaManager />
       <PendingWorks />
       <RecentEdits />
+      <SequelManager />
       <ContactManager />
       <ReportManager />
       <TagManager />
@@ -355,6 +356,56 @@ function RecentEdits() {
 }
 
 /** お問い合わせ・削除依頼（未対応）。削除依頼が先頭に並ぶ */
+/** 記録した続編の発表（自動・管理者の登録）。誤りは消せる（送った通知・予想の判定は戻らない）。登録は作品ページの管理者メニューから */
+function SequelManager() {
+  const qc = useQueryClient()
+  const { data, isError, error } = useQuery({ queryKey: ['admin', 'sequels'], queryFn: api.admin.listSequels })
+  const del = useMutation({
+    mutationFn: api.admin.deleteSequel,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'sequels'] }),
+  })
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          続編の発表
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Annict のシリーズに新しい作品が加わると自動で記録され、続編希望に投票・予想した人に通知が届きます。Annict に無い発表は作品ページの管理者メニューから登録できます。
+        </Typography>
+        {isError && <Alert severity="error">{(error as Error).message}</Alert>}
+        {data?.sequels.length === 0 && <Typography color="text.secondary">まだ記録はありません。</Typography>}
+        <Stack spacing={1}>
+          {data?.sequels.map((a) => (
+            <Stack key={a.id} direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { sm: 'center' }, borderTop: 1, borderColor: 'divider', pt: 1 }}>
+              <Box sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+                <Typography variant="caption" color="text.secondary">
+                  {formatDateTime(a.announcedAt, false)}・{a.source === 'auto' ? '自動' : '管理者'}・発表時点 続編希望{a.sequelVotes}票
+                </Typography>
+                <Typography variant="body2">
+                  <Link component={RouterLink} to={`/works/${a.work.id}`}>{a.work.title}</Link>
+                  {' → '}
+                  {a.sequelWork ? <Link component={RouterLink} to={`/works/${a.sequelWork.id}`}>{a.sequelWork.title}</Link> : '（作品なし）'}
+                  {a.note && `（${a.note}）`}
+                </Typography>
+              </Box>
+              <Button
+                size="small"
+                color="error"
+                disabled={del.isPending}
+                onClick={() => confirm('この記録を削除しますか？（送った通知・予想の判定は戻りません）') && del.mutate(a.id)}
+              >
+                削除
+              </Button>
+            </Stack>
+          ))}
+        </Stack>
+        {del.isError && <Alert severity="error" sx={{ mt: 1 }}>{(del.error as Error).message}</Alert>}
+      </CardContent>
+    </Card>
+  )
+}
+
 function ContactManager() {
   const qc = useQueryClient()
   const { data, isError, error } = useQuery({ queryKey: ['admin-contacts'], queryFn: api.admin.listContacts })
