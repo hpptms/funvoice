@@ -185,6 +185,17 @@ export interface NotifySettings {
   devices: number
 }
 
+/** トップの「最近の動き」1件（誰がしたかは含まない） */
+export interface Activity {
+  kind: 'vote' | 'post'
+  workId: number
+  workTitle: string
+  choice?: 'sequel' | 'complete'
+  threadId?: number
+  postNo?: number
+  at: string
+}
+
 export interface FinaleWork extends Work {
   lastBroadcastAt: string
 }
@@ -504,6 +515,7 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ willAnnounce }),
     }),
+  getActivity: () => request<{ items: Activity[] }>('/activity'),
   getFinales: () => request<{ ended: FinaleWork[]; upcoming: FinaleWork[] }>('/finales'),
   getSequels: () => request<{ sequels: SequelAchievement[] }>('/sequels'),
   listTags: () => request<{ tags: Tag[] }>('/tags'),

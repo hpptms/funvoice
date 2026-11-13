@@ -22,6 +22,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../api/client'
 import { Cursor, Prompt, RankingBanner } from '../components/Retro'
+import RecentActivity from '../components/RecentActivity'
 import WorkCard from '../components/WorkCard'
 import {
   TOP_HEADING,
@@ -176,6 +177,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           {retro && '// '}
           {pageTag ? tagPageDescription(pageTag.name, data?.total) : TOP_LEAD}
         </Typography>
+        {/* トップのPC幅では、ランキング・下のリンクの右の空きに最近の投票・書き込みを出す */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
+        <Box sx={{ flexShrink: 0, maxWidth: '100%' }}>
         {(isSeasonName(season) || !baseTagId) && (
           <Stack direction="row" useFlexGap sx={{ mt: 2, mb: 0.5, gap: 2, flexWrap: 'wrap' }}>
             {(['sequel', 'complete'] as const).map((kind) => (
@@ -214,6 +218,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
             </Link>
           </Stack>
         )}
+        </Box>
+        {!baseTagId && <RecentActivity />}
+        </Box>
       </Box>
       <Button component={RouterLink} to="/works/new" variant="outlined" startIcon={<AddIcon />} sx={{ height: 44, flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'auto' } }}>
         作品を追加
