@@ -60,6 +60,9 @@ export default function RecentActivity() {
         minWidth: 0,
         maxWidth: 460,
         mr: 1,
+        // 左のランキングボタン・リンクより少し下げる
+        position: 'relative',
+        top: 10,
       }}
     >
       <Box
@@ -140,28 +143,6 @@ export default function RecentActivity() {
           </Box>
         )}
       </Box>
-      </Box>
-      {/* マーカー置き（飾り） */}
-      <Box
-        aria-hidden
-        sx={{
-          alignSelf: 'center',
-          width: '70%',
-          height: 7,
-          mt: '-1px',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-start',
-          gap: 1,
-          pr: 2,
-          ...(retro
-            ? { bgcolor: '#fbfaf4', border: `2px solid ${ink}`, borderTop: 0, mt: '4px', boxShadow: `4px 4px 0 ${ink}` }
-            : { bgcolor: '#c9ced6', borderRadius: '0 0 4px 4px' }),
-        }}
-      >
-        {(['primary.main', 'secondary.main'] as const).map((c) => (
-          <Box key={c} sx={{ width: 26, height: 5, mt: retro ? 0 : '1px', bgcolor: c, ...(retro ? {} : { borderRadius: 2 }) }} />
-        ))}
       </Box>
     </Box>
   )
