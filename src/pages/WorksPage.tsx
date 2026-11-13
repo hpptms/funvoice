@@ -171,7 +171,8 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           ))}
           <Cursor />
         </Typography>
-        <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 13 }}>
+        {/* トップの説明文はPC幅（lg以上）では1行で見せる。タグページの文は長さが変わるので折り返しのまま */}
+        <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 13, whiteSpace: pageTag ? undefined : { lg: 'nowrap' } }}>
           {retro && '// '}
           {pageTag ? tagPageDescription(pageTag.name, data?.total) : TOP_LEAD}
         </Typography>
