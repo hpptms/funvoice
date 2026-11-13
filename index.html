@@ -23,15 +23,26 @@
       背景はReact起動後と同じ色（既定のレトロ表示）にして、切り替わりの白いちらつきを抑える。
       CSPでインラインscriptは使えないので、CSSだけで行う
     -->
+    <!--
+      .fv-boot は React 起動までの間だけ出す、ヘッダー（黒い帯とロゴ）の仮の表示。
+      何も描かれない時間を作らない（スマホの FCP がJSの読み込み待ちにならない）ため。
+      位置・大きさは src/components/Layout.tsx のヘッダー（レトロ表示）と同じにし、置き換わっても見た目が動かないようにしている
+    -->
     <style>
       body { margin: 0; background: #ecebe3; }
       .fv-ssr { visibility: hidden; animation: fv-ssr-show 0s 4s forwards; }
       @keyframes fv-ssr-show { to { visibility: visible; } }
+      .fv-boot { box-sizing: border-box; height: 58px; padding: 14px 12px; background: #141414; border-bottom: 2px solid #141414; }
+      .fv-boot img { display: block; width: 28px; height: 28px; outline: 2px solid #d4005c; image-rendering: pixelated; }
+      @media (min-width: 600px) {
+        .fv-boot { padding: 12px 24px; }
+        .fv-boot img { width: 32px; height: 32px; }
+      }
     </style>
-    <noscript><style>.fv-ssr { visibility: visible; animation: none; }</style></noscript>
+    <noscript><style>.fv-ssr { visibility: visible; animation: none; } .fv-boot { display: none; }</style></noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="fv-boot" aria-hidden="true"><img src="/logo-64.png" alt="" width="32" height="32" fetchpriority="high" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

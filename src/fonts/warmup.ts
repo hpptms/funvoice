@@ -39,15 +39,37 @@ export function parseFaces(css: string): Face[] {
 export function usedFaces(faces: Face[], text: string): Face[] {
   const codes = new Set<number>()
   for (const ch of text) codes.add(ch.codePointAt(0)!)
-  const sorted = [...codes].sort((a, b) => a - b)
-  return faces.filter((f) => f.ranges.some(([lo, hi]) => sorted.some((c) => c >= lo && c <= hi)))
+  const sorted = Int32Array.from(codes).sort()
+  // 範囲 [lo, hi] に入る文字があるか（sorted の中で lo 以上の最初の値が hi 以下か）を二分探索で調べる
+  const hasIn = (lo: number, hi: number) => {
+    let l = 0
+    let r = sorted.length
+    while (l < r) {
+      const m = (l + r) >> 1
+      if (sorted[m] < lo) l = m + 1
+      else r = m
+    }
+    return l < sorted.length && sorted[l] <= hi
+  }
+  return faces.filter((f) => f.ranges.some(([lo, hi]) => hasIn(lo, hi)))
 }
+
+/** 処理を区切ってブラウザに手を返す（1回の処理が長くなって操作の反応が遅れないように） */
+const yieldToBrowser = () => new Promise<void>((resolve) => setTimeout(resolve, 0))
 
 export async function warmFonts(): Promise<void> {
   if (typeof FontFace === 'undefined') return
-  const faces = usedFaces(parseFaces(dot400 + mono400 + mono700), document.title + document.body.innerText)
+  // innerText はレイアウト計算が走って重いので textContent を使う（#root の中だけ見る）
+  const text = document.title + (document.getElementById('root')?.textContent ?? '')
+  const faces: Face[] = []
+  for (const css of [dot400, mono400, mono700]) {
+    await yieldToBrowser()
+    faces.push(...parseFaces(css))
+  }
+  await yieldToBrowser()
+  const used = usedFaces(faces, text)
   // document.fonts に追加しないので画面には使われず、取得したファイルが HTTP キャッシュに残るだけ
   await Promise.allSettled(
-    faces.map((f) => new FontFace(f.family, `url(${f.url}) format('woff2')`, { weight: f.weight }).load()),
+    used.map((f) => new FontFace(f.family, `url(${f.url}) format('woff2')`, { weight: f.weight }).load()),
   )
 }

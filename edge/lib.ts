@@ -178,7 +178,8 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
     .on('head', { element: (e) => void e.append(head, { html: true }) })
 
   if (meta.bodyHtml) {
-    rewriter = rewriter.on('#root', { element: (e) => void e.setInnerContent(meta.bodyHtml!, { html: true }) })
+    // index.html の #root にある仮のヘッダー（.fv-boot）は残し、その後ろに本文を足す
+    rewriter = rewriter.on('#root', { element: (e) => void e.append(meta.bodyHtml!, { html: true }) })
   }
   if (meta.initialData) {
     const { id, data } = meta.initialData
