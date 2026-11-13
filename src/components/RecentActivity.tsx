@@ -1,8 +1,9 @@
-import { Box, Link, Typography } from '@mui/material'
+import { Box, Link, Typography, useMediaQuery, type Theme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { api, type Activity } from '../api/client'
+import { afterPageLoad } from '../lib/afterPageLoad'
 import { formatRelative } from '../lib/format'
 import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
@@ -31,18 +32,26 @@ function target(a: Activity): string {
  * 誰がしたかは出さず、作品名と種類と時刻だけを出す。
  */
 export default function RecentActivity() {
+  // スマホ・タブレットでは出さないので取得もしない。PCでもページの読み込みが終わってから取る
+  // （作品一覧・画像の読み込みと通信を取り合って、表示の速さの評価を下げないように）
+  const wide = useMediaQuery((t: Theme) => t.breakpoints.up('lg'), { noSsr: true })
+  const [loaded, setLoaded] = useState(false)
+  useEffect(() => afterPageLoad(() => setLoaded(true)), [])
+  const active = wide && loaded
   const { data } = useQuery({
     queryKey: ['activity'],
     queryFn: api.getActivity,
+    enabled: active,
     // エッジでキャッシュされ、投票・書き込みがあると無効化されるので、1分ごとに取り直しても軽い
-    refetchInterval: 60_000,
+    refetchInterval: active ? 60_000 : false,
   })
   // 「〇分前」を進めるため1分ごとに描き直す
   const [, setTick] = useState(0)
   useEffect(() => {
+    if (!active) return
     const id = setInterval(() => setTick((t) => t + 1), 60_000)
     return () => clearInterval(id)
-  }, [])
+  }, [active])
 
   const items = (data?.items ?? []).slice(0, ROWS)
   const retro = useRetro()
