@@ -332,8 +332,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           }}
         >
           {data.works.map((w, i) => (
-            // 最初の数枚は画面の一番上に出る（LCP）ので、遅延読み込みにせず優先して取りに行く
-            <WorkCard key={w.id} work={w} priority={i < 2} />
+            // 1行目のカードは画面の一番上に出る（LCP）ので、遅延読み込みにせず優先して取りに行く。
+            // PC幅では1行に3〜4枚並び、どれがLCPになるかは画像の届く順で変わるので、4枚目までを対象にする
+            <WorkCard key={w.id} work={w} priority={i < 4} />
           ))}
         </Box>
       )}
