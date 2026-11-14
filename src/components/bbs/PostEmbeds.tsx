@@ -1,6 +1,7 @@
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import { Box, ButtonBase, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
+import { stripSpoilers } from '../../../edge/spoiler'
 import { findEmbeds, niconicoPlayerUrl, vimeoPlayerUrl, type Embed } from '../../lib/embed'
 import { useRetro } from '../../lib/styleMode'
 import RemoteImage from '../RemoteImage'
@@ -13,7 +14,8 @@ import { YouTubeEmbed } from '../works/WorkMedia'
  * - 動画はどれも、押すまで外部のプレーヤー・ファイルを読み込まない（表示を軽くし、外部への通信を減らす）
  */
 export default function PostEmbeds({ body, compact = false }: { body: string; compact?: boolean }) {
-  const embeds = findEmbeds(body)
+  // ネタバレ部分のURLはここでは出さない（ネタバレを開いたときにその中で表示する）
+  const embeds = findEmbeds(stripSpoilers(body))
   if (embeds.length === 0) return null
   return (
     <Stack spacing={1} sx={{ mt: 1 }}>

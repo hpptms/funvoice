@@ -1,7 +1,9 @@
-import { Box, Link, Popover, Typography } from '@mui/material'
+import { Box, ButtonBase, Link, Popover, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
+import { splitSpoilers } from '../../../edge/spoiler'
 import { api } from '../../api/client'
+import { useRetro } from '../../lib/styleMode'
 import { tokenize } from '../../lib/text'
 import PostEmbeds from './PostEmbeds'
 import PostImage from './PostImage'
@@ -12,7 +14,30 @@ import { PostHeader } from './PostItem'
  * アンカー（>>12）はプレビュー、http(s) のURLだけを外部リンク（nofollow ugc）にする。
  */
 export default function PostBody({ threadId, body }: { threadId: number; body: string }) {
-  const nodes: ReactNode[] = tokenize(body).map((t, i) => {
+  const segments = splitSpoilers(body)
+  return (
+    <Typography component="div" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', lineHeight: 1.75, fontSize: 15 }}>
+      {segments.map((seg, i) =>
+        seg.spoiler ? (
+          <Spoiler key={i} threadId={threadId} text={seg.text} />
+        ) : (
+          // ネタバレ枠はブロック表示なので、枠の前後の改行1つは詰める（空行が出ないように）
+          <span key={i}>{renderInline(threadId, trimAround(seg.text, segments[i - 1]?.spoiler, segments[i + 1]?.spoiler))}</span>
+        ),
+      )}
+    </Typography>
+  )
+}
+
+function trimAround(text: string, afterSpoiler?: boolean, beforeSpoiler?: boolean): string {
+  let t = text
+  if (afterSpoiler) t = t.replace(/^[ 　]*\r?\n/, '')
+  if (beforeSpoiler) t = t.replace(/\r?\n[ 　]*$/, '')
+  return t
+}
+
+function renderInline(threadId: number, body: string): ReactNode[] {
+  return tokenize(body).map((t, i) => {
     switch (t.type) {
       case 'anchor':
         return <AnchorLink key={i} threadId={threadId} no={t.no} label={t.value} />
@@ -26,11 +51,45 @@ export default function PostBody({ threadId, body }: { threadId: number; body: s
         return t.value
     }
   })
+}
 
+/**
+ * 「#ネタバレ 〜 #」で囲まれた部分。最初は中身を描画せず（DOMにも出さない）、
+ * 押したときに初めて本文と画像・動画のプレビューを表示する。
+ */
+function Spoiler({ threadId, text }: { threadId: number; text: string }) {
+  const retro = useRetro()
+  const [open, setOpen] = useState(false)
   return (
-    <Typography component="div" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', lineHeight: 1.75, fontSize: 15 }}>
-      {nodes}
-    </Typography>
+    <Box component="span" sx={{ display: 'block', my: 0.75 }}>
+      <ButtonBase
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        sx={{
+          px: 1.5,
+          minHeight: 40,
+          fontSize: 13,
+          fontWeight: 700,
+          fontFamily: 'inherit',
+          color: 'warning.main',
+          border: 1,
+          borderColor: 'warning.main',
+          borderRadius: retro ? 0 : 1.5,
+          bgcolor: (t) => `color-mix(in srgb, ${t.vars!.palette.warning.main} 10%, transparent)`,
+        }}
+      >
+        {open ? '▲ ネタバレを隠す' : '#ネタバレの可能性あり！（タップで表示）'}
+      </ButtonBase>
+      {open && (
+        <Box
+          component="span"
+          sx={{ display: 'block', mt: 0.75, pl: 1.5, borderLeft: 3, borderColor: 'warning.main' }}
+        >
+          {renderInline(threadId, text)}
+          <PostEmbeds body={text} compact />
+        </Box>
+      )}
+    </Box>
   )
 }
 

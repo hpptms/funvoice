@@ -81,3 +81,27 @@ describe('tokenize', () => {
     expect(tokenize(body).map((t) => t.value).join('')).toBe(body)
   })
 })
+
+import { maskSpoilers, splitSpoilers, stripSpoilers } from '../../edge/spoiler'
+
+describe('splitSpoilers', () => {
+  it('#ネタバレ 〜 # を隠す', () => {
+    expect(splitSpoilers('前 #ネタバレ 中身 # 後')).toEqual([
+      { spoiler: false, text: '前 ' },
+      { spoiler: true, text: '中身' },
+      { spoiler: false, text: ' 後' },
+    ])
+  })
+  it('全角＃でも使える・複数ある', () => {
+    expect(maskSpoilers('＃ネタバレA＃と#ネタバレB#')).toBe('［ネタバレ］と［ネタバレ］')
+  })
+  it('閉じる # が無ければ最後まで隠す', () => {
+    expect(maskSpoilers('冒頭\n#ネタバレ\n犯人は〇〇')).toBe('冒頭\n［ネタバレ］')
+  })
+  it('マーカーが無ければそのまま', () => {
+    expect(splitSpoilers('#3話 よかった')).toEqual([{ spoiler: false, text: '#3話 よかった' }])
+  })
+  it('ネタバレ内のURLはプレビュー対象から外す', () => {
+    expect(stripSpoilers('#ネタバレ https://example.com/a.png #')).not.toContain('example.com')
+  })
+})

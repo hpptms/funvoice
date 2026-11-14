@@ -10,6 +10,7 @@ import {
 } from '../../edge/lib'
 import { apiGet } from '../../edge/cache'
 import { threadPageDescription, threadPageTitle } from '../../edge/seo'
+import { maskSpoilers } from '../../edge/spoiler'
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const { request, env, params } = ctx
@@ -53,7 +54,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         '@id': base,
         url: base,
         headline: thread.title,
-        text: first && !first.deleted ? first.body : thread.excerpt,
+        text: first && !first.deleted ? maskSpoilers(first.body) : thread.excerpt,
         datePublished: thread.createdAt,
         dateModified: thread.lastPostedAt,
         author: { '@type': 'Person', name: first && !first.deleted ? first.name : '匿名' },
@@ -65,7 +66,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           .map((p) => ({
             '@type': 'Comment',
             url: `${base}${page > 1 ? `?page=${page}` : ''}#p${p.no}`,
-            text: p.body,
+            text: maskSpoilers(p.body),
             datePublished: p.createdAt,
             author: { '@type': 'Person', name: p.name },
             upvoteCount: p.plus,
@@ -87,7 +88,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     .map((p) =>
       p.deleted
         ? `<li id="p${p.no}">${p.no}. このコメントは削除されました</li>`
-        : `<li id="p${p.no}"><p>${p.no}. ${escapeHtml(p.name)} ${escapeHtml(p.createdAt)} ＋${p.plus} －${p.minus}</p><p style="white-space:pre-wrap">${escapeHtml(p.body)}</p></li>`,
+        : `<li id="p${p.no}"><p>${p.no}. ${escapeHtml(p.name)} ${escapeHtml(p.createdAt)} ＋${p.plus} －${p.minus}</p><p style="white-space:pre-wrap">${escapeHtml(maskSpoilers(p.body))}</p></li>`,
     )
     .join('')
   const body = shellHtml(

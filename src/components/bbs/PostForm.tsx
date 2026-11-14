@@ -100,7 +100,7 @@ export default function PostForm({
           inputRef={textareaRef}
           error={tooLong}
           helperText={
-            `${length} / ${MAX_BODY}文字　「>>番号」で返信できます。画像・YouTube・動画のURLを貼ると表示されます` +
+            `${length} / ${MAX_BODY}文字　「>>番号」で返信、「#ネタバレ 〜 #」で囲むとネタバレを隠せます。画像・YouTube・動画のURLを貼ると表示されます` +
             (embedCount > 0 ? `（${embedCount}件）` : '')
           }
         />
