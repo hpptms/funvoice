@@ -13,7 +13,7 @@ import UserIcon from './account/UserIcon'
 import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
 
-/** フッターのリンク。成り行きで折り返すと最後の1つだけが2行目に残るので、「サイトの案内」と「規約・窓口」の2行に分ける */
+/** フッターのリンク。PC幅は1行、それより狭い幅で成り行きで折り返すと最後の1つだけが2行目に残るので、「サイトの案内」と「規約・窓口」の2行に分ける */
 const FOOTER_LINKS = [
   [
     ['/news', 'お知らせ'],
@@ -251,9 +251,14 @@ export default function Layout() {
               ? '/* 1クールで終わったあの作品の「続編希望」の声を、数字にして届ける。 */'
               : '1クールで終わったあの作品の「続編希望」の声を、数字にして届ける。'}
           </Box>
-          <Box component="nav" aria-label="サイト情報" sx={{ display: 'flex', flexDirection: 'column', rowGap: 0.5, flex: 1 }}>
+          {/* PC幅（lg以上）は全部を1行に並べる。それより狭いと収まらないので2行に分ける */}
+          <Box
+            component="nav"
+            aria-label="サイト情報"
+            sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, rowGap: 0.5, columnGap: 1.5, flex: 1 }}
+          >
             {FOOTER_LINKS.map((group, i) => (
-              <Box key={i} sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 2, rowGap: 0.5 }}>
+              <Box key={i} sx={{ display: 'flex', flexWrap: 'wrap', columnGap: { xs: 2, lg: 1.5 }, rowGap: 0.5 }}>
                 {group.map(([to, label]) => (
                   <Link key={to} component={RouterLink} to={to} color="inherit" sx={{ py: 0.75 }}>
                     {label}
