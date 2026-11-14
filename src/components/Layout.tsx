@@ -13,18 +13,23 @@ import UserIcon from './account/UserIcon'
 import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
 
+/** フッターのリンク。成り行きで折り返すと最後の1つだけが2行目に残るので、「サイトの案内」と「規約・窓口」の2行に分ける */
 const FOOTER_LINKS = [
-  ['/news', 'お知らせ'],
-  ['/about', 'サイトについて'],
-  ['/help', '使い方'],
-  ['/faq', 'よくある質問'],
-  ['/supporter', 'サポーター（応援プラン）'],
-  ['/guidelines', '投稿ガイドライン'],
-  ['/terms', '利用規約'],
-  ['/privacy', 'プライバシーポリシー'],
-  ['/copyright', '著作権・削除依頼'],
-  ['/tokushoho', '特定商取引法に基づく表記'],
-  ['/contact', 'お問い合わせ'],
+  [
+    ['/news', 'お知らせ'],
+    ['/about', 'サイトについて'],
+    ['/help', '使い方'],
+    ['/faq', 'よくある質問'],
+    ['/supporter', 'サポーター（応援プラン）'],
+    ['/guidelines', '投稿ガイドライン'],
+  ],
+  [
+    ['/terms', '利用規約'],
+    ['/privacy', 'プライバシーポリシー'],
+    ['/copyright', '著作権・削除依頼'],
+    ['/tokushoho', '特定商取引法に基づく表記'],
+    ['/contact', 'お問い合わせ'],
+  ],
 ] as const
 
 /**
@@ -246,11 +251,15 @@ export default function Layout() {
               ? '/* 1クールで終わったあの作品の「続編希望」の声を、数字にして届ける。 */'
               : '1クールで終わったあの作品の「続編希望」の声を、数字にして届ける。'}
           </Box>
-          <Box component="nav" aria-label="サイト情報" sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 2, rowGap: 0.5, flex: 1 }}>
-            {FOOTER_LINKS.map(([to, label]) => (
-              <Link key={to} component={RouterLink} to={to} color="inherit" sx={{ py: 0.75 }}>
-                {label}
-              </Link>
+          <Box component="nav" aria-label="サイト情報" sx={{ display: 'flex', flexDirection: 'column', rowGap: 0.5, flex: 1 }}>
+            {FOOTER_LINKS.map((group, i) => (
+              <Box key={i} sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 2, rowGap: 0.5 }}>
+                {group.map(([to, label]) => (
+                  <Link key={to} component={RouterLink} to={to} color="inherit" sx={{ py: 0.75 }}>
+                    {label}
+                  </Link>
+                ))}
+              </Box>
             ))}
           </Box>
           <Link component={RouterLink} to="/admin" color="inherit" sx={{ py: 0.75 }}>
