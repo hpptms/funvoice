@@ -23,7 +23,7 @@ const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/finales\/?$/, FinalesPage.preload],
   [/^\/sequels\/?$/, SequelsPage.preload],
   [/^\/contact\/?$/, ContactPage.preload],
-  [/^\/(about|help|faq|terms|privacy|copyright|tokushoho)\/?$/, StaticPage.preload],
+  [/^\/(about|help|faq|terms|privacy|copyright|tokushoho|guidelines|news)\/?$/, StaticPage.preload],
   [/^\/tags\/?$/, TagsPage.preload],
   [/^\/ranking(\/|$)/, RankingPage.preload],
   [/^\/supporter\/?$/, SupporterPage.preload],

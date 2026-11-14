@@ -32,7 +32,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const urls = [
     url(`${origin}/`),
     url(`${origin}/tags`),
-    ...['about', 'help', 'faq', 'terms', 'privacy', 'copyright', 'tokushoho', 'supporter', 'contact'].map((p) => url(`${origin}/${p}`)),
+    ...['about', 'help', 'faq', 'terms', 'privacy', 'copyright', 'tokushoho', 'supporter', 'guidelines', 'news', 'contact'].map((p) => url(`${origin}/${p}`)),
     ...rankings,
     ...((works.data.finales ?? 0) > 0 ? [url(`${origin}/finales`)] : []),
     ...((works.data.sequels ?? 0) >= SEQUELS_MIN_ITEMS ? [url(`${origin}/sequels`)] : []),

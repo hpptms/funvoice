@@ -1,5 +1,6 @@
 // /  トップ（作品一覧）。
 // タグ1つだけの一覧（以前の /?tag=N）は、タグ別ページ（/season/2026-autumn・/tags/N）へ 301 で転送する
+import { NEWS, newsDateLabel } from '../edge/news'
 import { escapeHtml, firstCardImage, renderPage, shellHtml, siteOrigin, type ApiTag, type ApiWorkList, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
 import {
@@ -52,7 +53,10 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       (seasonTag
         ? `<h2><a href="${tagPath(seasonTag)}">放送中のアニメ（${escapeHtml(seasonTag.name)}）</a></h2>`
         : `<h2>みんなの評価が集まっているアニメ</h2>`) +
-      `<ul>${items}</ul>`,
+      `<ul>${items}</ul>` +
+      `<h2><a href="/news">お知らせ</a></h2><ul>${NEWS.slice(0, 3)
+        .map((n) => `<li><time datetime="${escapeHtml(n.date)}">${escapeHtml(newsDateLabel(n.date))}</time> ${escapeHtml(n.title)}</li>`)
+        .join('')}</ul>`,
   )
 
   const jsonLd = {

@@ -42,6 +42,8 @@ export default function App() {
         <Route path="privacy" element={<StaticPage slug="privacy" />} />
         <Route path="copyright" element={<StaticPage slug="copyright" />} />
         <Route path="tokushoho" element={<StaticPage slug="tokushoho" />} />
+        <Route path="guidelines" element={<StaticPage slug="guidelines" />} />
+        <Route path="news" element={<StaticPage slug="news" />} />
         <Route path="supporter" element={<SupporterPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="register" element={<AuthPage key="register" mode="register" />} />

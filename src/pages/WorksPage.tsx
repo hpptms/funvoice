@@ -23,6 +23,7 @@ import { Link as RouterLink, Navigate, useNavigate, useParams, useSearchParams }
 import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../api/client'
 import { Cursor, Prompt, RankingBanner } from '../components/Retro'
 import RecentActivity from '../components/RecentActivity'
+import TopNews from '../components/TopNews'
 import WorkCard from '../components/WorkCard'
 import {
   TOP_HEADING,
@@ -357,6 +358,9 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
           }}
         />
       )}
+
+      {/* 運営のお知らせ（トップだけ）。一覧の下なので、一覧の表示を遅らせない */}
+      {!baseTagId && <TopNews />}
     </Stack>
   )
 }

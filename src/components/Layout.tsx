@@ -14,10 +14,12 @@ import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
 
 const FOOTER_LINKS = [
+  ['/news', 'お知らせ'],
   ['/about', 'サイトについて'],
   ['/help', '使い方'],
   ['/faq', 'よくある質問'],
   ['/supporter', 'サポーター（応援プラン）'],
+  ['/guidelines', '投稿ガイドライン'],
   ['/terms', '利用規約'],
   ['/privacy', 'プライバシーポリシー'],
   ['/copyright', '著作権・削除依頼'],
@@ -254,6 +256,13 @@ export default function Layout() {
           <Link component={RouterLink} to="/admin" color="inherit" sx={{ py: 0.75 }}>
             {retro ? 'sudo' : '管理'}
           </Link>
+          <Box sx={{ flexBasis: '100%' }}>
+            {retro && '// '}
+            作品データ提供：
+            <Link href="https://annict.com/" target="_blank" rel="noopener noreferrer" color="inherit">
+              Annict
+            </Link>
+          </Box>
         </Container>
       </Box>
     </Box>

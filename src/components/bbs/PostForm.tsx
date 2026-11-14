@@ -1,5 +1,6 @@
-import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Link, Stack, TextField, Typography } from '@mui/material'
 import { useState, type Ref } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { loadSavedName, saveName } from '../../lib/bbs'
 import { findEmbeds } from '../../lib/embed'
 import { useRetro } from '../../lib/styleMode'
@@ -107,7 +108,11 @@ export default function PostForm({
         <Stack direction={{ xs: 'column-reverse', sm: 'row' }} sx={{ gap: 1.5, alignItems: { sm: 'center' } }}>
           <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
             {retro && '// '}
-            IDは同じ日・同じトピック内で共通です。個人情報や、アニメのスクリーンショットなど他人の著作物を無断で掲載しているページの画像・動画のURLは貼らないでください。
+            IDは同じ日・同じトピック内で共通です。個人情報や、アニメのスクリーンショットなど他人の著作物を無断で掲載しているページの画像・動画のURLは貼らないでください。ネタバレの扱いなどは
+            <Link component={RouterLink} to="/guidelines" target="_blank" rel="noopener">
+              投稿ガイドライン
+            </Link>
+            をご覧ください。
           </Typography>
           <Button type="submit" variant="contained" size="large" disabled={!canSubmit} sx={{ minWidth: 160, height: 48 }}>
             {pending ? '送信中…' : submitLabel}
