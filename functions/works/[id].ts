@@ -44,7 +44,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
   const [{ status, data: work }, threadsRes] = await Promise.all([
     apiGet<ApiWork>(ctx, `/api/works/${id}`),
-    apiGet<{ threads: { id: number; title: string; postCount: number }[] }>(ctx, `/api/works/${id}/threads`),
+    // ブラウザ（api.listThreads の既定）と同じURLにして、エッジキャッシュを共有する
+    apiGet<{ threads: { id: number; title: string; postCount: number }[] }>(
+      ctx,
+      `/api/works/${id}/threads?sort=active&page=1`,
+    ),
   ])
   if (status === 404) {
     return renderPage(env, request, { title: '作品が見つかりません', canonical, noindex: true, status: 404 })
