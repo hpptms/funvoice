@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Link, Popover, Typography } from '@mui/material'
+import { Box, ButtonBase, Collapse, Link, Popover, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { splitSpoilers } from '../../../edge/spoiler'
@@ -60,38 +60,61 @@ function renderInline(threadId: number, body: string): ReactNode[] {
 function Spoiler({ threadId, text }: { threadId: number; text: string }) {
   const retro = useRetro()
   const [open, setOpen] = useState(false)
+  // 閉じるアニメーションが終わるまでは横幅を広げたままにする
+  const [wide, setWide] = useState(false)
+  const toggle = () => {
+    if (!open) setWide(true)
+    setOpen(!open)
+  }
   return (
-    <Box component="span" sx={{ display: 'block', my: 0.75 }}>
+    <Box
+      component="span"
+      sx={{
+        display: 'block',
+        width: wide ? '100%' : 'fit-content',
+        maxWidth: '100%',
+        my: 0.75,
+        border: 1,
+        borderColor: SPOILER_COLOR,
+        borderRadius: retro ? 0 : 1.5,
+        bgcolor: `color-mix(in srgb, ${SPOILER_COLOR} 12%, transparent)`,
+        overflow: 'hidden',
+      }}
+    >
       <ButtonBase
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-expanded={open}
         sx={{
+          display: 'flex',
+          width: '100%',
+          justifyContent: 'flex-start',
           px: 1.5,
           minHeight: 40,
           fontSize: 13,
           fontWeight: 700,
           fontFamily: 'inherit',
-          color: 'warning.main',
-          border: 1,
-          borderColor: 'warning.main',
-          borderRadius: retro ? 0 : 1.5,
-          bgcolor: (t) => `color-mix(in srgb, ${t.vars!.palette.warning.main} 10%, transparent)`,
+          color: SPOILER_TEXT,
         }}
       >
-        {open ? '▲ ネタバレを隠す' : '#ネタバレの可能性あり！（タップで表示）'}
+        {open ? '▲ #ネタバレの可能性あり！（タップで閉じる）' : '#ネタバレの可能性あり！（タップで表示）'}
       </ButtonBase>
-      {open && (
+      {/* 閉じているあいだは中身を描画しない（unmountOnExit）。開閉はスライドで */}
+      <Collapse in={open} timeout={250} unmountOnExit onExited={() => setWide(false)} component="span" sx={{ display: 'block' }}>
         <Box
           component="span"
-          sx={{ display: 'block', mt: 0.75, pl: 1.5, borderLeft: 3, borderColor: 'warning.main' }}
+          sx={{ display: 'block', px: 1.5, pt: 1, pb: 1.25, borderTop: 1, borderColor: `color-mix(in srgb, ${SPOILER_COLOR} 45%, transparent)` }}
         >
           {renderInline(threadId, text)}
           <PostEmbeds body={text} compact />
         </Box>
-      )}
+      </Collapse>
     </Box>
   )
 }
+
+/** ネタバレ枠の水色（枠線・背景）と文字色 */
+const SPOILER_COLOR = '#4fb8e6'
+const SPOILER_TEXT = '#1a8cc4'
 
 /** >>12 をタップ/クリックすると、そのコメントをポップアップで表示する */
 function AnchorLink({ threadId, no, label }: { threadId: number; no: number; label: string }) {
