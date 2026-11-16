@@ -3,10 +3,18 @@ import { escapeHtml, firstCardImage, renderPage, shellHtml, siteOrigin, type Api
 import { apiGet, type CacheContext } from './cache'
 import { isSeasonName, rankingPath, rankingTitle, tagPageDescription, tagPageTitle, tagPath } from './seo'
 
-/** 放送時期のURL名（2026-autumn）から放送時期タグを探す */
-export async function findSeasonTag(ctx: CacheContext, label: string): Promise<ApiTag | undefined> {
+/** 放送時期のURL名（2026-autumn）から放送時期タグを探す。バックエンドに繋がらないときは null（404 と区別する） */
+export async function findSeasonTag(ctx: CacheContext, label: string): Promise<ApiTag | undefined | null> {
   const { data } = await apiGet<{ tags: ApiTag[] }>(ctx, '/api/tags?kind=season')
-  return data?.tags.find((t) => t.kind === 'season' && t.name === label)
+  if (!data) return null
+  return data.tags.find((t) => t.kind === 'season' && t.name === label)
+}
+
+/** バックエンド停止中など。SPAはそのまま返し、検索エンジンには一時的なエラーと伝える（404 や空の一覧で索引から外されないように） */
+export async function unavailablePage(env: Env, request: Request, canonical: string): Promise<Response> {
+  const res = await renderPage(env, request, { canonical, noindex: true, status: 503 })
+  res.headers.set('Retry-After', '600')
+  return res
 }
 
 export async function renderTagPage(ctx: CacheContext, tag: ApiTag): Promise<Response> {
@@ -18,6 +26,7 @@ export async function renderTagPage(ctx: CacheContext, tag: ApiTag): Promise<Res
   const extra = [...url.searchParams.keys()].length > 0
 
   const list = await apiGet<ApiWorkList>(ctx, `/api/works?tag=${tag.id}`)
+  if (!list.data) return unavailablePage(env, request, `${origin}${path}`)
   const works = list.data?.works ?? []
   const title = tagPageTitle(tag.name)
   const description = tagPageDescription(tag.name, list.data?.total)

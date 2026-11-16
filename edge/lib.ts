@@ -135,6 +135,12 @@ export interface PageMeta {
   status?: number
 }
 
+/**
+ * renderPage が返すページに付ける内部用の目印（_middleware が見て外す）。
+ * 目印の無い HTML は、Functions に一致しなかったパスへの Pages の SPA フォールバック（= 存在しないページ）
+ */
+export const PAGE_MARKER = 'X-FV-Page'
+
 /** SPAの index.html に、ページごとのmeta・構造化データ・本文を埋め込んで返す */
 export async function renderPage(env: Env, request: Request, meta: PageMeta): Promise<Response> {
   const shell = await env.ASSETS.fetch(new URL('/', request.url))
@@ -194,6 +200,7 @@ export async function renderPage(env: Env, request: Request, meta: PageMeta): Pr
   headers.set('Content-Type', 'text/html; charset=utf-8')
   headers.set('Cache-Control', 'public, max-age=0, must-revalidate')
   if (meta.noindex) headers.set('X-Robots-Tag', 'noindex')
+  headers.set(PAGE_MARKER, '1')
   return new Response(res.body, { status: meta.status ?? 200, headers })
 }
 
