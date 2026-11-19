@@ -56,6 +56,11 @@ import { takeInitialWork, usePageMeta } from '../lib/pageMeta'
 import { useRetro } from '../lib/styleMode'
 import { safeHttpUrl } from '../lib/text'
 
+/** これより票が少ない間は、Annictの記録数を添えて投票を呼びかける */
+const FEW_VOTES = 10
+/** Annictの記録がこれ未満の作品は数字を出さない（少ない数字はかえって閑散と見える） */
+const MIN_WATCHERS = 100
+
 export default function WorkDetailPage() {
   const id = Number(useParams().id)
   const qc = useQueryClient()
@@ -239,6 +244,17 @@ export default function WorkDetailPage() {
 
         <Window file="stats.log" title={`「${work.title}」${phrase}希望の声`}>
           <VoteTally tally={work.tally} />
+          {/* 票が少ないうちは、Annictの記録数で「見ている人は多い作品」であることを示して最初の票を後押しする（少ない数字は逆効果なので出さない） */}
+          {sequel + complete < FEW_VOTES && work.watchersCount >= MIN_WATCHERS && (
+            <Typography sx={{ mt: 1.5, fontSize: 13 }}>
+              {retro && '> '}
+              <Link href="https://annict.com/" target="_blank" rel="noopener noreferrer" color="inherit">
+                Annict
+              </Link>
+              で{work.watchersCount.toLocaleString('ja-JP')}人が記録している作品です。
+              {sequel + complete === 0 ? '最初の声を届けませんか？' : 'あなたの声も届けませんか？'}
+            </Typography>
+          )}
           {work.seasonRank && isSeason && (
             <Typography sx={{ mt: 1.5, fontSize: 13 }}>
               {retro && '> '}
