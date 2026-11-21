@@ -51,7 +51,7 @@ export default function SupporterPage() {
         {page.title}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.8 }}>
-        個人で運営しているFanVoiceを、月額のサブスクリプションで応援できます。投票・掲示板などの機能はこれまでどおりすべて無料です。
+        個人で運営しているFunVoiceを、月額のサブスクリプションで応援できます。投票・掲示板などの機能はこれまでどおりすべて無料です。
       </Typography>
 
       <Card sx={{ mb: 2, borderTop: retro ? undefined : 4, borderColor: 'primary.main' }}>

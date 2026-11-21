@@ -1,7 +1,7 @@
 {
-  "name": "FanVoice - アニメを語りたい人の掲示板",
+  "name": "FunVoice - アニメを語りたい人の掲示板",
   "description": "好きなアニメを語りたい人のためのアニメ掲示板。続編を応援する1票と、みんなの評価が集まります。",
-  "short_name": "FanVoice",
+  "short_name": "FunVoice",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#141414",

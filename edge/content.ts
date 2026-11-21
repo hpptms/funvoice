@@ -34,20 +34,20 @@ export interface StaticPageContent {
   sections: StaticSection[]
 }
 
-export const OPERATOR = 'FanVoice運営'
+export const OPERATOR = 'FunVoice運営'
 const UPDATED = '2026年11月9日'
 
 export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   about: {
     title: 'サイトについて',
     description:
-      'FanVoiceは、好きなアニメを語りたい人のためのアニメ掲示板です。1クールで終わった作品に「続編希望」か「キレイに終わった」かを投票し、みんなの評価として数字にして、続編を応援する声を制作者に届けます。',
+      'FunVoiceは、好きなアニメを語りたい人のためのアニメ掲示板です。1クールで終わった作品に「続編希望」か「キレイに終わった」かを投票し、みんなの評価として数字にして、続編を応援する声を制作者に届けます。',
     sections: [
       {
-        heading: 'FanVoiceをつくった理由',
+        heading: 'FunVoiceをつくった理由',
         paragraphs: [
           '日本のアニメは1クール（約3か月）で放送が終わる作品が多く、続編が作られるかどうかは、円盤や配信の数字だけで判断されがちです。',
-          '「続編を見たい」というファンの声や、「この終わり方で満足した」という声は、なかなか制作者に届きません。FanVoiceは、その声を作品ごとに集めて数字にし、実は需要があることを示すためにつくりました。',
+          '「続編を見たい」というファンの声や、「この終わり方で満足した」という声は、なかなか制作者に届きません。FunVoiceは、その声を作品ごとに集めて数字にし、実は需要があることを示すためにつくりました。',
         ],
       },
       {
@@ -90,7 +90,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
       {
         heading: '運営者情報',
         paragraphs: [
-          `FanVoiceは${OPERATOR}が個人で運営しているファンサイトです。アニメの制作会社・出版社・放送局などの権利者とは関係ありません。`,
+          `FunVoiceは${OPERATOR}が個人で運営しているファンサイトです。アニメの制作会社・出版社・放送局などの権利者とは関係ありません。`,
         ],
         list: [
           `運営者：${OPERATOR}（個人運営）`,
@@ -112,7 +112,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   help: {
     title: '使い方ガイド',
     description:
-      'FanVoiceの使い方ガイド。アニメ作品の探し方、「続編希望」「キレイに終わった」への投票、ランキングの見方、掲示板での書き込み・返信、タグ付けや作品の追加まで、はじめての方向けに順番に説明します。',
+      'FunVoiceの使い方ガイド。アニメ作品の探し方、「続編希望」「キレイに終わった」への投票、ランキングの見方、掲示板での書き込み・返信、タグ付けや作品の追加まで、はじめての方向けに順番に説明します。',
     sections: [
       {
         heading: '1. 作品を探す',
@@ -215,13 +215,13 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   faq: {
     title: 'よくある質問',
     description:
-      'FanVoiceのよくある質問。投票のしくみ（登録ユーザー票と匿名票の違い、変更・取り消し）、ランキング、掲示板の使い方、作品の追加やタグ、アカウント、投稿の削除についてまとめています。',
+      'FunVoiceのよくある質問。投票のしくみ（登録ユーザー票と匿名票の違い、変更・取り消し）、ランキング、掲示板の使い方、作品の追加やタグ、アカウント、投稿の削除についてまとめています。',
     sections: [
       {
-        heading: 'FanVoiceについて',
+        heading: 'FunVoiceについて',
         qa: [
           {
-            q: 'FanVoiceはどんなサイトですか？',
+            q: 'FunVoiceはどんなサイトですか？',
             a: '1クールで終わったアニメに「続編希望」か「キレイに終わった」かを投票し、続編を求める声を数字にして見える形にするアニメ掲示板です。作品ごとに掲示板もあり、感想や考察を語り合えます。',
           },
           {
@@ -367,7 +367,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
           },
           {
             q: 'プッシュ通知を受け取るには？メールアドレスは必要ですか？',
-            a: 'メールアドレスは必要ありません。マイページの「通知」で「このブラウザでプッシュ通知を受け取る」をオンにし、ブラウザの通知を許可してください。使う端末ごとにオンにします。iPhone・iPad では、Safari の共有ボタンから「ホーム画面に追加」したFanVoiceを開くとオンにできます（iOS 16.4以降）。返信・続編決定のそれぞれでプッシュ通知を止めることもできます。',
+            a: 'メールアドレスは必要ありません。マイページの「通知」で「このブラウザでプッシュ通知を受け取る」をオンにし、ブラウザの通知を許可してください。使う端末ごとにオンにします。iPhone・iPad では、Safari の共有ボタンから「ホーム画面に追加」したFunVoiceを開くとオンにできます（iOS 16.4以降）。返信・続編決定のそれぞれでプッシュ通知を止めることもできます。',
           },
           {
             q: '続編の発表はどうやって判定していますか？',
@@ -411,13 +411,13 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
 
   terms: {
     title: '利用規約',
-    description: 'FanVoiceの利用規約です。投稿のルール、禁止事項、投稿の削除などについて定めています。',
+    description: 'FunVoiceの利用規約です。投稿のルール、禁止事項、投稿の削除などについて定めています。',
     updated: '2026年11月12日',
     sections: [
       {
         heading: '第1条（適用）',
         paragraphs: [
-          `この規約は、${OPERATOR}（以下「運営」）が提供するFanVoice（以下「本サービス」）を利用するすべての方（以下「利用者」）に適用されます。本サービスを利用した時点で、この規約に同意したものとみなします。`,
+          `この規約は、${OPERATOR}（以下「運営」）が提供するFunVoice（以下「本サービス」）を利用するすべての方（以下「利用者」）に適用されます。本サービスを利用した時点で、この規約に同意したものとみなします。`,
         ],
       },
       {
@@ -479,7 +479,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
 
   privacy: {
     title: 'プライバシーポリシー',
-    description: 'FanVoiceが取得する情報（IPアドレス、Cookieなど）と、その利用目的・保存期間・第三者提供についての方針です。',
+    description: 'FunVoiceが取得する情報（IPアドレス、Cookieなど）と、その利用目的・保存期間・第三者提供についての方針です。',
     updated: '2026年11月13日',
     sections: [
       {
@@ -540,7 +540,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   copyright: {
     title: '著作権について・削除依頼',
     description:
-      'FanVoiceの掲示板に画像や文章を投稿するときの著作権の注意点と、権利者の方からの削除依頼の受け付け方法です。',
+      'FunVoiceの掲示板に画像や文章を投稿するときの著作権の注意点と、権利者の方からの削除依頼の受け付け方法です。',
     updated: UPDATED,
     sections: [
       {
@@ -594,7 +594,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
 
   tokushoho: {
     title: '特定商取引法に基づく表記',
-    description: 'FanVoiceの有料サービス「サポーター」（サブスクリプション）についての、特定商取引法に基づく表記です。',
+    description: 'FunVoiceの有料サービス「サポーター」（サブスクリプション）についての、特定商取引法に基づく表記です。',
     updated: '2026年11月12日',
     sections: [
       {
@@ -650,12 +650,12 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   supporter: {
     title: 'サポーター（月額の応援プラン）',
     description:
-      'FanVoiceの運営を応援できる月額のサブスクリプション「サポーター」の案内です。掲示板のコメントに「★サポーター」バッジが付き、サイト内の広告が表示されなくなります。',
+      'FunVoiceの運営を応援できる月額のサブスクリプション「サポーター」の案内です。掲示板のコメントに「★サポーター」バッジが付き、サイト内の広告が表示されなくなります。',
     sections: [
       {
         heading: 'サポーターとは',
         paragraphs: [
-          `FanVoiceは${OPERATOR}が個人で運営しているファンサイトです。サーバー代などの運営費を、任意の月額サブスクリプション「サポーター」で応援していただけます。投票・掲示板などの機能は、これまでどおりすべて無料で使えます。`,
+          `FunVoiceは${OPERATOR}が個人で運営しているファンサイトです。サーバー代などの運営費を、任意の月額サブスクリプション「サポーター」で応援していただけます。投票・掲示板などの機能は、これまでどおりすべて無料で使えます。`,
         ],
       },
       {
@@ -670,7 +670,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
         list: [
           'ユーザー登録（無料）をして、ログインします。',
           'マイページの「サポーター」欄、またはこのページの「サポーターになる」を押します。',
-          'Stripe の決済ページでクレジットカード情報を入力して支払います（FanVoiceではカード情報を扱いません）。',
+          'Stripe の決済ページでクレジットカード情報を入力して支払います（FunVoiceではカード情報を扱いません）。',
           '支払いが終わると、すぐに特典が有効になります。',
         ],
       },
@@ -689,13 +689,13 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
   guidelines: {
     title: '投稿ガイドライン',
     description:
-      'FanVoiceの掲示板に書き込むときのルールです。誹謗中傷・個人情報・無断転載・宣伝などの禁止事項、ネタバレの扱いと隠し方、違反投稿の削除についてまとめています。',
+      'FunVoiceの掲示板に書き込むときのルールです。誹謗中傷・個人情報・無断転載・宣伝などの禁止事項、ネタバレの扱いと隠し方、違反投稿の削除についてまとめています。',
     updated: '2026年11月14日',
     sections: [
       {
         heading: 'みんなが気持ちよく語れる場所にするために',
         paragraphs: [
-          'FanVoiceの掲示板は、好きなアニメについて語り合う場所です。意見が違う人がいても、作品や相手への敬意を忘れずに書き込んでください。',
+          'FunVoiceの掲示板は、好きなアニメについて語り合う場所です。意見が違う人がいても、作品や相手への敬意を忘れずに書き込んでください。',
           'このガイドラインは利用規約の一部です。違反する投稿は、運営が予告なく削除します。',
         ],
       },
@@ -761,7 +761,7 @@ export const STATIC_PAGES: Record<StaticSlug, StaticPageContent> = {
 
   news: {
     title: 'お知らせ',
-    description: 'FanVoiceのお知らせ（更新情報）です。新しい機能の追加やページの公開などをお知らせします。',
+    description: 'FunVoiceのお知らせ（更新情報）です。新しい機能の追加やページの公開などをお知らせします。',
     sections: NEWS.map((n) => ({
       heading: `${newsDateLabel(n.date)}　${n.title}`,
       paragraphs: n.body ? [n.body] : undefined,

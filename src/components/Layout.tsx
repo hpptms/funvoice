@@ -103,7 +103,7 @@ export default function Layout() {
             />
             {/* スマホ（〜479px）ではロゴ画像だけにして、ヘッダーのボタン（作品・タグ・ランキング）を1行に収める */}
             {/* サイト名はブラウザの自動翻訳で訳させない */}
-            {/* スマホで隠すときも display:none にせず見た目だけ消し、リンクの読み上げ名（FanVoice）として残す。
+            {/* スマホで隠すときも display:none にせず見た目だけ消し、リンクの読み上げ名（FunVoice）として残す。
                 aria-label で別の名前を付けると表示文字と食い違う（Lighthouse の label-content-name-mismatch） */}
             <Box
               component="span"
@@ -120,7 +120,7 @@ export default function Layout() {
                 },
               }}
             >
-              FanVoice
+              FunVoice
             </Box>
             {retro && (
               <Box component="span" sx={{ fontSize: 11, ml: 0.75, opacity: 0.7, display: { xs: 'none', md: 'inline' } }}>
@@ -142,7 +142,7 @@ export default function Layout() {
           {!me?.premium && (
             <Button component={NavLink} to="/supporter" sx={{ ...navSx, gap: 0.25, display: { xs: 'none', sm: 'inline-flex' } }}>
               <StarRoundedIcon aria-hidden sx={{ fontSize: 20, color: '#F2B705' }} />
-              {/* md 未満は見た目だけ隠し、リンクの読み上げ名として残す（ロゴの「FanVoice」と同じ方式） */}
+              {/* md 未満は見た目だけ隠し、リンクの読み上げ名として残す（ロゴの「FunVoice」と同じ方式） */}
               <Box
                 component="span"
                 sx={{

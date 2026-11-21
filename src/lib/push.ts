@@ -2,7 +2,7 @@ import { api } from '../api/client'
 
 // プッシュ通知（Web Push）。通知をオンにしたブラウザだけ Service Worker（/sw.js）を登録する。
 //
-// iPhone・iPad は「ホーム画面に追加」したFanVoiceからだけ通知を受け取れる（Safari のタブでは使えない）。
+// iPhone・iPad は「ホーム画面に追加」したFunVoiceからだけ通知を受け取れる（Safari のタブでは使えない）。
 
 export type PushSupport =
   | 'supported'

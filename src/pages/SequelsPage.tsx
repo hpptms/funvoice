@@ -11,7 +11,7 @@ import { takeInitialData, usePageMeta } from '../lib/pageMeta'
 import { seasonNameLabel } from '../lib/season'
 import { useRetro } from '../lib/styleMode'
 
-/** /sequels FanVoice で続編希望の声があった作品の続編決定（発表時点の票と一緒に） */
+/** /sequels FunVoice で続編希望の声があった作品の続編決定（発表時点の票と一緒に） */
 export default function SequelsPage() {
   const [initial] = useState(() => takeInitialData<{ sequels: SequelAchievement[] }>('fv-initial-sequels', () => true))
   const q = useQuery({ queryKey: ['sequels'], queryFn: api.getSequels, initialData: initial })
@@ -27,7 +27,7 @@ export default function SequelsPage() {
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
           {retro && '// '}
-          FanVoiceで「続編希望」の声が集まっていた作品の、続編決定の記録です。票は発表を確認した時点のものです。
+          FunVoiceで「続編希望」の声が集まっていた作品の、続編決定の記録です。票は発表を確認した時点のものです。
         </Typography>
       </Box>
       {q.isLoading && <CircularProgress sx={{ display: 'block', mx: 'auto', my: 4 }} />}

@@ -6,9 +6,9 @@ import { useState } from 'react'
 function embedSnippet(origin: string, work: { id: number; title: string }): string {
   const title = work.title.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
   return (
-    `<iframe src="${origin}/embed/works/${work.id}" title="「${title}」続編希望の投票（FanVoice）" ` +
+    `<iframe src="${origin}/embed/works/${work.id}" title="「${title}」続編希望の投票（FunVoice）" ` +
     `width="100%" height="150" style="border:0;max-width:480px" loading="lazy"></iframe>\n` +
-    `<p><a href="${origin}/works/${work.id}">「${title}」の続編希望の声・投票（FanVoice）</a></p>`
+    `<p><a href="${origin}/works/${work.id}">「${title}」の続編希望の声・投票（FunVoice）</a></p>`
   )
 }
 

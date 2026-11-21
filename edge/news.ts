@@ -53,7 +53,7 @@ export const NEWS: NewsItem[] = [
   },
   {
     date: '2026-11-09',
-    title: 'FanVoiceを公開しました',
+    title: 'FunVoiceを公開しました',
   },
 ]
 

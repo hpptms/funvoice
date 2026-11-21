@@ -1,4 +1,4 @@
-// FanVoice の Service Worker。プッシュ通知（返信・続編決定）を表示するだけで、ページのキャッシュはしない。
+// FunVoice の Service Worker。プッシュ通知（返信・続編決定）を表示するだけで、ページのキャッシュはしない。
 // 通知をオンにしたときだけ登録される（src/lib/push.ts）。
 
 self.addEventListener('install', () => self.skipWaiting())
@@ -21,7 +21,7 @@ self.addEventListener('push', (event) => {
   } catch {
     data = {}
   }
-  const title = typeof data.title === 'string' && data.title ? data.title.slice(0, 80) : 'FanVoice'
+  const title = typeof data.title === 'string' && data.title ? data.title.slice(0, 80) : 'FunVoice'
   const body = typeof data.body === 'string' ? data.body.slice(0, 200) : ''
   event.waitUntil(
     self.registration.showNotification(title, {

@@ -45,7 +45,7 @@ export async function renderTagPage(ctx: CacheContext, tag: ApiTag): Promise<Res
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'FanVoice', item: `${origin}/` },
+      { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
       { '@type': 'ListItem', position: 2, name: 'タグ', item: `${origin}/tags` },
       { '@type': 'ListItem', position: 3, name: tag.name, item: `${origin}${path}` },
     ],

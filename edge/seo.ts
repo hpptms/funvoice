@@ -4,7 +4,7 @@
 // 狙うキーワード: アニメ / 掲示板 / 応援 / みんなの評価 / 語りたい（とその組み合わせ）。
 // 詰め込みすぎると逆効果なので、人が読んで自然な文になる範囲で入れる。
 
-export const SITE_NAME = 'FanVoice'
+export const SITE_NAME = 'FunVoice'
 export const DEFAULT_TITLE = `${SITE_NAME} - アニメを語りたい人の掲示板｜続編を応援・みんなの評価`
 export const DEFAULT_DESCRIPTION =
   '好きなアニメを語りたい人のためのアニメ掲示板。1クールで終わった作品に「続編希望」か「キレイに終わった」かを投票して、みんなの評価をチェック。続編を応援する声を数字にして制作者に届けます。'
@@ -265,9 +265,9 @@ export const FINALES_TITLE = '今週最終回のアニメ｜2期（続編）見�
 export const FINALES_DESCRIPTION =
   '今週最終回を迎えたアニメと、まもなく最終回のアニメの一覧。見終わったら「続編希望」か「キレイに終わった」かを投票しよう。最終回直後のファンの声を数字にして届けます。'
 
-export const SEQUELS_TITLE = '続編決定アニメ一覧｜FanVoiceで続編を希望された作品'
+export const SEQUELS_TITLE = '続編決定アニメ一覧｜FunVoiceで続編を希望された作品'
 export const SEQUELS_DESCRIPTION =
-  'FanVoiceで「続編希望」の声が集まっていたアニメの、続編（2期・劇場版など）決定の一覧。発表時点の続編希望の票数とあわせて紹介します。'
+  'FunVoiceで「続編希望」の声が集まっていたアニメの、続編（2期・劇場版など）決定の一覧。発表時点の続編希望の票数とあわせて紹介します。'
 /** 実績ページを検索エンジンに載せ、サイト内からリンクする件数 */
 export const SEQUELS_MIN_ITEMS = 3
 
@@ -296,7 +296,7 @@ export function sequelAnswer(
 ): string {
   const word = sequelWord(w.title, w.media)
   const { sequel, complete } = w.tally.total
-  const voices = `FanVoiceでは続編希望${sequel}票・キレイに終わった${complete}票が集まっています。`
+  const voices = `FunVoiceでは続編希望${sequel}票・キレイに終わった${complete}票が集まっています。`
   if (st?.announced) {
     const first = st.works[0]
     const label = first ? seasonLabelFromSlug(first.seasonName) : null

@@ -1,4 +1,4 @@
-// /sequels  FanVoice で続編希望の声があった作品の続編決定（記録が少ないうちは検索エンジンに載せない）
+// /sequels  FunVoice で続編希望の声があった作品の続編決定（記録が少ないうちは検索エンジンに載せない）
 import { escapeHtml, renderPage, shellHtml, siteOrigin, type ApiRelatedWork, type Env } from '../edge/lib'
 import { apiGet } from '../edge/cache'
 import { SEQUELS_DESCRIPTION, SEQUELS_MIN_ITEMS, SEQUELS_TITLE } from '../edge/seo'

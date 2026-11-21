@@ -28,7 +28,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const origin = siteOrigin(env, request)
   const { data } = /^[1-9]\d{0,17}$/.test(id) ? await apiGet<EmbedWork>(ctx, `/api/embed/works/${id}`) : { data: undefined }
   if (!data) {
-    return new Response(page(`<p class="t"><a href="${origin}/" target="_blank" rel="noopener">FanVoice</a></p>`), {
+    return new Response(page(`<p class="t"><a href="${origin}/" target="_blank" rel="noopener">FunVoice</a></p>`), {
       status: 404,
       headers: { ...HEADERS, 'Cache-Control': 'public, max-age=60' },
     })
@@ -44,14 +44,14 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     (total ? `<span class="s" style="width:${pct}%"></span><span class="c"></span>` : '') +
     `</span>` +
     `<span class="n"><span class="sq">続編希望 ${sequel}票</span><span class="cp">キレイに終わった ${complete}票</span></span>` +
-    `<span class="f"><span class="b">投票する ›</span><span class="logo">FanVoice</span></span>` +
+    `<span class="f"><span class="b">投票する ›</span><span class="logo">FunVoice</span></span>` +
     `</a>`
   return new Response(page(body), { headers: HEADERS })
 }
 
 function page(body: string): string {
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>FanVoice</title><style>
+<meta name="robots" content="noindex"><title>FunVoice</title><style>
 :root{color-scheme:light dark;--bg:#fff;--fg:#141414;--sub:#666;--line:#ddd;--p:#d9406c;--s:#2b78bf}
 @media (prefers-color-scheme:dark){:root{--bg:#1c1c1c;--fg:#f2f2f2;--sub:#aaa;--line:#444}}
 *{box-sizing:border-box}html,body{margin:0;background:transparent;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}

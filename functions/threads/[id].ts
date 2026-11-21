@@ -76,7 +76,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'FanVoice', item: `${origin}/` },
+          { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
           { '@type': 'ListItem', position: 2, name: thread.workTitle, item: `${origin}/works/${thread.workId}` },
           { '@type': 'ListItem', position: 3, name: thread.title, item: base },
         ],

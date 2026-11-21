@@ -142,7 +142,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
             name: `「${work.title}」の続編を希望している人はどれくらい？`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: `FanVoiceでは「続編希望」${sequel}票、「キレイに終わった」${complete}票が集まっています（登録ユーザー・匿名の合計）。`,
+              text: `FunVoiceでは「続編希望」${sequel}票、「キレイに終わった」${complete}票が集まっています（登録ユーザー・匿名の合計）。`,
             },
           },
         ],
@@ -150,7 +150,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'FanVoice', item: `${origin}/` },
+          { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
           ...(seasonTag
             ? [{ '@type': 'ListItem', position: 2, name: `${seasonTag.name}のアニメ`, item: `${origin}${tagPath(seasonTag)}` }]
             : []),

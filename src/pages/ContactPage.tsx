@@ -14,7 +14,7 @@ const CATEGORIES: Record<ContactCategory, string> = {
 }
 
 export default function ContactPage() {
-  usePageMeta({ title: 'お問い合わせ', description: 'FanVoiceへのお問い合わせ、著作権侵害などの削除依頼はこちらから。' })
+  usePageMeta({ title: 'お問い合わせ', description: 'FunVoiceへのお問い合わせ、著作権侵害などの削除依頼はこちらから。' })
   const [sp] = useSearchParams()
   const initialCategory = (Object.keys(CATEGORIES) as ContactCategory[]).find((c) => c === sp.get('category')) ?? 'general'
   const [category, setCategory] = useState<ContactCategory>(initialCategory)
@@ -43,7 +43,7 @@ export default function ContactPage() {
 
   return (
     <Box sx={{ maxWidth: 640, mx: 'auto' }}>
-      <Prompt>mail admin@fanvoice</Prompt>
+      <Prompt>mail admin@funvoice</Prompt>
       <Typography variant="h4" component="h1" sx={{ fontSize: { xs: 24, md: 30 }, mb: 2 }}>
         お問い合わせ
       </Typography>

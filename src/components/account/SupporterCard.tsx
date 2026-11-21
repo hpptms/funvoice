@@ -97,7 +97,7 @@ export default function SupporterCard() {
         ) : (
           <>
             <Typography variant="body2" sx={{ mb: 1.5 }}>
-              サブスクリプションでFanVoiceの運営を支援できます。サポーターには次の特典があります（
+              サブスクリプションでFunVoiceの運営を支援できます。サポーターには次の特典があります（
               <Link component={RouterLink} to="/supporter">
                 詳しく
               </Link>

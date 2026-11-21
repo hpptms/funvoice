@@ -57,7 +57,7 @@ export default function NotifySettingsCard() {
           <Alert severity="info">プッシュ通知は現在準備中です。サイト内の通知はご利用いただけます。</Alert>
         ) : support === 'ios-needs-install' ? (
           <Alert severity="info">
-            iPhone・iPad では、Safari の共有ボタン（□↑）から「ホーム画面に追加」して、ホーム画面のFanVoiceを開くとプッシュ通知をオンにできます（iOS 16.4以降）。
+            iPhone・iPad では、Safari の共有ボタン（□↑）から「ホーム画面に追加」して、ホーム画面のFunVoiceを開くとプッシュ通知をオンにできます（iOS 16.4以降）。
           </Alert>
         ) : support === 'unsupported' ? (
           <Alert severity="info">このブラウザはプッシュ通知に対応していません。サイト内の通知はご利用いただけます。</Alert>

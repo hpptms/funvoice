@@ -31,7 +31,7 @@ export function Prompt({ children }: { children: ReactNode }) {
   return (
     <Box component="div" sx={{ color: 'text.secondary', fontSize: 13, mb: 0.5 }}>
       <Box component="span" sx={{ color: 'success.main' }}>
-        fanvoice@anime
+        funvoice@anime
       </Box>
       :~$ {children}
     </Box>
