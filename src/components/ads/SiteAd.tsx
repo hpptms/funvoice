@@ -4,10 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { pickCreative, type AdBanner } from '../../lib/adCreatives'
 import { afterPageLoad } from '../../lib/afterPageLoad'
-import { useMe } from '../../lib/auth'
 import { useShowAds } from '../../lib/ads'
 
-/** PCとして扱う幅（lg以上）。それより狭い幅（スマホ・タブレット）はヘッダーの下に横長のバナーを出す */
+/** PCとして扱う幅（lg以上）。それより狭い幅（スマホ・タブレット）は画面の一番下に横長のバナーを出す */
 function useWide() {
   return useMediaQuery((t: Theme) => t.breakpoints.up('lg'), { noSsr: true })
 }
@@ -38,26 +37,44 @@ function Banner({ ad, width, height }: { ad: AdBanner; width: number; height: nu
   )
 }
 
+/** iPhone のホームバーなどに重ならないよう、画面下の安全領域の分も空ける */
+const SAFE_BOTTOM = 'env(safe-area-inset-bottom, 0px)'
+
 /**
- * スマホ・タブレット用: ヘッダーの下に出す 320x50 のバナー。
- * ログイン状態の読み込み中も高さだけ確保して、広告が出たときに下の内容がずれないようにする（サポーターだと分かったら消す）。
+ * スマホ・タブレット用: 画面の一番下に固定して出す 320x50 のバナー。
+ * ページの末尾（フッター）が広告に隠れないよう、同じ高さの余白もページの最後に入れる。
  */
-export function HeaderAd() {
+export function BottomAd() {
   const wide = useWide()
-  const me = useMe()
   const show = useShowAds()
   const loaded = useLoaded()
   const ad = useCreative()
-  if (wide || !ad) return null
-  if (me !== undefined && !show) return null
+  if (wide || !show || !loaded || !ad) return null
   return (
-    <Box
-      component="aside"
-      aria-label="広告"
-      sx={{ display: 'flex', justifyContent: 'center', mt: 1, height: 50, overflow: 'hidden', position: 'relative' }}
-    >
-      {show && loaded && <Banner ad={ad.sp} width={320} height={50} />}
-    </Box>
+    <>
+      <Box aria-hidden sx={{ height: `calc(50px + ${SAFE_BOTTOM})` }} />
+      <Box
+        component="aside"
+        aria-label="広告"
+        sx={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: (t) => t.zIndex.appBar - 1,
+          display: 'flex',
+          justifyContent: 'center',
+          bgcolor: 'background.paper',
+          borderTop: 1,
+          borderColor: 'divider',
+          pb: SAFE_BOTTOM,
+        }}
+      >
+        <Box sx={{ position: 'relative', height: 50, overflow: 'hidden' }}>
+          <Banner ad={ad.sp} width={320} height={50} />
+        </Box>
+      </Box>
+    </>
   )
 }
 
