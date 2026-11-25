@@ -55,7 +55,7 @@ export default function SupporterPage() {
       </Typography>
       <Alert severity="warning" icon={false} sx={{ mb: 2, lineHeight: 1.8 }}>
         <Box component="strong" sx={{ display: 'block', mb: 0.5 }}>
-          サーバー代が赤字のため、サポートをお願いします。
+          サービス維持のため、良かったらサポートお願いします。
         </Box>
         サポーターは運営を続けるための任意の支援です。加入しなくても、投票・掲示板などすべての機能を無料で使えます（有料会員にならないと使えない機能はありません）。
       </Alert>
