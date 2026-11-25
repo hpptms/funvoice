@@ -10,6 +10,7 @@ import { useMe } from '../lib/auth'
 import { useUnreadCount } from '../lib/notifications'
 import SupporterBadge from './account/SupporterBadge'
 import UserIcon from './account/UserIcon'
+import { FloatingAd, HeaderAd } from './ads/SiteAd'
 import BackButton from './BackButton'
 import StyleSwitch from './StyleSwitch'
 
@@ -231,6 +232,10 @@ export default function Layout() {
           <StyleSwitch />
         </Toolbar>
       </AppBar>
+
+      {/* 広告（サポーターには出さない）。スマホ・タブレットはヘッダーの下、PCは画面の右下に固定 */}
+      <HeaderAd />
+      <FloatingAd />
 
       <Container maxWidth="lg" sx={{ py: 3, pt: isTop ? 3 : 1.5, flex: 1 }}>
         {/* トップ以外のページには、左上に控えめな「戻る」ボタンを出す */}

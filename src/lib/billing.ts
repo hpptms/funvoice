@@ -3,7 +3,7 @@ import type { SubscriptionInfo } from '../api/client'
 /** サポーターの特典（マイページ・説明文で共通） */
 export const SUPPORTER_PERKS = [
   '掲示板のコメントに「★サポーター」バッジを表示',
-  'サイト内の広告を表示しない（広告は今後導入予定）',
+  'サイト内の広告を表示しない',
 ] as const
 
 // 0円の通貨（円など）は最小単位がそのまま金額。それ以外は 1/100
