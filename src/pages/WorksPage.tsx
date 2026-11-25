@@ -205,7 +205,7 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
                 sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: 13, color: 'text.secondary', minHeight: 24 }}
               >
                 <StarRoundedIcon aria-hidden sx={{ fontSize: 18, color: '#F2B705' }} />
-                サーバー代が赤字のため、サポートをお願いします（任意）
+                サービス維持のため、良かったらサポートお願いします。
               </Link>
             )}
             {/* 最終回の直後に投票してもらうための入り口 */}
