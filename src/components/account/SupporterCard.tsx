@@ -97,7 +97,7 @@ export default function SupporterCard() {
         ) : (
           <>
             <Typography variant="body2" sx={{ mb: 1.5 }}>
-              サブスクリプションでFunVoiceの運営を支援できます。サポーターには次の特典があります（
+              サーバー代が赤字のため、サポートをお願いします。サポーターは任意の支援で、加入しなくてもすべての機能を無料で使えます。サポーターには次の特典があります（
               <Link component={RouterLink} to="/supporter">
                 詳しく
               </Link>

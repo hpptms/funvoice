@@ -53,6 +53,12 @@ export default function SupporterPage() {
       <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.8 }}>
         個人で運営しているFunVoiceを、月額のサブスクリプションで応援できます。投票・掲示板などの機能はこれまでどおりすべて無料です。
       </Typography>
+      <Alert severity="warning" icon={false} sx={{ mb: 2, lineHeight: 1.8 }}>
+        <Box component="strong" sx={{ display: 'block', mb: 0.5 }}>
+          サーバー代が赤字のため、サポートをお願いします。
+        </Box>
+        サポーターは運営を続けるための任意の支援です。加入しなくても、投票・掲示板などすべての機能を無料で使えます（有料会員にならないと使えない機能はありません）。
+      </Alert>
 
       <Card sx={{ mb: 2, borderTop: retro ? undefined : 4, borderColor: 'primary.main' }}>
         <CardContent sx={{ px: { xs: 2, sm: 4 }, py: { xs: 2.5, sm: 3.5 } }}>
