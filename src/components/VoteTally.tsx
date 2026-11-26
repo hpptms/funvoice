@@ -95,7 +95,7 @@ export default function VoteTally({ tally }: { tally: Tally }) {
       <Row label="合計" count={tally.total} />
       <Row label="匿名" count={tally.anonymous} note="回線・ブラウザ単位で1票" />
       <Row label="登録ユーザー" count={tally.registered} note="1アカウント1票" />
-      {tally.supporter && <Row label="サポーター" count={tally.supporter} note="登録ユーザー票のうち" />}
+      {tally.supporter && <Row label="サポーター" count={tally.supporter} note="登録ユーザー票のうち。有料会員の票なので水増しできず、最も信頼性が高い票です" />}
     </Stack>
   )
 }
