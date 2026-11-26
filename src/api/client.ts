@@ -189,7 +189,8 @@ export interface NotifySettings {
 
 /** トップの「最近の動き」1件（誰がしたかは含まない） */
 export interface Activity {
-  kind: 'vote' | 'post'
+  /** lounge = 雑談掲示板への書き込み（workId は 0、workTitle はトピックのタイトル） */
+  kind: 'vote' | 'post' | 'lounge'
   workId: number
   workTitle: string
   choice?: 'sequel' | 'complete'

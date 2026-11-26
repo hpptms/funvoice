@@ -17,10 +17,11 @@ const LABEL = {
   sequel: { text: '続編希望', color: 'primary.main' },
   complete: { text: 'キレイに終わった', color: 'secondary.main' },
   post: { text: '書き込み', color: 'text.secondary' },
+  lounge: { text: '雑談掲示板', color: 'text.secondary' },
 } as const
 
 function target(a: Activity): string {
-  if (a.kind === 'post' && a.threadId) {
+  if ((a.kind === 'post' || a.kind === 'lounge') && a.threadId) {
     const page = Math.ceil((a.postNo ?? 1) / POSTS_PER_PAGE)
     return `/threads/${a.threadId}${page > 1 ? `?page=${page}` : ''}#p${a.postNo}`
   }
@@ -122,7 +123,7 @@ export default function RecentActivity() {
         </Typography>
       <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
         {items.map((a) => {
-          const label = LABEL[a.kind === 'vote' ? (a.choice ?? 'sequel') : 'post']
+          const label = LABEL[a.kind === 'vote' ? (a.choice ?? 'sequel') : a.kind]
           return (
             <Box
               component="li"
