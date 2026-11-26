@@ -27,7 +27,10 @@ import PostForm, { type PostInput } from './PostForm'
 
 const SORT_LABEL: Record<ThreadSort, string> = { active: '最新コメント', new: '新着', popular: 'コメント数' }
 
-/** 作品ページの「掲示板」：トピック一覧と、トピックを立てるボタン */
+/**
+ * 作品ページの「掲示板」：トピック一覧と、トピックを立てるボタン。
+ * workId が 0 なら雑談掲示板（作品に紐づかないトピック）のページで使う。
+ */
 export default function ThreadSection({ workId, workTitle }: { workId: number; workTitle: string }) {
   const retro = useRetro()
   const [sort, setSort] = useState<ThreadSort>('active')
@@ -38,7 +41,7 @@ export default function ThreadSection({ workId, workTitle }: { workId: number; w
   })
 
   return (
-    <Window file="bbs/" title="語りたい人の掲示板">
+    <Window file={workId ? 'bbs/' : 'lounge/'} title={workId ? '語りたい人の掲示板' : 'トピック一覧'}>
       {/* スマホ: ボタン → タブ（全幅）の2段 / タブレット以上: 横並び */}
       <Stack direction={{ xs: 'column-reverse', sm: 'row' }} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, gap: 1, mb: 1 }}>
         <Tabs
@@ -135,7 +138,7 @@ function CreateThreadDialog({
       <DialogTitle sx={{ pr: 6 }}>
         トピックを立てる
         <Typography variant="body2" color="text.secondary">
-          {workTitle}
+          {workTitle || '雑談掲示板'}
         </Typography>
       </DialogTitle>
       <DialogContent>

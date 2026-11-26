@@ -80,7 +80,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         itemListElement: lounge
           ? [
               { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
-              { '@type': 'ListItem', position: 2, name: thread.title, item: base },
+              { '@type': 'ListItem', position: 2, name: '雑談掲示板', item: `${origin}/lounge` },
+              { '@type': 'ListItem', position: 3, name: thread.title, item: base },
             ]
           : [
               { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
@@ -99,7 +100,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     )
     .join('')
   const body = shellHtml(
-    (lounge ? '<p><a href="/">FunVoice</a></p>' : `<p><a href="/works/${thread.workId}">${escapeHtml(thread.workTitle)}</a></p>`) +
+    (lounge ? '<p><a href="/lounge">雑談掲示板</a></p>' : `<p><a href="/works/${thread.workId}">${escapeHtml(thread.workTitle)}</a></p>`) +
       `<h1>${escapeHtml(thread.title)}</h1><p>${thread.postCount}コメント</p><ol style="list-style:none;padding:0">${items}</ol>`,
   )
 

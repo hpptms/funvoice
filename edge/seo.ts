@@ -206,18 +206,22 @@ export function summarize(text: string, max: number): string {
   return [...s].length > max ? [...s].slice(0, max - 1).join('') + '…' : s
 }
 
-/** 雑談掲示板（作品に紐づかないトピック）は workTitle が空 */
+/** 雑談掲示板（/lounge）。作品を問わないトピックの一覧 */
+export const LOUNGE_TITLE = '雑談掲示板｜アニメの雑談・配信情報の交換'
+export const LOUNGE_LEAD =
+  'アニメの話なら何でもどうぞ。「このアニメはどの配信サービスで見られる？」「〇〇で見放題になってた」など、配信情報の交換も歓迎です。話したいことがあれば、トピックを立ててください。'
+export const LOUNGE_DESCRIPTION =
+  '作品を問わずアニメの話ができる雑談掲示板。「このアニメはどの配信サービスで見られる？」など配信情報の交換も。誰でもトピックを立てられます。'
+
+/** 雑談掲示板のトピック（作品に紐づかない）は workTitle が空 */
 export function threadPageTitle(threadTitle: string, workTitle: string): string {
-  if (!workTitle) return `${threadTitle}｜アニメの雑談・配信情報の交換`
+  if (!workTitle) return `${threadTitle}｜アニメの雑談掲示板`
   return `${threadTitle}｜${workTitle}の掲示板`
 }
 
 export function threadPageDescription(t: { title: string; workTitle: string; postCount: number; excerpt: string }): string {
   if (!t.workTitle)
-    return summarize(
-      `アニメ好きが自由に話せる「${t.title}」${t.postCount}コメント。「このアニメはどの配信サービスで見られる？」などの情報交換も。${t.excerpt}`,
-      120,
-    )
+    return summarize(`アニメの雑談掲示板のトピック「${t.title}」${t.postCount}コメント。${t.excerpt}`, 120)
   return summarize(`「${t.workTitle}」を語りたい人の掲示板「${t.title}」${t.postCount}コメント。${t.excerpt}`, 120)
 }
 

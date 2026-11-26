@@ -13,6 +13,7 @@ export const StaticPage = lazyPage(() => import('./pages/StaticPage'))
 export const TagsPage = lazyPage(() => import('./pages/TagsPage'))
 export const RankingPage = lazyPage(() => import('./pages/RankingPage'))
 export const SupporterPage = lazyPage(() => import('./pages/SupporterPage'))
+export const LoungePage = lazyPage(() => import('./pages/LoungePage'))
 
 const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/works\/new\/?$/, AddWorkPage.preload],
@@ -27,6 +28,7 @@ const LAZY_ROUTES: [RegExp, () => Promise<unknown>][] = [
   [/^\/tags\/?$/, TagsPage.preload],
   [/^\/ranking(\/|$)/, RankingPage.preload],
   [/^\/supporter\/?$/, SupporterPage.preload],
+  [/^\/lounge\/?$/, LoungePage.preload],
 ]
 
 /** 最初に開かれたページが遅延読み込みのページなら、描画前に読み込んでおく */

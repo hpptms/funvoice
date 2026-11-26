@@ -32,6 +32,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const urls = [
     url(`${origin}/`),
     url(`${origin}/tags`),
+    url(`${origin}/lounge`),
     ...['about', 'help', 'faq', 'terms', 'privacy', 'copyright', 'tokushoho', 'supporter', 'guidelines', 'news', 'contact'].map((p) => url(`${origin}/${p}`)),
     ...rankings,
     ...((works.data.finales ?? 0) > 0 ? [url(`${origin}/finales`)] : []),

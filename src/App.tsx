@@ -7,6 +7,7 @@ import {
   AuthPage,
   ContactPage,
   FinalesPage,
+  LoungePage,
   MyPage,
   NotificationsPage,
   RankingPage,
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="works/new" element={<AddWorkPage />} />
         <Route path="works/:id" element={<WorkDetailPage />} />
         <Route path="threads/:id" element={<ThreadPage />} />
+        <Route path="lounge" element={<LoungePage />} />
         <Route path="tags" element={<TagsPage />} />
         <Route path="tags/:id" element={<TagWorksPage />} />
         <Route path="season/:slug" element={<SeasonWorksPage />} />

@@ -76,13 +76,6 @@ export default function ThreadPage() {
   const thread = threadQuery.data
   // 雑談掲示板（作品に紐づかないトピック）
   const lounge = thread?.workId === 0
-  // 雑談掲示板が上限まで埋まったら、次のトピック（その2…）へ案内する
-  const nextLoungeQuery = useQuery({
-    queryKey: ['lounge'],
-    queryFn: api.getLounge,
-    enabled: lounge && !!thread?.closed,
-  })
-  const nextLoungeId = nextLoungeQuery.data && nextLoungeQuery.data.thread.id !== id ? nextLoungeQuery.data.thread.id : undefined
   usePageMeta({
     title: thread ? threadPageTitle(thread.title, thread.workTitle) : undefined,
     description: thread ? threadPageDescription(thread) : undefined,
@@ -194,9 +187,9 @@ export default function ThreadPage() {
             {retro ? '~' : 'トップ'}
           </Link>
           {lounge ? (
-            <Typography sx={{ fontSize: 13 }} color="text.secondary">
+            <Link component={RouterLink} to="/lounge" color="inherit">
               雑談掲示板
-            </Typography>
+            </Link>
           ) : (
             <Link component={RouterLink} to={`/works/${thread.workId}`} color="inherit">
               {thread.workTitle}
@@ -215,19 +208,6 @@ export default function ThreadPage() {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {thread.postCount}コメント・{formatDateTime(thread.createdAt, false)} 作成
         </Typography>
-        {lounge && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            アニメの話なら何でもどうぞ。「このアニメはどの配信サービスで見られる？」「〇〇で見放題になってた」など、配信情報の交換も歓迎です。
-          </Typography>
-        )}
-        {lounge && nextLoungeId && (
-          <Alert severity="info" sx={{ mt: 1.5 }}>
-            この雑談掲示板は上限に達しました。{' '}
-            <Link component={RouterLink} to={`/threads/${nextLoungeId}`}>
-              新しい雑談掲示板へ
-            </Link>
-          </Alert>
-        )}
       </Box>
 
       <Card sx={{ overflow: 'visible' }}>

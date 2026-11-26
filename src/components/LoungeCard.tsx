@@ -8,24 +8,24 @@ import { useRetro } from '../lib/styleMode'
 import { PIXEL_FONT } from '../theme'
 import { TitleBar } from './Retro'
 
-/** カードに出す新しいコメントの件数（backend の loungePreview と同じ） */
+/** カードに出すトピックの件数（最近コメントがあった順） */
 const ROWS = 3
 const ROW_HEIGHT = 20
 
 /**
- * トップの作品一覧の先頭に出す「雑談掲示板」の入口。作品カードと同じ形・大きさにして一覧に並べる。
- * 中身は作品の掲示板と同じトピックのページ（/threads/:id）で、作品に紐づかないだけ。
+ * トップの作品一覧の先頭に出す「雑談掲示板」（/lounge）の入口。作品カードと同じ形・大きさにして一覧に並べる。
+ * 最近コメントがあったトピックを数件見せる（カード全体が /lounge へのリンクなので、トピック名はリンクにしない）。
  */
 export default function LoungeCard() {
   const retro = useRetro()
   const { data } = useQuery({
-    queryKey: ['lounge'],
-    queryFn: api.getLounge,
+    // 雑談掲示板のページのトピック一覧（最新コメント順）と同じデータ
+    queryKey: ['threads', 0, 'active'],
+    queryFn: () => api.listThreads(0, 'active'),
     // エッジでキャッシュされ、書き込みがあると無効化されるので、1分ごとに取り直しても軽い
     refetchInterval: 60_000,
   })
-  const posts = (data?.posts ?? []).slice(0, ROWS)
-  const to = data ? `/threads/${data.thread.id}` : undefined
+  const threads = (data?.threads ?? []).slice(0, ROWS)
 
   const inner = (
     <>
@@ -82,31 +82,35 @@ export default function LoungeCard() {
         </Typography>
         {/* 読み込みの前後で高さが変わらないよう固定（CLS対策） */}
         <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, height: ROWS * ROW_HEIGHT, overflow: 'hidden' }}>
-          {data && posts.length === 0 && (
+          {data && threads.length === 0 && (
             <Box component="li" sx={{ fontSize: 12.5, lineHeight: `${ROW_HEIGHT}px`, color: 'text.secondary' }}>
-              {retro ? '> no posts yet' : 'まだ書き込みがありません。最初の一言をどうぞ'}
+              {retro ? '> no topics yet' : 'まだトピックがありません。最初のトピックをどうぞ'}
             </Box>
           )}
-          {posts.map((p) => (
+          {threads.map((t) => (
             <Box
               component="li"
-              key={p.id}
+              key={t.id}
               sx={{ display: 'flex', gap: 1, fontSize: 12.5, lineHeight: `${ROW_HEIGHT}px`, whiteSpace: 'nowrap' }}
             >
               <Box component="span" sx={{ minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {p.body || '（画像・動画）'}
+                {retro ? '# ' : '・'}
+                {t.title}
+              </Box>
+              <Box component="span" sx={{ flexShrink: 0, color: 'primary.main', fontSize: 11.5 }}>
+                {t.postCount}
               </Box>
               <Box component="span" sx={{ flexShrink: 0, color: 'text.secondary', fontSize: 11.5 }}>
-                {formatRelative(p.createdAt)}
+                {formatRelative(t.lastPostedAt)}
               </Box>
             </Box>
           ))}
         </Box>
         <Typography variant="caption" color="text.secondary" component="div">
-          {data ? (retro ? `${data.thread.postCount} comments` : `${data.thread.postCount}コメント`) : ' '}
+          {data ? (retro ? `${data.total} topics` : `${data.total}トピック`) : '\u00a0'}
           {' / '}
           <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
-            {retro ? '> 書き込む' : '書き込む →'}
+            {retro ? '> トピックを見る・立てる' : 'トピックを見る・立てる →'}
           </Box>
         </Typography>
       </CardContent>
@@ -124,17 +128,13 @@ export default function LoungeCard() {
           : { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.10)' },
       }}
     >
-      {to ? (
-        <CardActionArea
-          component={RouterLink}
-          to={to}
-          sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
-        >
-          {inner}
-        </CardActionArea>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>{inner}</Box>
-      )}
+      <CardActionArea
+        component={RouterLink}
+        to="/lounge"
+        sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+      >
+        {inner}
+      </CardActionArea>
     </Card>
   )
 }
