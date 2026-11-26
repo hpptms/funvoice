@@ -191,8 +191,10 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       `<p>${escapeHtml(sequelQuestion(work.title, work.media))}</p>` +
       `<p>${escapeHtml(description)}</p>` +
       `<h2>「${escapeHtml(work.title)}」${escapeHtml(phrase)}希望の声・みんなの評価</h2><ul>` +
-      `<li>続編希望: ${sequel}票（登録ユーザー ${work.tally.registered.sequel} / 匿名 ${work.tally.anonymous.sequel}）</li>` +
-      `<li>キレイに終わった: ${complete}票（登録ユーザー ${work.tally.registered.complete} / 匿名 ${work.tally.anonymous.complete}）</li></ul>` +
+      `<li>続編希望: ${sequel}票（登録ユーザー ${work.tally.registered.sequel} / 匿名 ${work.tally.anonymous.sequel}` +
+      `${work.tally.supporter ? ` / うちサポーター ${work.tally.supporter.sequel}` : ''}）</li>` +
+      `<li>キレイに終わった: ${complete}票（登録ユーザー ${work.tally.registered.complete} / 匿名 ${work.tally.anonymous.complete}` +
+      `${work.tally.supporter ? ` / うちサポーター ${work.tally.supporter.complete}` : ''}）</li></ul>` +
       rankLine +
       `<h2>「${escapeHtml(work.title)}」の${escapeHtml(phrase)}はある？</h2>` +
       `<p>${escapeHtml(sequelAnswer(work, work.sequel))}</p>` +

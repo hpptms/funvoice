@@ -36,6 +36,8 @@ export interface ChoiceCount {
 export interface Tally {
   registered: ChoiceCount
   anonymous: ChoiceCount
+  /** 登録ユーザー票のうちサポーターとして入れた票（辞めたあとも残る。合計には足さない）。古いキャッシュには無い */
+  supporter?: ChoiceCount
   total: ChoiceCount
 }
 

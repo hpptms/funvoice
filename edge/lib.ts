@@ -285,6 +285,7 @@ export interface ApiWork {
   tally: {
     registered: { sequel: number; complete: number }
     anonymous: { sequel: number; complete: number }
+    supporter?: { sequel: number; complete: number }
     total: { sequel: number; complete: number }
   }
   // 以下は作品ページ（GET /api/works/:id）だけ。古いバックエンドでは無いことがある
