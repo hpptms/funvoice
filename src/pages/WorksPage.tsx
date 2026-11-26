@@ -24,6 +24,7 @@ import { TAG_KIND_LABEL, api, type Tag, type WorkList, type WorkSort } from '../
 import { Cursor, Prompt, RankingBanner } from '../components/Retro'
 import RecentActivity from '../components/RecentActivity'
 import TopNews from '../components/TopNews'
+import LoungeCard from '../components/LoungeCard'
 import WorkCard from '../components/WorkCard'
 import {
   TOP_HEADING,
@@ -339,6 +340,8 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
             opacity: worksQuery.isPlaceholderData ? 0.6 : 1,
           }}
         >
+          {/* トップ（検索・絞り込みなしの1ページ目）だけ、先頭に雑談掲示板の入口を置く */}
+          {!baseTagId && !q && tagIds.length === 0 && page <= 1 && <LoungeCard />}
           {data.works.map((w, i) => (
             // 1行目のカードは画面の一番上に出る（LCP）ので、遅延読み込みにせず優先して取りに行く。
             // PC幅では1行に3〜4枚並び、どれがLCPになるかは画像の届く順で変わるので、4枚目までを対象にする

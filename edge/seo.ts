@@ -206,11 +206,18 @@ export function summarize(text: string, max: number): string {
   return [...s].length > max ? [...s].slice(0, max - 1).join('') + '…' : s
 }
 
+/** 雑談掲示板（作品に紐づかないトピック）は workTitle が空 */
 export function threadPageTitle(threadTitle: string, workTitle: string): string {
+  if (!workTitle) return `${threadTitle}｜アニメの雑談・配信情報の交換`
   return `${threadTitle}｜${workTitle}の掲示板`
 }
 
 export function threadPageDescription(t: { title: string; workTitle: string; postCount: number; excerpt: string }): string {
+  if (!t.workTitle)
+    return summarize(
+      `アニメ好きが自由に話せる「${t.title}」${t.postCount}コメント。「このアニメはどの配信サービスで見られる？」などの情報交換も。${t.excerpt}`,
+      120,
+    )
   return summarize(`「${t.workTitle}」を語りたい人の掲示板「${t.title}」${t.postCount}コメント。${t.excerpt}`, 120)
 }
 

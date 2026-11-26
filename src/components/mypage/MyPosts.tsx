@@ -26,10 +26,15 @@ export default function MyPosts() {
           {data.posts.map((p) => (
             <Box component="li" key={`${p.threadId}-${p.no}`} sx={{ py: 1.25, borderTop: 1, borderColor: 'divider', '&:first-of-type': { borderTop: 0 } }}>
               <Typography variant="caption" color="text.secondary" component="p" sx={{ overflowWrap: 'anywhere' }}>
-                <Link component={RouterLink} to={`/works/${p.workId}`} color="inherit">
-                  {p.workTitle}
-                </Link>
-                {' › '}
+                {/* 雑談掲示板（作品なし）は workId が 0 */}
+                {p.workId > 0 && (
+                  <>
+                    <Link component={RouterLink} to={`/works/${p.workId}`} color="inherit">
+                      {p.workTitle}
+                    </Link>
+                    {' › '}
+                  </>
+                )}
                 <Link component={RouterLink} to={`/threads/${p.threadId}`} color="inherit">
                   {p.threadTitle}
                 </Link>

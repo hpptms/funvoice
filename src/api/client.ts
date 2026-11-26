@@ -313,7 +313,14 @@ export interface ThreadSummary {
   excerpt: string
 }
 
+/** トップに出す雑談掲示板（作品に紐づかないトピック）。posts は新しい順で、本文は短く切ってある */
+export interface Lounge {
+  thread: Pick<ThreadSummary, 'id' | 'title' | 'postCount' | 'createdAt' | 'lastPostedAt'>
+  posts: Post[]
+}
+
 export interface ThreadDetail extends ThreadSummary {
+  /** 雑談掲示板（作品なし）のときは空文字（workId は 0） */
   workTitle: string
   closed: boolean
   maxPosts: number
@@ -534,6 +541,7 @@ export const api = {
       body: JSON.stringify(input),
     }),
   getThread: (id: number) => request<ThreadDetail>(`/threads/${id}`),
+  getLounge: () => request<Lounge>('/lounge'),
   listPosts: (threadId: number, params: { page?: number; sort?: PostSort; replyTo?: number }) => {
     const sp = new URLSearchParams()
     if (params.replyTo) sp.set('replyTo', String(params.replyTo))

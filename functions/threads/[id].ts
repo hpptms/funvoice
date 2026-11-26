@@ -43,6 +43,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const first = posts.find((p) => p.no === 1)
 
   const description = threadPageDescription(thread)
+  // 雑談掲示板（作品に紐づかないトピック）は workId が 0
+  const lounge = thread.workId === 0
 
   // Google の「ディスカッション フォーラム」構造化データ
   const visible = posts.filter((p) => !p.deleted)
@@ -58,7 +60,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         datePublished: thread.createdAt,
         dateModified: thread.lastPostedAt,
         author: { '@type': 'Person', name: first && !first.deleted ? first.name : '匿名' },
-        about: { '@type': 'CreativeWork', name: thread.workTitle, url: `${origin}/works/${thread.workId}` },
+        ...(lounge ? {} : { about: { '@type': 'CreativeWork', name: thread.workTitle, url: `${origin}/works/${thread.workId}` } }),
         interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: thread.postCount },
         comment: visible
           .filter((p) => p.no !== 1)
@@ -75,11 +77,16 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       },
       {
         '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
-          { '@type': 'ListItem', position: 2, name: thread.workTitle, item: `${origin}/works/${thread.workId}` },
-          { '@type': 'ListItem', position: 3, name: thread.title, item: base },
-        ],
+        itemListElement: lounge
+          ? [
+              { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
+              { '@type': 'ListItem', position: 2, name: thread.title, item: base },
+            ]
+          : [
+              { '@type': 'ListItem', position: 1, name: 'FunVoice', item: `${origin}/` },
+              { '@type': 'ListItem', position: 2, name: thread.workTitle, item: `${origin}/works/${thread.workId}` },
+              { '@type': 'ListItem', position: 3, name: thread.title, item: base },
+            ],
       },
     ],
   }
@@ -92,7 +99,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     )
     .join('')
   const body = shellHtml(
-    `<p><a href="/works/${thread.workId}">${escapeHtml(thread.workTitle)}</a></p>` +
+    (lounge ? '<p><a href="/">FunVoice</a></p>' : `<p><a href="/works/${thread.workId}">${escapeHtml(thread.workTitle)}</a></p>`) +
       `<h1>${escapeHtml(thread.title)}</h1><p>${thread.postCount}コメント</p><ol style="list-style:none;padding:0">${items}</ol>`,
   )
 
@@ -104,7 +111,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     noindex: !!sort && sort !== 'asc',
     ogType: 'article',
     // SNS で共有したときは、作品のカード画像（作品名と票の割合）
-    ogImage: `${origin}/api/og/works/${thread.workId}.png`,
+    // 雑談掲示板はサイト全体の画像
+    ogImage: lounge ? `${origin}/api/og/site.png` : `${origin}/api/og/works/${thread.workId}.png`,
     jsonLd,
     bodyHtml: body,
     initialData: page === 1 && !sort && postsRes.data ? { id: 'fv-initial-thread', data: { thread, posts: postsRes.data } } : undefined,

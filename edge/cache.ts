@@ -42,6 +42,8 @@ export function cacheGroups(pathname: string): string[] | null {
   if (pathname === '/api/push/key') return ['all']
   // トップの「最近の動き」（投票・書き込みで無効化）
   if (pathname === '/api/activity') return ['all', 'activity']
+  // トップの雑談掲示板のカード（雑談掲示板への書き込みで無効化）
+  if (pathname === '/api/lounge') return ['all', 'lounge']
   // ブログなどに埋め込む投票数のカード
   if ((m = pathname.match(/^\/api\/embed\/works\/(\d+)$/))) return ['all', `work:${m[1]}`]
   // サポーターの価格（人によって変わらない）
@@ -81,7 +83,7 @@ export function invalidatedGroups(res: Response): string[] {
   if (!raw) return []
   return raw
     .split(/[\s,]+/)
-    .filter((g) => /^(all|works|activity|work:\d+|thread:\d+)$/.test(g))
+    .filter((g) => /^(all|works|activity|lounge|work:\d+|thread:\d+)$/.test(g))
 }
 
 function sMaxAge(res: Response): number | null {
