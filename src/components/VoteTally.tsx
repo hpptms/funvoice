@@ -88,13 +88,13 @@ function Row({ label, count, note }: { label: string; count: ChoiceCount; note?:
   )
 }
 
-/** 合計・登録ユーザー・匿名・サポーター（登録ユーザー票の内訳）の4段で集計を表示 */
+/** 合計・匿名・登録ユーザー・サポーター（登録ユーザー票の内訳）の4段で集計を表示 */
 export default function VoteTally({ tally }: { tally: Tally }) {
   return (
     <Stack spacing={2.5}>
       <Row label="合計" count={tally.total} />
-      <Row label="登録ユーザー" count={tally.registered} note="1アカウント1票" />
       <Row label="匿名" count={tally.anonymous} note="回線・ブラウザ単位で1票" />
+      <Row label="登録ユーザー" count={tally.registered} note="1アカウント1票" />
       {tally.supporter && <Row label="サポーター" count={tally.supporter} note="登録ユーザー票のうち" />}
     </Stack>
   )
