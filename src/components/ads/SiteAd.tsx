@@ -1,10 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, IconButton, useMediaQuery, type Theme } from '@mui/material'
+import { Box, Card, IconButton, useMediaQuery, type Theme } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { pickCreative, type AdBanner } from '../../lib/adCreatives'
 import { afterPageLoad } from '../../lib/afterPageLoad'
 import { useShowAds } from '../../lib/ads'
+import { useRetro } from '../../lib/styleMode'
+import { TitleBar } from '../Retro'
 
 /** PCとして扱う幅（lg以上）。それより狭い幅（スマホ・タブレット）は画面の一番下に横長のバナーを出す */
 function useWide() {
@@ -49,6 +51,7 @@ export function BottomAd() {
   const show = useShowAds()
   const loaded = useLoaded()
   const ad = useCreative()
+  const retro = useRetro()
   if (wide || !show || !loaded || !ad) return null
   return (
     <>
@@ -65,7 +68,8 @@ export function BottomAd() {
           display: 'flex',
           justifyContent: 'center',
           bgcolor: 'background.paper',
-          borderTop: 1,
+          // レトロはカードと同じ太い黒線で区切る
+          borderTop: retro ? 2 : 1,
           borderColor: 'divider',
           pb: SAFE_BOTTOM,
         }}
@@ -85,7 +89,34 @@ export function FloatingAd() {
   const loaded = useLoaded()
   const ad = useCreative()
   const [closed, setClosed] = useState(false)
+  const retro = useRetro()
   if (!wide || !show || !loaded || !ad || closed) return null
+  // レトロ: 作品カードと同じ、タイトルバー付きのウィンドウ（黒い太枠＋ハード影。× で閉じる）
+  if (retro)
+    return (
+      <Card
+        component="aside"
+        aria-label="広告"
+        sx={{
+          position: 'fixed',
+          right: 16,
+          bottom: 16,
+          zIndex: (t) => t.zIndex.appBar - 1,
+          width: 'auto',
+          borderRadius: 0,
+        }}
+      >
+        <TitleBar onClose={() => setClosed(true)} closeLabel="広告を閉じる">
+          <Box component="span" sx={{ bgcolor: 'primary.main', color: '#fff', px: 0.5, py: 0.25, mr: 0.75 }}>
+            広告
+          </Box>
+          sponsor.exe
+        </TitleBar>
+        <Box sx={{ position: 'relative', lineHeight: 0 }}>
+          <Banner ad={ad.pc} width={300} height={250} />
+        </Box>
+      </Card>
+    )
   return (
     <Box
       component="aside"

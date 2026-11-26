@@ -38,8 +38,21 @@ export function Prompt({ children }: { children: ReactNode }) {
   )
 }
 
-/** 昔のOS風のタイトルバー（_ □ × 付き）。飾りなのでボタンは押せない */
-export function TitleBar({ children, right }: { children: ReactNode; right?: ReactNode }) {
+/**
+ * 昔のOS風のタイトルバー（_ □ × 付き）。飾りなのでボタンは押せない。
+ * onClose を渡したときだけ × が押せる「閉じる」ボタンになる（closeLabel が読み上げの名前）
+ */
+export function TitleBar({
+  children,
+  right,
+  onClose,
+  closeLabel = '閉じる',
+}: {
+  children: ReactNode
+  right?: ReactNode
+  onClose?: () => void
+  closeLabel?: string
+}) {
   return (
     <Box
       sx={{
@@ -60,12 +73,25 @@ export function TitleBar({ children, right }: { children: ReactNode; right?: Rea
         {children}
       </Box>
       {right}
-      <Box component="span" aria-hidden sx={{ display: 'flex', gap: '3px' }}>
+      <Box component="span" sx={{ display: 'flex', gap: '3px' }}>
         {['_', '□', '×'].map((c) => (
           <Box
             key={c}
-            component="span"
+            {...(c === '×' && onClose
+              ? {
+                  component: 'button' as const,
+                  type: 'button' as const,
+                  'aria-label': closeLabel,
+                  onClick: onClose,
+                }
+              : { component: 'span' as const, 'aria-hidden': true })}
             sx={{
+              p: 0,
+              bgcolor: 'transparent',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              lineHeight: 1,
+              ...(c === '×' && onClose ? { cursor: 'pointer', '&:hover': { bgcolor: 'primary.main' } } : {}),
               width: 16,
               height: 16,
               display: 'grid',
