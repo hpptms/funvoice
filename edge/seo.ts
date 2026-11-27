@@ -206,6 +206,12 @@ export function summarize(text: string, max: number): string {
   return [...s].length > max ? [...s].slice(0, max - 1).join('') + '…' : s
 }
 
+/**
+ * トップの作品一覧（検索・タグ絞り込みなし）の1ページの件数。先頭に雑談掲示板のカードを置くので、
+ * 27件＋1枚＝28枚で1行4枚（PC）・2枚（タブレット）に揃う。backend の perPage=27 と対応
+ */
+export const TOP_WORKS_PER_PAGE = 27
+
 /** 雑談掲示板（/lounge）。作品を問わないトピックの一覧 */
 export const LOUNGE_TITLE = '雑談掲示板｜アニメの雑談・配信情報の交換'
 export const LOUNGE_LEAD =

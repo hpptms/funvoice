@@ -7,6 +7,7 @@ import {
   DEFAULT_DESCRIPTION,
   SITE_NAME,
   TOP_HEADING,
+  TOP_WORKS_PER_PAGE,
   TOP_LEAD,
   currentSeasonName,
   rankingPath,
@@ -41,7 +42,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     : (await apiGet<{ tags: ApiTag[] }>(ctx, '/api/tags?kind=season')).data?.tags.find((t) => t.name === seasonLabel)
   const list = noindex
     ? undefined
-    : await apiGet<ApiWorkList>(ctx, seasonTag ? `/api/works?tag=${seasonTag.id}` : '/api/works')
+    : await apiGet<ApiWorkList>(
+        ctx,
+        // 画面と同じく、雑談掲示板のカードの分だけ多い件数（TOP_WORKS_PER_PAGE）で取る
+        seasonTag ? `/api/works?perPage=${TOP_WORKS_PER_PAGE}&tag=${seasonTag.id}` : `/api/works?perPage=${TOP_WORKS_PER_PAGE}`,
+      )
   const works = list?.data?.works ?? []
 
   const items = works

@@ -489,8 +489,9 @@ async function request<T>(path: string, init: RequestInit & { admin?: boolean } 
 
 export const api = {
   /** noMedia: 動画・画像がどちらも未設定の作品だけ（管理画面用）。minYear: 放送年がこの年以降の作品だけ */
-  listWorks(params: { q?: string; tags?: number[]; sort?: WorkSort; page?: number; noMedia?: boolean; minYear?: number }) {
+  listWorks(params: { q?: string; tags?: number[]; sort?: WorkSort; page?: number; noMedia?: boolean; minYear?: number; perPage?: number }) {
     const sp = new URLSearchParams()
+    if (params.perPage) sp.set('perPage', String(params.perPage))
     if (params.q) sp.set('q', params.q)
     params.tags?.forEach((t) => sp.append('tag', String(t)))
     if (params.sort) sp.set('sort', params.sort)

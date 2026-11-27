@@ -28,6 +28,7 @@ import LoungeCard from '../components/LoungeCard'
 import WorkCard from '../components/WorkCard'
 import {
   TOP_HEADING,
+  TOP_WORKS_PER_PAGE,
   TOP_LEAD,
   isSeasonName,
   rankingPath,
@@ -91,6 +92,10 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const onAirTag = onAir ? allTags.find((t) => t.kind === 'season' && t.name === onAirLabel) : undefined
   const queryTags = onAirTag && !tagIds.includes(onAirTag.id) ? [...tagIds, onAirTag.id] : tagIds
   const apiSort: WorkSort = onAir ? 'recommended' : sort
+  // トップ（検索・タグ絞り込みなし）は全ページの先頭に雑談掲示板のカードを置き、作品を3件多く出して行を揃える
+  // （1ページ目だけ件数を変えると、2ページ目との境目で作品が重複・欠落するので全ページ同じにする）
+  const showLounge = !baseTagId && !q && tagIds.length === 0
+  const perPage = showLounge ? TOP_WORKS_PER_PAGE : undefined
 
   // Pages Functions がHTMLに埋め込んだ一覧（条件なし、またはタグ1つだけの1ページ目）。最初の1回だけ読む
   // トップは今期で絞った「放送中」、タグ別のページは「おすすめ順」の一覧が埋め込まれる（sort で区別）
@@ -103,8 +108,8 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
   const fromInitial = !!initial && matchesInitial(initial)
 
   const worksQuery = useQuery({
-    queryKey: ['works', { q, tagIds: queryTags, sort: apiSort, page }],
-    queryFn: () => api.listWorks({ q, tags: queryTags, sort: apiSort, page }),
+    queryKey: ['works', { q, tagIds: queryTags, sort: apiSort, page, perPage }],
+    queryFn: () => api.listWorks({ q, tags: queryTags, sort: apiSort, page, perPage }),
     // 放送中・前期は、タグの一覧を読んで対象の時期のタグが分かってから取りに行く
     enabled: fromInitial || !onAir || !!onAirTag,
     placeholderData: keepPreviousData,
@@ -340,8 +345,8 @@ export default function WorksPage({ baseTagId }: { baseTagId?: number }) {
             opacity: worksQuery.isPlaceholderData ? 0.6 : 1,
           }}
         >
-          {/* トップ（検索・絞り込みなしの1ページ目）だけ、先頭に雑談掲示板の入口を置く */}
-          {!baseTagId && !q && tagIds.length === 0 && page <= 1 && <LoungeCard />}
+          {/* トップ（検索・絞り込みなし）だけ、先頭に雑談掲示板の入口を置く */}
+          {showLounge && <LoungeCard />}
           {data.works.map((w, i) => (
             // 1行目のカードは画面の一番上に出る（LCP）ので、遅延読み込みにせず優先して取りに行く。
             // PC幅では1行に3〜4枚並び、どれがLCPになるかは画像の届く順で変わるので、4枚目までを対象にする
